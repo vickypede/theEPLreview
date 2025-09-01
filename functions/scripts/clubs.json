@@ -1,0 +1,22 @@
+{
+  "arsenal": {"name": "Arsenal", "isTop6": true, "names": ["Arsenal","Gunners","AFC"], "ambiguous": []},
+  "chelsea": {"name": "Chelsea", "isTop6": true, "names": ["Chelsea","Blues","CFC"], "ambiguous": []},
+  "liverpool": {"name": "Liverpool", "isTop6": true, "names": ["Liverpool","Reds","LFC"], "ambiguous": []},
+  "manchester-city": {"name": "Manchester City", "isTop6": true, "names": ["Manchester City","Man City","MCFC","City"], "ambiguous": ["City"]},
+  "manchester-united": {"name": "Manchester United", "isTop6": true, "names": ["Manchester United","Man United","Man Utd","United","MUFC"], "ambiguous": ["United"]},
+  "tottenham": {"name": "Tottenham Hotspur", "isTop6": true, "names": ["Tottenham","Tottenham Hotspur","Spurs","THFC"], "ambiguous": []},
+  "aston-villa": {"name": "Aston Villa", "isTop6": false, "names": ["Aston Villa","Villa","AVFC"], "ambiguous": ["Villa"]},
+  "brighton": {"name": "Brighton & Hove Albion", "isTop6": false, "names": ["Brighton","Brighton & Hove Albion","Seagulls","BHAFC"], "ambiguous": []},
+  "burnley": {"name": "Burnley", "isTop6": false, "names": ["Burnley","Clarets","BFC"], "ambiguous": []},
+  "crystal-palace": {"name": "Crystal Palace", "isTop6": false, "names": ["Crystal Palace","Palace","CPFC"], "ambiguous": ["Palace"]},
+  "everton": {"name": "Everton", "isTop6": false, "names": ["Everton","Toffees","EFC"], "ambiguous": []},
+  "fulham": {"name": "Fulham", "isTop6": false, "names": ["Fulham","Cottagers","FFC"], "ambiguous": []},
+  "luton": {"name": "Luton Town", "isTop6": false, "names": ["Luton","Luton Town","Hatters","LTFC"], "ambiguous": ["Luton"]},
+  "newcastle": {"name": "Newcastle United", "isTop6": false, "names": ["Newcastle","Newcastle United","Magpies","NUFC"], "ambiguous": ["Newcastle"]},
+  "nottingham-forest": {"name": "Nottingham Forest", "isTop6": false, "names": ["Nottingham Forest","Forest","NFFC"], "ambiguous": ["Forest"]},
+  "sheffield-united": {"name": "Sheffield United", "isTop6": false, "names": ["Sheffield United","Sheff Utd","Blades","SUFC"], "ambiguous": ["United"]},
+  "west-ham": {"name": "West Ham United", "isTop6": false, "names": ["West Ham","West Ham United","Hammers","WHUFC"], "ambiguous": ["West Ham"]},
+  "wolves": {"name": "Wolverhampton Wanderers", "isTop6": false, "names": ["Wolves","Wolverhampton","Wolverhampton Wanderers","WWFC"], "ambiguous": ["Wolves"]},
+  "brentford": {"name": "Brentford", "isTop6": false, "names": ["Brentford","Bees","BFC"], "ambiguous": []},
+  "bournemouth": {"name": "AFC Bournemouth", "isTop6": false, "names": ["Bournemouth","AFC Bournemouth","Cherries","AFCB"], "ambiguous": ["Bournemouth"]}
+}

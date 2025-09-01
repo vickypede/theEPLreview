@@ -1,0 +1,15 @@
+services:
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+  api:
+    image: mcp/firecrawl:latest
+    env_file: .env
+    ports: ["3002:3002"]
+    depends_on: [redis]
+    command: ["npm","run","start:api"]
+  worker:
+    image: mcp/firecrawl:latest
+    env_file: .env
+    command: ["npm","run","start:worker"]
+    depends_on: [redis]

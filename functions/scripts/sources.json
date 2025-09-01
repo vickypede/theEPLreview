@@ -1,0 +1,73 @@
+{
+  "bbc-football": {
+    "name": "BBC Football",
+    "type": "rss",
+    "url": "https://feeds.bbci.co.uk/sport/football/rss.xml",
+    "clubSlugs": [],
+    "isActive": true
+  },
+  "guardian-football": {
+    "name": "The Guardian Football",
+    "type": "rss",
+    "url": "https://www.theguardian.com/football/rss",
+    "clubSlugs": [],
+    "isActive": true
+  },
+  "sky-sports-football": {
+    "name": "Sky Sports Football",
+    "type": "rss",
+    "url": "https://www.skysports.com/rss/12040",
+    "clubSlugs": [],
+    "isActive": true
+  },
+  "espn-soccer": {
+    "name": "ESPN Soccer",
+    "type": "rss",
+    "url": "https://www.espn.com/espn/rss/soccer/news",
+    "clubSlugs": [],
+    "isActive": true
+  },
+  "arsenal-official": {
+    "name": "Arsenal Official",
+    "type": "html",
+    "url": "https://www.arsenal.com/news",
+    "clubSlugs": ["arsenal"],
+    "isActive": true
+  },
+  "chelsea-official": {
+    "name": "Chelsea Official",
+    "type": "html",
+    "url": "https://www.chelseafc.com/en/news",
+    "clubSlugs": ["chelsea"],
+    "isActive": true
+  },
+  "liverpool-official": {
+    "name": "Liverpool Official",
+    "type": "html",
+    "url": "https://www.liverpoolfc.com/news",
+    "clubSlugs": ["liverpool"],
+    "isActive": true
+  },
+  "man-city-official": {
+    "name": "Manchester City Official",
+    "type": "html",
+    "url": "https://www.mancity.com/news",
+    "clubSlugs": ["manchester-city"],
+    "isActive": true
+  },
+  "man-united-official": {
+    "name": "Manchester United Official",
+    "type": "html",
+    "url": "https://www.manutd.com/en/news",
+    "clubSlugs": ["manchester-united"],
+    "isActive": true
+  },
+  "tottenham-official": {
+    "name": "Tottenham Hotspur Official",
+    "type": "html",
+    "url": "https://www.tottenhamhotspur.com/news/",
+    "clubSlugs": ["tottenham"],
+    "isActive": true
+  }
+}
+

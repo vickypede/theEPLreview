@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Public articles (read‑only)
+    match /articles/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Admin‑only operational collections
+    match /sources/{doc} {
+      allow read, write: if request.auth.token.admin == true;
+    }
+    
+    match /ingestion_runs/{doc} {
+      allow read, write: if request.auth.token.admin == true;
+    }
+    
+    match /mailboxes/{doc} {
+      allow read, write: if request.auth.token.admin == true;
+    }
+    
+    match /config/{doc} {
+      allow read, write: if request.auth.token.admin == true;
+    }
+
+    // Clubs are readable; writes by admin only
+    match /clubs/{doc} {
+      allow read: if true;
+      allow write: if request.auth.token.admin == true;
+    }
+
+    // Letters submissions
+    match /letters_submissions/{doc} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth.token.admin == true;
+    }
+  }
+}
