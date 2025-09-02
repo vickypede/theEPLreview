@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, orderBy, limit, query, startAfter } from 'firebase/firestore';
+import { collection, getDocs, orderBy, limit, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Article } from '@/types';
 
@@ -9,10 +9,8 @@ type UiArticle = Article & { sourceName?: string; source?: string };
 
 export default function ArticlesList() {
   const [articles, setArticles] = useState<UiArticle[]>([]);
-  const [loading, setLoading] => useState(true);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [lastDoc, setLastDoc] = useState<any>(null);
   const [allArticles, setAllArticles] = useState<UiArticle[]>([]);
   const articlesPerPage = 30;
   const totalPages = 3;
@@ -23,7 +21,7 @@ export default function ArticlesList() {
       try {
         if (!db) return;
         const articlesRef = collection(db, 'articles');
-        const q = query(articlesRef, orderBy('publishedAt', 'desc'), limit(90)); // Load 90 articles
+        const q = query(articlesRef, orderBy('publishedAt', 'desc'), limit(90));
         const snapshot = await getDocs(q);
         const list = snapshot.docs.map((d) => {
           const data = d.data() as Omit<Article, 'id'> & { sourceName?: string; source?: string };
@@ -31,8 +29,6 @@ export default function ArticlesList() {
         });
         if (mounted) {
           setAllArticles(list);
-          setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
-          setHasMore(snapshot.docs.length === 90);
         }
       } catch {
         // ignore
