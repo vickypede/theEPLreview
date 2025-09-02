@@ -7,6 +7,7 @@ const nav = [
   { href: '/', label: 'Home' },
   { href: '/clubs', label: 'Clubs' },
   { href: '/news', label: 'News' },
+  { href: '/table', label: 'Table' },
 ];
 
 export default function Header() {
