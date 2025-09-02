@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 const nav = [
   { href: '/', label: 'Home' },
   { href: '/clubs', label: 'Clubs' },
-  { href: '/news', label: 'Latest Football News' },
+  { href: '/news', label: 'News' },
 ];
 
 export default function Header() {
