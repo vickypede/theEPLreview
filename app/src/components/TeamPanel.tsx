@@ -10,7 +10,7 @@ const TEAMS = [
   { name: "Arsenal", slug: "arsenal", id: 1 },
   { name: "Manchester City", slug: "manchester-city", id: 2 },
   { name: "Liverpool", slug: "liverpool", id: 3 },
-  { name: "Chelsea", slug: "chelsea", id: 4 },
+  { name: "Chelsea", slug: "chelsea", id: 18 },
   { name: "Manchester United", slug: "manchester-united", id: 5 },
   { name: "Tottenham Hotspur", slug: "tottenham", id: 6 },
   { name: "Newcastle United", slug: "newcastle-united", id: 7 },
@@ -24,7 +24,7 @@ const TEAMS = [
   { name: "Everton", slug: "everton", id: 15 },
   { name: "Nottingham Forest", slug: "nottingham-forest", id: 16 },
   { name: "Burnley", slug: "burnley", id: 17 },
-  { name: "Luton Town", slug: "luton-town", id: 18 },
+  { name: "Luton Town", slug: "luton-town", id: 4 },
   { name: "Sheffield United", slug: "sheffield-united", id: 19 },
   { name: "Bournemouth", slug: "bournemouth", id: 20 },
 ];
