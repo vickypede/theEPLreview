@@ -33,6 +33,12 @@ const TEAMS = [
 const saSrc = (type: "team-info" | "team-next-match", teamId: number, inst: string) =>
   `https://www.scoreaxis.com/widget/${type}/${teamId}&inst=${inst}`;
 
+// Type for ScoreAxis postMessage data
+interface ScoreAxisMessage {
+  inst?: string;
+  appHeight?: string;
+}
+
 interface TeamPanelProps {
   slug: string;
 }
@@ -51,8 +57,9 @@ export default function TeamPanel({ slug }: TeamPanelProps) {
   // Auto-height listener (ScoreAxis posts back the height via postMessage)
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
-      const inst = (e?.data as any)?.inst;
-      const appHeight = (e?.data as any)?.appHeight;
+      const data = e.data as ScoreAxisMessage;
+      const inst = data?.inst;
+      const appHeight = data?.appHeight;
       if (!inst || !appHeight) return;
       const iframe = document.querySelector<HTMLIFrameElement>(`iframe[data-inst="${inst}"]`);
       if (iframe) iframe.style.height = `${parseInt(appHeight, 10)}px`;
