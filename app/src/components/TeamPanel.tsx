@@ -7,27 +7,28 @@ import { Club } from "@/types";
 
 // ScoreAxis ID mapping - these are the widget IDs from ScoreAxis
 // Keep this in sync when you get new IDs from their widget generator
+// link to get Ids https://www.scoreaxis.com/free-soccer-widgets/team-info-widget/ !!!
 const SCOREAXIS_IDS: Record<string, number> = {
-  "arsenal": 1,
-  "manchester-city": 2,
-  "liverpool": 3,
+  "arsenal": 19,
+  "manchester-city": 9,
+  "liverpool": 8,
   "chelsea": 18,
-  "manchester-united": 5,
+  "manchester-united": 14,
   "tottenham": 6,
-  "newcastle-united": 7,
-  "aston-villa": 8,
-  "brighton": 9,
-  "west-ham": 10,
-  "brentford": 11,
-  "fulham": 12,
-  "crystal-palace": 13,
-  "wolves": 14,
-  "everton": 15,
-  "nottingham-forest": 16,
-  "burnley": 17,
-  "luton-town": 4,
-  "sheffield-united": 19,
-  "bournemouth": 20,
+  "newcastle-united": 20,
+  "aston-villa": 15,
+  "brighton": 78,
+  "west-ham": 1,
+  "brentford": 236,
+  "fulham": 11,
+  "crystal-palace": 51,
+  "wolves": 29,
+  "everton": 13,
+  "nottingham-forest": 63,
+  "burnley": 27,
+  "luton-town": 115,
+  "sheffield-united": 21,
+  "bournemouth": 52,
 };
 
 function saSrc(
