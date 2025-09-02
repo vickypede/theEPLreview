@@ -1,6 +1,15 @@
 "use client";
 
+import Script from "next/script";
+import { useEffect } from "react";
+
 export default function Stats() {
+  useEffect(() => {
+    // Give the DOM a tick, then trigger the 'load' event their script listens for
+    const t = setTimeout(() => window.dispatchEvent(new Event("load")), 100);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -79,8 +88,16 @@ export default function Stats() {
         </div>
       </section>
 
-      {/* Football Web Pages Script */}
-      <script src="https://www.footballwebpages.co.uk/embed.js" defer />
+      {/* Football Web Pages Script - Next.js optimized */}
+      <Script
+        id="fwp-embed"
+        src="https://www.footballwebpages.co.uk/embed.js"
+        strategy="afterInteractive"
+        onLoad={() => {
+          // Make sure FWP scans after hydration
+          window.dispatchEvent(new Event("load"));
+        }}
+      />
     </div>
   );
 }
