@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 
-// Team configuration with ScoreAxis IDs
-// Get each ID by opening ScoreAxis' Team Info widget page,
-// selecting a team, and copying the number in the iframe src
-// after /widget/team-info/{ID}
-const TEAMS = [
+type Team = { name: string; slug: string; id: number };
+
+// ⬇️ REPLACE the ids with the real ScoreAxis team IDs you copy from the Team Info widget generator.
+// How: open https://www.scoreaxis.com/free-soccer-widgets/team-info-widget/,
+// select a team, then copy the number in the iframe src after /widget/team-info/{ID}
+const TEAMS: Team[] = [
   { name: "Arsenal", slug: "arsenal", id: 1 },
   { name: "Manchester City", slug: "manchester-city", id: 2 },
   { name: "Liverpool", slug: "liverpool", id: 3 },
@@ -29,95 +30,60 @@ const TEAMS = [
   { name: "Bournemouth", slug: "bournemouth", id: 20 },
 ];
 
-// Helper to build ScoreAxis widget URLs
-const saSrc = (type: "team-info" | "team-next-match", teamId: number, inst: string) =>
-  `https://www.scoreaxis.com/widget/${type}/${teamId}&inst=${inst}`;
-
-// Type for ScoreAxis postMessage data
-interface ScoreAxisMessage {
-  inst?: string;
-  appHeight?: string;
+function saSrc(
+  type: "team-info" | "team-next-match",
+  teamId: number,
+  inst: string
+) {
+  // ScoreAxis supports auto height via postMessage; ?autoHeight=1 helps in some setups
+  return `https://www.scoreaxis.com/widget/${type}/${teamId}?autoHeight=1&inst=${encodeURIComponent(
+    inst
+  )}`;
 }
 
-interface TeamPanelProps {
-  slug: string;
-}
-
-export default function TeamPanel({ slug }: TeamPanelProps) {
-  const [teamId, setTeamId] = useState<number | null>(null);
-
-  // Find team by slug and set ID
+function useScoreAxisAutoHeight() {
   useEffect(() => {
-    const team = TEAMS.find(t => t.slug === slug);
-    if (team) {
-      setTeamId(team.id);
-    }
-  }, [slug]);
-
-  // Auto-height listener (ScoreAxis posts back the height via postMessage)
-  useEffect(() => {
-    const onMsg = (e: MessageEvent) => {
-      const data = e.data as ScoreAxisMessage;
-      const inst = data?.inst;
-      const appHeight = data?.appHeight;
-      if (!inst || !appHeight) return;
-      const iframe = document.querySelector<HTMLIFrameElement>(`iframe[data-inst="${inst}"]`);
-      if (iframe) iframe.style.height = `${parseInt(appHeight, 10)}px`;
+    const onMsg = (event: MessageEvent) => {
+      const data = event.data as { inst?: string; appHeight?: string };
+      if (!data?.inst || !data?.appHeight) return;
+      const iframe = document.querySelector<HTMLIFrameElement>(
+        `iframe[data-inst="${data.inst}"]`
+      );
+      if (iframe) iframe.style.height = `${parseInt(data.appHeight, 10)}px`;
     };
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
   }, []);
+}
 
-  // Don't render if team not found
-  if (!teamId) {
-    return null;
-  }
+export default function TeamPanel({ slug }: { slug: string }) {
+  useScoreAxisAutoHeight();
 
-  const team = TEAMS.find(t => t.id === teamId);
+  const team = useMemo(() => TEAMS.find((t) => t.slug === slug) ?? null, [slug]);
+  if (!team) return null;
+
+  // unique inst values per iframe (important when the page has multiple widgets)
+  const instInfo = `info_${team.id}`;
 
   return (
     <section className="mb-8">
-      {/* Team Header */}
       <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{team?.name}</h1>
-        <p className="text-gray-600">Team information and upcoming matches</p>
+        <h1 className="text-3xl font-bold text-gray-900">{team.name}</h1>
+        <p className="text-gray-600">Team information and statistics</p>
       </div>
 
-      {/* Widgets */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Next Match */}
-        <article className="bg-white rounded-lg shadow-md border overflow-hidden">
-          <div className="px-4 py-3 border-b bg-gradient-to-r from-purple-600 to-purple-700 text-white">
-            <h3 className="font-semibold">Next Match</h3>
-          </div>
-          <div className="p-3">
-            <iframe
-              key={`next-${teamId}`} // forces refresh on change
-              data-inst="next"
-              src={saSrc("team-next-match", teamId, "next")}
-              title="Team Next Match"
-              className="w-full rounded-lg border-0"
-              style={{ height: 420 }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
-          <div className="px-4 pb-3 text-xs text-gray-500">
-            Data by <a className="underline text-blue-600 hover:text-blue-800" href="https://www.scoreaxis.com/" target="_blank" rel="noreferrer">ScoreAxis</a>
-          </div>
-        </article>
-
-        {/* Team Stats / Info */}
+      <div className="max-w-4xl mx-auto">
+        {/* Team Info / Stats (includes tabs like Stats / Players / Matches) */}
         <article className="bg-white rounded-lg shadow-md border overflow-hidden">
           <div className="px-4 py-3 border-b bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
-            <h3 className="font-semibold">Team Stats</h3>
+            <h3 className="font-semibold">Team Info & Stats</h3>
           </div>
           <div className="p-3">
             <iframe
-              key={`info-${teamId}`}
-              data-inst="info"
-              src={saSrc("team-info", teamId, "info")}
-              title="Team Info / Stats"
+              key={`info-${team.id}`}
+              data-inst={instInfo}
+              src={saSrc("team-info", team.id, instInfo)}
+              title={`${team.name} – Team Info`}
               className="w-full rounded-lg border-0"
               style={{ height: 420 }}
               loading="lazy"
@@ -125,7 +91,15 @@ export default function TeamPanel({ slug }: TeamPanelProps) {
             />
           </div>
           <div className="px-4 pb-3 text-xs text-gray-500">
-            Team data by <a className="underline text-blue-600 hover:text-blue-800" href="https://www.scoreaxis.com/" target="_blank" rel="noreferrer">ScoreAxis</a>
+            Team data by{" "}
+            <a
+              className="underline text-blue-600 hover:text-blue-800"
+              href="https://www.scoreaxis.com/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              ScoreAxis
+            </a>
           </div>
         </article>
       </div>
