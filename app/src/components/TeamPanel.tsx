@@ -15,7 +15,7 @@ const SCOREAXIS_IDS: Record<string, number> = {
   "chelsea": 18,
   "manchester-united": 14,
   "tottenham": 6,
-  "newcastle-united": 20,
+  "newcastle": 20,
   "aston-villa": 15,
   "brighton": 78,
   "west-ham": 1,
@@ -29,6 +29,7 @@ const SCOREAXIS_IDS: Record<string, number> = {
   "luton-town": 115,
   "sheffield-united": 21,
   "bournemouth": 52,
+  "leeds": 71,
 };
 
 function saSrc(
@@ -37,7 +38,8 @@ function saSrc(
   inst: string
 ) {
   // ScoreAxis supports auto height via postMessage; ?autoHeight=1 helps in some setups
-  return `https://www.scoreaxis.com/widget/${type}/${teamId}?autoHeight=1&inst=${encodeURIComponent(
+  // Additional parameters: teamLogo=1 (shows logo), statsTab=1 (shows stats), playersTab=1 (shows players)
+  return `https://www.scoreaxis.com/widget/${type}/${teamId}?autoHeight=1&teamLogo=1&statsTab=1&playersTab=1&inst=${encodeURIComponent(
     inst
   )}`;
 }
