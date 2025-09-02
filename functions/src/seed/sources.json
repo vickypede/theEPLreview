@@ -180,6 +180,83 @@
     "url": "https://www.nottinghampost.com/all-about/nottingham-forest-fc",
     "clubSlugs": ["nottingham-forest"],
     "isActive": true
+  },
+  "fourfourtwo": {
+    "name": "FourFourTwo",
+    "type": "html",
+    "url": "https://www.fourfourtwo.com/news",
+    "clubSlugs": [],
+    "isActive": true
+  },
+  "goal": {
+    "name": "Goal",
+    "type": "html",
+    "url": "https://www.goal.com/en",
+    "clubSlugs": [],
+    "isActive": true
+  },
+  "sportsmole": {
+    "name": "Sports Mole",
+    "type": "html",
+    "url": "https://www.sportsmole.co.uk/football/",
+    "clubSlugs": [],
+    "isActive": true
+  },
+  "yahoo-sports-soccer": {
+    "name": "Yahoo Sports Soccer",
+    "type": "html",
+    "url": "https://sports.yahoo.com/soccer/",
+    "clubSlugs": [],
+    "isActive": true
+  },
+  "eurosport": {
+    "name": "Eurosport Football",
+    "type": "html",
+    "url": "https://www.eurosport.com/football/",
+    "clubSlugs": [],
+    "isActive": true
+  },
+  "premierleague-official": {
+    "name": "Premier League",
+    "type": "html",
+    "url": "https://www.premierleague.com/news",
+    "clubSlugs": [],
+    "isActive": true
+  },
+  "football-london-brentford": {
+    "name": "Football.London (Brentford)",
+    "type": "html",
+    "url": "https://www.football.london/brentford-fc/",
+    "clubSlugs": ["brentford"],
+    "isActive": true
+  },
+  "football-london-fulham": {
+    "name": "Football.London (Fulham)",
+    "type": "html",
+    "url": "https://www.football.london/fulham-fc/",
+    "clubSlugs": ["fulham"],
+    "isActive": true
+  },
+  "football-london-crystalpalace": {
+    "name": "Football.London (Crystal Palace)",
+    "type": "html",
+    "url": "https://www.football.london/crystal-palace-fc/",
+    "clubSlugs": ["crystal-palace"],
+    "isActive": true
+  },
+  "football-london-bournemouth": {
+    "name": "Football.London (Bournemouth)",
+    "type": "html",
+    "url": "https://www.football.london/afc-bournemouth/",
+    "clubSlugs": ["bournemouth"],
+    "isActive": true
+  },
+  "everton-liverpoolecho": {
+    "name": "Liverpool Echo (Everton)",
+    "type": "html",
+    "url": "https://www.liverpoolecho.co.uk/all-about/everton-fc",
+    "clubSlugs": ["everton"],
+    "isActive": true
   }
 }
 
