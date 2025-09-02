@@ -1,0 +1,99 @@
+{
+  "arsenal": {
+    "name": "Arsenal",
+    "isTop6": true,
+    "names": ["Arsenal", "Gunners", "AFC"]
+  },
+  "aston-villa": {
+    "name": "Aston Villa",
+    "isTop6": false,
+    "names": ["Aston Villa", "Villa", "Villans", "AVFC"]
+  },
+  "bournemouth": {
+    "name": "AFC Bournemouth",
+    "isTop6": false,
+    "names": ["Bournemouth", "AFC Bournemouth", "Cherries", "AFCB"]
+  },
+  "brentford": {
+    "name": "Brentford",
+    "isTop6": false,
+    "names": ["Brentford", "Bees", "BFC"]
+  },
+  "brighton": {
+    "name": "Brighton & Hove Albion",
+    "isTop6": false,
+    "names": ["Brighton", "Brighton & Hove Albion", "Seagulls", "Albion"]
+  },
+  "burnley": {
+    "name": "Burnley",
+    "isTop6": false,
+    "names": ["Burnley", "Clarets"]
+  },
+  "chelsea": {
+    "name": "Chelsea",
+    "isTop6": true,
+    "names": ["Chelsea", "Blues", "CFC"]
+  },
+  "crystal-palace": {
+    "name": "Crystal Palace",
+    "isTop6": false,
+    "names": ["Crystal Palace", "Palace", "Eagles", "CPFC"]
+  },
+  "everton": {
+    "name": "Everton",
+    "isTop6": false,
+    "names": ["Everton", "Toffees", "EFC"]
+  },
+  "fulham": {
+    "name": "Fulham",
+    "isTop6": false,
+    "names": ["Fulham", "Cottagers", "FFC"]
+  },
+  "leeds": {
+    "name": "Leeds United",
+    "isTop6": false,
+    "names": ["Leeds", "Leeds United", "Whites", "LUFC", "Peacocks"]
+  },
+  "liverpool": {
+    "name": "Liverpool",
+    "isTop6": true,
+    "names": ["Liverpool", "Reds", "LFC"]
+  },
+  "manchester-city": {
+    "name": "Manchester City",
+    "isTop6": true,
+    "names": ["Manchester City", "Man City", "City", "Citizens", "Cityzens", "Sky Blues", "MCFC"]
+  },
+  "manchester-united": {
+    "name": "Manchester United",
+    "isTop6": true,
+    "names": ["Manchester United", "Man United", "United", "Red Devils", "MUFC"]
+  },
+  "newcastle": {
+    "name": "Newcastle United",
+    "isTop6": false,
+    "names": ["Newcastle", "Newcastle United", "Magpies", "Toon", "NUFC"]
+  },
+  "nottingham-forest": {
+    "name": "Nottingham Forest",
+    "isTop6": false,
+    "names": ["Nottingham Forest", "Forest", "Tricky Trees", "NFFC"]
+  },
+  "tottenham": {
+    "name": "Tottenham Hotspur",
+    "isTop6": true,
+    "names": ["Tottenham", "Tottenham Hotspur", "Spurs", "Lilywhites", "THFC"]
+  },
+  "west-ham": {
+    "name": "West Ham United",
+    "isTop6": false,
+    "names": ["West Ham", "West Ham United", "Hammers", "Irons", "WHUFC"]
+  },
+  "wolves": {
+    "name": "Wolverhampton Wanderers",
+    "isTop6": false,
+    "names": ["Wolves", "Wolverhampton", "Wolverhampton Wanderers", "WWFC"]
+  }
+}
+
+

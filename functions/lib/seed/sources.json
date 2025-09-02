@@ -19,5 +19,166 @@
         "url": "https://www.arsenal.com/news",
         "clubSlugs": ["arsenal"],
         "isActive": true
+    },
+    "football365": {
+        "name": "Football365",
+        "type": "html",
+        "url": "https://www.football365.com/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "skysports-football": {
+        "name": "Sky Sports Football",
+        "type": "html",
+        "url": "https://www.skysports.com/football/news",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "talksport-football": {
+        "name": "talkSPORT Football",
+        "type": "html",
+        "url": "https://talksport.com/football/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "espn-soccer": {
+        "name": "ESPN Soccer",
+        "type": "html",
+        "url": "https://www.espn.com/soccer/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "ninetymin": {
+        "name": "90min",
+        "type": "html",
+        "url": "https://www.90min.com/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "teamtalk": {
+        "name": "TeamTalk",
+        "type": "html",
+        "url": "https://www.teamtalk.com/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "footballfancast": {
+        "name": "Football FanCast",
+        "type": "html",
+        "url": "https://www.footballfancast.com/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "independent-football": {
+        "name": "The Independent Football",
+        "type": "html",
+        "url": "https://www.independent.co.uk/sport/football",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "telegraph-football": {
+        "name": "The Telegraph Football",
+        "type": "html",
+        "url": "https://www.telegraph.co.uk/football/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "mirror-football": {
+        "name": "Mirror Football",
+        "type": "html",
+        "url": "https://www.mirror.co.uk/sport/football/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "arsenal-arseblog": {
+        "name": "Arseblog",
+        "type": "html",
+        "url": "https://arseblog.com/",
+        "clubSlugs": ["arsenal"],
+        "isActive": true
+    },
+    "arsenal-goonernews": {
+        "name": "GoonerNews",
+        "type": "html",
+        "url": "https://goonernews.com/",
+        "clubSlugs": ["arsenal"],
+        "isActive": true
+    },
+    "arsenal-footballlondon": {
+        "name": "Football.London (Arsenal)",
+        "type": "html",
+        "url": "https://www.football.london/arsenal-fc/",
+        "clubSlugs": ["arsenal"],
+        "isActive": true
+    },
+    "chelsea-talkchelsea": {
+        "name": "TalkChelsea",
+        "type": "html",
+        "url": "https://www.talkchelsea.net/",
+        "clubSlugs": ["chelsea"],
+        "isActive": true
+    },
+    "chelsea-footballlondon": {
+        "name": "Football.London (Chelsea)",
+        "type": "html",
+        "url": "https://www.football.london/chelsea-fc/",
+        "clubSlugs": ["chelsea"],
+        "isActive": true
+    },
+    "liverpool-thisisanfield": {
+        "name": "This Is Anfield",
+        "type": "html",
+        "url": "https://www.thisisanfield.com/",
+        "clubSlugs": ["liverpool"],
+        "isActive": true
+    },
+    "liverpool-empireofthekop": {
+        "name": "Empire of the Kop",
+        "type": "html",
+        "url": "https://www.empireofthekop.com/",
+        "clubSlugs": ["liverpool"],
+        "isActive": true
+    },
+    "liverpool-echo": {
+        "name": "Liverpool Echo (LFC)",
+        "type": "html",
+        "url": "https://www.liverpoolecho.co.uk/all-about/liverpool-fc",
+        "clubSlugs": ["liverpool"],
+        "isActive": true
+    },
+    "tottenham-footballlondon": {
+        "name": "Football.London (Tottenham)",
+        "type": "html",
+        "url": "https://www.football.london/tottenham-hotspur-fc/",
+        "clubSlugs": ["tottenham"],
+        "isActive": true
+    },
+    "westham-whtid": {
+        "name": "West Ham Till I Die",
+        "type": "html",
+        "url": "https://www.westhamtillidie.com/",
+        "clubSlugs": ["west-ham"],
+        "isActive": true
+    },
+    "westham-footballlondon": {
+        "name": "Football.London (West Ham)",
+        "type": "html",
+        "url": "https://www.football.london/west-ham-united-fc/",
+        "clubSlugs": ["west-ham"],
+        "isActive": true
+    },
+    "manutd-manunews": {
+        "name": "ManUtd News",
+        "type": "html",
+        "url": "https://manunews.com/",
+        "clubSlugs": ["manchester-united"],
+        "isActive": true
+    },
+    "forest-nottinghampost": {
+        "name": "Nottingham Post (Forest)",
+        "type": "html",
+        "url": "https://www.nottinghampost.com/all-about/nottingham-forest-fc",
+        "clubSlugs": ["nottingham-forest"],
+        "isActive": true
     }
 }

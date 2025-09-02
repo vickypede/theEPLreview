@@ -14,9 +14,12 @@ import Parser from "rss-parser";
 import * as cheerio from "cheerio";
 import * as crypto from "crypto";
 import sourcesPayload from "./seed/sources.json";
+import clubsPayload from "./seed/clubs.json";
 export { cleanupOldArticles } from "./cleanup";
 
-admin.initializeApp();
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 const db = admin.firestore();
 
 // Feature flags
@@ -195,9 +198,47 @@ function makeDeterministicIdFromUrl(rawUrl: string): { id: string; normalizedUrl
   return { id, normalizedUrl };
 }
 
+// --- Club detection utilities -------------------------------------------------
+type ClubDetector = { slug: string; regexes: RegExp[] };
+
+function escapeRegExp(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+async function buildClubDetectors(): Promise<ClubDetector[]> {
+  try {
+    const snap = await db.collection("clubs").get();
+    const detectors: ClubDetector[] = [];
+    for (const doc of snap.docs) {
+      const slug = doc.id;
+      const data = (doc.data() as any) || {};
+      const names: string[] = Array.isArray(data.names) ? data.names : [];
+      // Always include the proper club name (doc id may also work as a keyword)
+      const allNames = new Set<string>([slug, ...names]);
+      const regexes = Array.from(allNames)
+        .filter((n) => n && n.trim().length > 1)
+        .map((n) => new RegExp(`\\b${escapeRegExp(n.trim())}\\b`, "i"));
+      if (regexes.length > 0) detectors.push({ slug, regexes });
+    }
+    return detectors;
+  } catch {
+    return [];
+  }
+}
+
+function detectClubsFromText(text: string | undefined | null, detectors: ClubDetector[]): string[] {
+  if (!text) return [];
+  const hits: string[] = [];
+  for (const d of detectors) {
+    if (d.regexes.some((r) => r.test(text))) hits.push(d.slug);
+  }
+  return Array.from(new Set(hits));
+}
+
 export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => {
   try {
     const group = (req.query.group as string) || "all"; // top6 | other14 | all
+    const verbose = String(req.query.verbose || "").toLowerCase() === "1" || String(req.query.verbose || "").toLowerCase() === "true";
     const sourcesSnap = await db.collection("sources").where("isActive", "==", true).get();
     let sources = sourcesSnap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
 
@@ -230,6 +271,10 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
     let addedCount = 0;
     let skippedCount = 0;
     const runErrors: string[] = [];
+    const errorDetails: Array<{ id: string; type: "rss" | "html"; message: string }> = [];
+
+    // Build club detectors once per run
+    const clubDetectors = await buildClubDetectors();
 
     for (const source of sources) {
       if (source.type === "rss") {
@@ -241,6 +286,14 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
             const { id, normalizedUrl } = makeDeterministicIdFromUrl(url);
             const ref = db.collection("articles").doc(id);
             const existed = (await ref.get()).exists;
+
+            // Detect clubs from item title/content
+            const detectedClubs = detectClubsFromText(
+              `${item.title || ""} ${item.contentSnippet || item.content || ""}`,
+              clubDetectors,
+            );
+            const sourceClubs: string[] = Array.isArray(source.clubSlugs) ? source.clubSlugs : [];
+            const clubs = Array.from(new Set<string>([...sourceClubs, ...detectedClubs]));
             await ref.set(
               {
                 id,
@@ -249,7 +302,7 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
                 summary: item.contentSnippet || item.content || "",
                 sourceId: source.id,
                 sourceName: source.name,
-                clubs: Array.isArray(source.clubSlugs) ? source.clubSlugs : [],
+                clubs,
                 publishedAt: item.isoDate ? new Date(item.isoDate) : new Date(),
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -268,6 +321,7 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
             { merge: true },
           );
         } catch (err) {
+          const errMessage = (err as any)?.message ? String((err as any).message) : String(err);
           // circuit breaker accounting on error
           try {
             await db.runTransaction(async (tx) => {
@@ -281,12 +335,15 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
                   lastFetchedAt: admin.firestore.FieldValue.serverTimestamp(),
                   failureCount,
                   ...(failureCount >= 10 ? { isActive: false } : {}),
+                  lastError: errMessage?.slice(0, 500),
+                  lastErrorAt: admin.firestore.FieldValue.serverTimestamp(),
                 },
                 { merge: true },
               );
             });
           } catch {}
           runErrors.push(`rss:${source.id}`);
+          errorDetails.push({ id: source.id, type: "rss", message: errMessage });
         }
       } else if (source.type === "html") {
         try {
@@ -360,6 +417,11 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
 
             const ref = db.collection("articles").doc(id);
             const existed = (await ref.get()).exists;
+
+            // Detect clubs from title (and possibly surrounding context later)
+            const detectedClubs = detectClubsFromText(title, clubDetectors);
+            const sourceClubs: string[] = Array.isArray(source.clubSlugs) ? source.clubSlugs : [];
+            const clubs = Array.from(new Set<string>([...sourceClubs, ...detectedClubs]));
             await ref.set(
               {
                 id,
@@ -368,7 +430,7 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
                 summary: "",
                 sourceId: source.id,
                 sourceName: source.name,
-                clubs: Array.isArray(source.clubSlugs) ? source.clubSlugs : [],
+                clubs,
                 publishedAt: publishedAt ?? new Date(),
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -387,6 +449,7 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
             { merge: true },
           );
         } catch (err) {
+          const errMessage = (err as any)?.message ? String((err as any).message) : String(err);
           // circuit breaker accounting on error
           try {
             await db.runTransaction(async (tx) => {
@@ -400,12 +463,15 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
                   lastFetchedAt: admin.firestore.FieldValue.serverTimestamp(),
                   failureCount,
                   ...(failureCount >= 10 ? { isActive: false } : {}),
+                  lastError: errMessage?.slice(0, 500),
+                  lastErrorAt: admin.firestore.FieldValue.serverTimestamp(),
                 },
                 { merge: true },
               );
             });
           } catch {}
           runErrors.push(`html:${source.id}`);
+          errorDetails.push({ id: source.id, type: "html", message: errMessage });
         }
       }
     }
@@ -427,7 +493,9 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
       console.warn(`Ingestion run produced 0 new items for group=${group}`);
     }
 
-    res.json({ ok: true, processed: sources.length, group, addedCount, skippedCount, errors: runErrors.length });
+    const baseResp: any = { ok: true, processed: sources.length, group, addedCount, skippedCount, errors: runErrors.length };
+    if (verbose) baseResp.errorDetails = errorDetails;
+    res.json(baseResp);
   } catch (e: any) {
     res.status(500).json({ ok: false, error: e?.message || String(e) });
   }
@@ -449,6 +517,29 @@ export const seedSourcesHttp = onRequest({ timeoutSeconds: 300 }, async (_req, r
         isActive: data.isActive ?? true,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+    }
+    await batch.commit();
+    res.json({ ok: true, count: Object.keys(payload).length });
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e?.message || String(e) });
+  }
+});
+
+// Seed or upsert clubs (names/nicknames) for detection
+export const seedClubsHttp = onRequest({ timeoutSeconds: 300 }, async (_req, res) => {
+  try {
+    const payload = clubsPayload as Record<string, any>;
+    const batch = db.batch();
+    for (const [id, data] of Object.entries(payload)) {
+      const ref = db.collection("clubs").doc(id);
+      batch.set(ref, {
+        id,
+        name: data.name,
+        isTop6: Boolean(data.isTop6),
+        names: Array.isArray(data.names) ? data.names : [],
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
     }
     await batch.commit();
