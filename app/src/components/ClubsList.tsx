@@ -74,9 +74,6 @@ export default function ClubsList() {
               )}
               <h3 className="text-lg font-semibold text-foreground">{club.name}</h3>
             </div>
-            {club.isTop6 && (
-              <span className="ml-3 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground border border-border">Top 6</span>
-            )}
           </div>
         </Link>
       ))}
