@@ -11,6 +11,7 @@ const nav = [
   { href: '/news', label: 'News' },
   { href: '/table', label: 'Table' },
   { href: '/profile', label: 'Profile' },
+  { href: '/landing2', label: 'Landing2' },
 ];
 
 export default function Header() {
