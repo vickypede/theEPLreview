@@ -1,3 +1,5 @@
+import { Timestamp } from 'firebase/firestore';
+
 export interface Article {
   id: string;
   title: string;
@@ -28,6 +30,6 @@ export interface UserProfile {
   followedClubs: ClubSlug[];        // multi-select
   includeGeneral: boolean;          // show general league-wide items
   marketingOptIn: boolean;
-  createdAt: any; // Firestore Timestamp - will be properly typed when used
-  updatedAt: any; // Firestore Timestamp - will be properly typed when used
+  createdAt: Timestamp | Date;
+  updatedAt: Timestamp | Date;
 }

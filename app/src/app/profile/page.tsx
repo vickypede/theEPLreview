@@ -3,25 +3,27 @@
 import { useEffect, useMemo, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
 import {
-  GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut
+  GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, User
 } from 'firebase/auth';
 import {
-  collection, doc, getDoc, getDocs, orderBy, query, setDoc, updateDoc, where
+  collection, doc, getDoc, getDocs, orderBy, query, setDoc, updateDoc
 } from 'firebase/firestore';
 import { Club, UserProfile } from '@/types';
 
 export default function ProfilePage(){
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [saving, setSaving] = useState(false);
 
   // Auth
   useEffect(() => {
+    if (!auth || !db) return;
+    
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (!u) return;
-      const prefRef = doc(db, 'user_profiles', u.uid);
+      const prefRef = doc(db!, 'user_profiles', u.uid);
       const snap = await getDoc(prefRef);
       if (!snap.exists()) {
         await setDoc(prefRef, {
@@ -42,10 +44,12 @@ export default function ProfilePage(){
 
   // Load clubs
   useEffect(() => {
+    if (!db) return;
+    
     (async () => {
-      const qClubs = query(collection(db, 'clubs'), orderBy('name'));
+      const qClubs = query(collection(db!, 'clubs'), orderBy('name'));
       const s = await getDocs(qClubs);
-      setClubs(s.docs.map(d => ({ id: d.id, ...(d.data() as any) })));
+      setClubs(s.docs.map(d => ({ id: d.id, ...(d.data() as Omit<Club, 'id'>) })));
     })();
   }, []);
 
@@ -53,8 +57,15 @@ export default function ProfilePage(){
   const top6Slugs = useMemo(() => clubs.filter(c => c.isTop6).map(c => c.id), [clubs]);
   const allSlugs  = useMemo(() => clubs.map(c => c.id), [clubs]);
 
-  const signIn = async () => { await signInWithPopup(auth, new GoogleAuthProvider()); };
-  const doSignOut = async () => { await signOut(auth); };
+  const signIn = async () => { 
+    if (!auth) return;
+    await signInWithPopup(auth, new GoogleAuthProvider()); 
+  };
+  
+  const doSignOut = async () => { 
+    if (!auth) return;
+    await signOut(auth); 
+  };
 
   const toggleFollow = (slug: string) => {
     if (!profile) return;
@@ -65,13 +76,15 @@ export default function ProfilePage(){
     setProfile({ ...profile, followedClubs: next });
   };
 
-  const setFollowed = (list: string[]) =>
+  const setFollowed = (list: string[]) => {
+    if (!profile) return;
     setProfile({ ...profile, followedClubs: Array.from(new Set(list)).slice(0, 20) });
+  };
 
   const save = async () => {
-    if (!user || !profile) return;
+    if (!user || !profile || !db) return;
     setSaving(true);
-    const prefRef = doc(db, 'user_profiles', user.uid);
+    const prefRef = doc(db!, 'user_profiles', user.uid);
     await updateDoc(prefRef, {
       displayName: profile.displayName || '',
       favoriteClub: profile.favoriteClub || null,
@@ -84,6 +97,7 @@ export default function ProfilePage(){
   };
 
   const resetDefaults = () => {
+    if (!profile) return;
     setProfile({
       ...profile,
       includeGeneral: true,

@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect } from 'react';
 import { useEnsureProfile } from '@/lib/useEnsureProfile';
 
 const nav = [
@@ -17,9 +16,7 @@ export default function Header() {
   const pathname = usePathname();
   
   // Auto-create profile on first login
-  useEffect(() => { 
-    useEnsureProfile(); 
-  }, []);
+  useEnsureProfile();
 
   return (
     <header className="bg-white border-b">
