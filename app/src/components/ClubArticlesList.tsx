@@ -77,7 +77,7 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-gray-600 mb-4">Loading…</h2>
+        <h2 className="text-2xl font-semibold text-muted mb-4">Loading…</h2>
       </div>
     );
   }
@@ -85,27 +85,27 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">{club?.name || slug}</h1>
-        <p className="text-gray-600">Latest news and updates</p>
+        <h1 className="text-4xl font-bold text-foreground mb-2">{club?.name || slug}</h1>
+        <p className="text-muted">Latest news and updates</p>
       </div>
       
       {allArticles.length === 0 ? (
         <div className="text-center py-12">
-          <h2 className="text-2xl font-semibold text-gray-600 mb-4">No articles yet</h2>
-          <p className="text-gray-500">Articles will appear here once the ingestion system is running.</p>
+          <h2 className="text-2xl font-semibold text-muted mb-4">No articles yet</h2>
+          <p className="text-muted">Articles will appear here once the ingestion system is running.</p>
         </div>
       ) : (
         <>
           {/* Articles Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
             {articles.map((article) => (
-              <article key={article.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">{article.title}</h2>
-                <p className="text-gray-600 text-sm mb-4">{article.sourceName || article.source || ''}</p>
+              <article key={article.id} className="bg-card rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-border">
+                <h2 className="text-xl font-semibold text-foreground mb-2 line-clamp-2">{article.title}</h2>
+                <p className="text-muted text-sm mb-4">{article.sourceName || article.source || ''}</p>
                 {article.publishedAt?.toDate && (
-                  <p className="text-gray-500 text-xs mb-4">{new Date(article.publishedAt.toDate()).toLocaleString()}</p>
+                  <p className="text-muted text-xs mb-4">{new Date(article.publishedAt.toDate()).toLocaleString()}</p>
                 )}
-                <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm font-medium">Read more →</a>
+                <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-foreground text-sm font-medium">Read more →</a>
               </article>
             ))}
           </div>
@@ -121,8 +121,8 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
                   disabled={currentPage === 1}
                   className={`px-4 py-2 rounded-lg font-medium ${
                     currentPage === 1
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      ? 'surface-2 text-muted cursor-not-allowed'
+                      : 'bg-primary text-primary-foreground hover:text-foreground'
                   }`}
                 >
                   Previous
@@ -135,8 +135,8 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
                     onClick={() => handlePageChange(page)}
                     className={`px-4 py-2 rounded-lg font-medium ${
                       currentPage === page
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'surface-2 text-foreground hover:text-primary'
                     }`}
                   >
                     {page}
@@ -149,8 +149,8 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
                   disabled={currentPage === totalPages}
                   className={`px-4 py-2 rounded-lg font-medium ${
                     currentPage === totalPages
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      ? 'surface-2 text-muted cursor-not-allowed'
+                      : 'bg-primary text-primary-foreground hover:text-foreground'
                   }`}
                 >
                   Next
@@ -158,7 +158,7 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
               </div>
 
               {/* Page Info */}
-              <div className="text-center text-gray-600 mb-8">
+              <div className="text-center text-muted mb-8">
                 <p>
                   Showing page {currentPage} of {totalPages} •
                   Articles {((currentPage - 1) * articlesPerPage) + 1} - {Math.min(currentPage * articlesPerPage, allArticles.length)} of {allArticles.length}

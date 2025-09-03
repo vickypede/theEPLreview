@@ -113,8 +113,8 @@ export default function TeamPanel({ slug }: { slug: string }) {
     return (
       <section className="mb-8">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Loading...</h1>
-          <p className="text-gray-600">Loading team information...</p>
+          <h1 className="text-3xl font-bold text-foreground">Loading...</h1>
+          <p className="text-muted">Loading team information...</p>
         </div>
       </section>
     );
@@ -124,8 +124,8 @@ export default function TeamPanel({ slug }: { slug: string }) {
     return (
       <section className="mb-8">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Team Not Found</h1>
-          <p className="text-gray-600">Could not find team information for this club.</p>
+          <h1 className="text-3xl font-bold text-foreground">Team Not Found</h1>
+          <p className="text-muted">Could not find team information for this club.</p>
         </div>
       </section>
     );
@@ -136,21 +136,21 @@ export default function TeamPanel({ slug }: { slug: string }) {
     return (
       <section className="mb-8">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">{team.name}</h1>
-          <p className="text-gray-600">Team information and statistics</p>
+          <h1 className="text-3xl font-bold text-foreground">{team.name}</h1>
+          <p className="text-muted">Team information and statistics</p>
         </div>
         <div className="max-w-4xl mx-auto">
-          <article className="bg-white rounded-lg shadow-md border overflow-hidden">
-            <div className="px-4 py-3 border-b bg-gradient-to-r from-yellow-600 to-yellow-700 text-white">
+          <article className="bg-card rounded-lg shadow-md border overflow-hidden border-border">
+            <div className="px-4 py-3 border-b surface-2 text-foreground">
               <h3 className="font-semibold">ScoreAxis Not Configured</h3>
             </div>
             <div className="p-6 text-center">
-              <p className="text-gray-600 mb-4">
-                Team stats widget not yet configured for <strong>{team.name}</strong>. 
-                Please add this team to the <code className="bg-gray-100 px-2 py-1 rounded">SCOREAXIS_IDS</code> mapping in the code.
+              <p className="text-muted mb-4">
+                Team stats widget not yet configured for <strong className="text-foreground">{team.name}</strong>. 
+                Please add this team to the <code className="px-2 py-1 rounded surface-2 border border-border">SCOREAXIS_IDS</code> mapping in the code.
               </p>
-              <p className="text-sm text-gray-500">
-                To get the ID: visit <a href="https://www.scoreaxis.com/free-soccer-widgets/team-info-widget/" target="_blank" rel="noreferrer" className="underline text-blue-600">ScoreAxis Team Info Widget</a>, select {team.name}, and copy the number from the iframe src.
+              <p className="text-sm text-muted">
+                To get the ID: visit <a href="https://www.scoreaxis.com/free-soccer-widgets/team-info-widget/" target="_blank" rel="noreferrer" className="underline text-primary">ScoreAxis Team Info Widget</a>, select {team.name}, and copy the number from the iframe src.
               </p>
             </div>
           </article>
@@ -165,14 +165,14 @@ export default function TeamPanel({ slug }: { slug: string }) {
   return (
     <section className="mb-8">
       <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">{team.name}</h1>
-        <p className="text-gray-600">Team information and statistics</p>
+        <h1 className="text-3xl font-bold text-foreground">{team.name}</h1>
+        <p className="text-muted">Team information and statistics</p>
       </div>
 
       <div className="max-w-4xl mx-auto">
         {/* Team Info / Stats (includes tabs like Stats / Players / Matches) */}
-        <article className="bg-white rounded-lg shadow-md border overflow-hidden">
-          <div className="px-4 py-3 border-b bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
+        <article className="bg-card rounded-lg shadow-md border overflow-hidden border-border">
+          <div className="px-4 py-3 border-b surface-2 text-foreground">
             <h3 className="font-semibold">Team Info & Stats</h3>
           </div>
           <div className="p-3">
@@ -187,10 +187,10 @@ export default function TeamPanel({ slug }: { slug: string }) {
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
-          <div className="px-4 pb-3 text-xs text-gray-500">
+          <div className="px-4 pb-3 text-xs text-muted">
             Team data by{" "}
             <a
-              className="underline text-blue-600 hover:text-blue-800"
+              className="underline text-primary hover:text-foreground"
               href="https://www.scoreaxis.com/"
               target="_blank"
               rel="noreferrer"

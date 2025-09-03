@@ -2,12 +2,12 @@
 
 export default function Stats() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen surface">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16">
+      <section className="surface-2 text-foreground py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl font-bold mb-4">Premier League Hub</h1>
-          <p className="text-xl opacity-90">Live table and top scorers & assists</p>
+          <p className="text-xl text-muted">Live table and top scorers & assists</p>
         </div>
       </section>
 
@@ -17,9 +17,9 @@ export default function Stats() {
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
             
             {/* EPL Table Card */}
-            <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-                <h2 className="text-xl font-bold text-white">EPL Table</h2>
+            <article className="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-border">
+              <div className="px-6 py-4 border-b border-border">
+                <h2 className="text-xl font-bold text-foreground">EPL Table</h2>
               </div>
               <div className="p-4">
                 <iframe
@@ -30,17 +30,17 @@ export default function Stats() {
                   referrerPolicy="no-referrer-when-downgrade"
                 />
               </div>
-              <footer className="px-6 py-3 bg-gray-50 border-t text-center">
-                <small className="text-gray-600">
-                  Data by <a href="https://www.scoreaxis.com/" target="_blank" rel="noopener" className="text-blue-600 hover:text-blue-800">ScoreAxis</a>
+              <footer className="px-6 py-3 surface-2 border-t border-border text-center">
+                <small className="text-muted">
+                  Data by <a href="https://www.scoreaxis.com/" target="_blank" rel="noopener" className="text-primary hover:text-foreground">ScoreAxis</a>
                 </small>
               </footer>
             </article>
 
             {/* Top Scorers & Assists Card */}
-            <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
-                <h2 className="text-xl font-bold text-white">Top Scorers & Assists</h2>
+            <article className="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-border">
+              <div className="px-6 py-4 border-b border-border">
+                <h2 className="text-xl font-bold text-foreground">Top Scorers & Assists</h2>
               </div>
               <div className="p-4">
                 <iframe
@@ -51,9 +51,9 @@ export default function Stats() {
                   referrerPolicy="no-referrer-when-downgrade"
                 />
               </div>
-              <footer className="px-6 py-3 bg-gray-50 border-t text-center">
-                <small className="text-gray-600">
-                  Data by <a href="https://www.scoreaxis.com/" target="_blank" rel="noopener" className="text-blue-600 hover:text-blue-800">ScoreAxis</a>
+              <footer className="px-6 py-3 surface-2 border-t border-border text-center">
+                <small className="text-muted">
+                  Data by <a href="https://www.scoreaxis.com/" target="_blank" rel="noopener" className="text-primary hover:text-foreground">ScoreAxis</a>
                 </small>
               </footer>
             </article>

@@ -1,4 +1,11 @@
-@import "tailwindcss";
+Absolutely. I’ve turned your palette into **HSL tokens** (so `hsl(var(--…))` works everywhere), added soft “matte” shadows, proper focus rings, scrollbars, selection color, and handy component/util classes. It stays pure Tailwind-friendly and dark by default.
+
+Drop-in replacement for `globals.css`:
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ========= THEME TOKENS (HSL triples) ========= */
 :root {
@@ -59,31 +66,6 @@
 /* Optional class-based dark toggle support */
 .dark { color-scheme: dark; }
 
-/* ========= MAP TOKENS TO TAILWIND THEME (v4 inline) ========= */
-@theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-success: hsl(var(--success));
-  --color-success-foreground: hsl(var(--foreground));
-  --color-warning: hsl(var(--warning));
-  --color-warning-foreground: hsl(var(--foreground));
-  --color-info: hsl(var(--info));
-  --color-info-foreground: hsl(var(--foreground));
-}
-
 /* ========= BASE ========= */
 @layer base {
   * { @apply border-border; }
@@ -124,7 +106,7 @@
   }
 }
 
-/* ========= COMPONENT PRESETS ========= */
+/* ========= COMPONENT PRESETS (handy with Tailwind) ========= */
 @layer components {
   .surface   { background: hsl(var(--background)); }
   .surface-2 { background: hsl(var(--background-secondary)); }
@@ -191,3 +173,56 @@
   .border-primary   { border-color: hsl(var(--border)); }
   .border-secondary { border-color: hsl(var(--background-quaternary)); }
 }
+```
+
+### (Optional) Tailwind mapping
+
+If you haven’t already, map the CSS variables so Tailwind classes like `bg-background`/`text-foreground` work:
+
+```ts
+// tailwind.config.ts
+export default {
+  darkMode: ["class"],
+  content: ["./app/**/*.{ts,tsx}","./components/**/*.{ts,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        card: "hsl(var(--card))",
+        "card-foreground": "hsl(var(--card-foreground))",
+        primary: "hsl(var(--primary))",
+        "primary-foreground": "hsl(var(--primary-foreground))",
+        secondary: "hsl(var(--secondary))",
+        "secondary-foreground": "hsl(var(--secondary-foreground))",
+        muted: "hsl(var(--muted))",
+        "muted-foreground": "hsl(var(--muted-foreground))",
+        accent: "hsl(var(--accent))",
+        "accent-foreground": "hsl(var(--accent-foreground))",
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "var(--radius-md)",
+        sm: "var(--radius-sm)",
+      },
+      boxShadow: {
+        card: "var(--shadow-1)",
+        "card-lg": "var(--shadow-2)",
+      },
+    },
+  },
+  plugins: [],
+};
+```
+
+### Why this is better (quick hits)
+
+* Your previous `hsl(var(--border))` used **hexes** — switching to **HSL triples** fixes that and enables alpha (`/ 0.35`) everywhere.
+* Adds **accessible focus**, **reduced-motion** support, and **dark scrollbars**.
+* Ready-made **`.card`**, **`.btn*`**, **`.badge`**, and **layer** utilities keep things consistent.
+* Subtle **radial + linear gradient** background (and optional `.bg-noise`) = modern matte without glare.
+
+If you want, tell me your preferred **brand accent** (e.g., a soft teal for links/CTAs), and I’ll wire a tasteful color into `--accent` to lift key actions while keeping that matte vibe.

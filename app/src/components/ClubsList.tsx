@@ -41,7 +41,7 @@ export default function ClubsList() {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-gray-600 mb-4">Loading…</h2>
+        <h2 className="text-2xl font-semibold text-muted mb-4">Loading…</h2>
       </div>
     );
   }
@@ -49,8 +49,8 @@ export default function ClubsList() {
   if (clubs.length === 0) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-gray-600 mb-4">No clubs found</h2>
-        <p className="text-gray-500">Seed the clubs collection to view club pages.</p>
+        <h2 className="text-2xl font-semibold text-muted mb-4">No clubs found</h2>
+        <p className="text-muted">Seed the clubs collection to view club pages.</p>
       </div>
     );
   }
@@ -58,15 +58,15 @@ export default function ClubsList() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {clubs.map((club) => (
-        <Link key={club.id} href={`/clubs/${club.id}`} className="block bg-white rounded-lg shadow p-5 hover:shadow-md transition-shadow">
+        <Link key={club.id} href={`/clubs/${club.id}`} className="block bg-card rounded-lg shadow p-5 hover:shadow-md transition-shadow border border-border">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">{club.name}</h3>
+            <h3 className="text-lg font-semibold text-foreground">{club.name}</h3>
             {club.isTop6 && (
-              <span className="ml-3 inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">Top 6</span>
+              <span className="ml-3 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground border border-border">Top 6</span>
             )}
           </div>
           {club.names?.length > 0 && (
-            <p className="mt-2 text-xs text-gray-500 truncate">Also known as: {club.names.slice(0, 3).join(', ')}{club.names.length > 3 ? '…' : ''}</p>
+            <p className="mt-2 text-xs text-muted truncate">Also known as: {club.names.slice(0, 3).join(', ')}{club.names.length > 3 ? '…' : ''}</p>
           )}
         </Link>
       ))}

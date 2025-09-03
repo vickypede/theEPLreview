@@ -130,26 +130,26 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" aria-modal role="dialog">
-      <div ref={dialogRef} className="w-full max-w-md transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[hsl(0_0%_0%_/_0.6)] backdrop-blur-sm p-4" aria-modal role="dialog">
+      <div ref={dialogRef} className="w-full max-w-md transform overflow-hidden rounded-3xl bg-card border border-border shadow-2xl transition-all text-foreground">
         {/* Header */}
-        <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-12 text-white">
+        <div className="relative surface-2 px-8 py-12">
           <button 
             onClick={onClose} 
-            className="absolute right-4 top-4 rounded-full p-2 text-white/80 hover:bg-white/10 transition-colors"
+            className="absolute right-4 top-4 rounded-full p-2 text-foreground/80 hover:opacity-80 transition-colors"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-              <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full surface-3 border border-border backdrop-blur-sm">
+              <svg className="h-8 w-8 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
             <h2 className="text-2xl font-bold">Welcome Back</h2>
-            <p className="mt-2 text-blue-100">Sign in to access your account</p>
+            <p className="mt-2 text-muted">Sign in to access your account</p>
           </div>
         </div>
 
@@ -157,23 +157,23 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
         <div className="px-8 py-8">
           {/* Messages */}
           {msg && (
-            <div className="mb-6 rounded-xl bg-emerald-50 border border-emerald-200 p-4">
+            <div className="mb-6 rounded-xl surface-2 border border-border p-4">
               <div className="flex items-center">
-                <svg className="h-5 w-5 text-emerald-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5 text-success mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="text-emerald-800 font-medium">{msg}</p>
+                <p className="text-foreground font-medium">{msg}</p>
               </div>
             </div>
           )}
           
           {err && (
-            <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4">
+            <div className="mb-6 rounded-xl surface-2 border border-border p-4">
               <div className="flex items-center">
-                <svg className="h-5 w-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5 text-warning mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="text-red-800 font-medium">{err}</p>
+                <p className="text-foreground font-medium">{err}</p>
               </div>
             </div>
           )}
@@ -184,7 +184,7 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
               <button
                 onClick={startGoogle}
                 disabled={busy}
-                className="group relative w-full rounded-xl border-2 border-gray-200 bg-white px-6 py-4 font-semibold text-gray-700 hover:border-blue-300 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                className="group relative w-full rounded-xl border border-border surface px-6 py-4 font-semibold text-foreground hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
                 <div className="flex items-center justify-center">
                   <svg className="h-5 w-5 mr-3" viewBox="0 0 24 24">
@@ -200,10 +200,10 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
               {/* Divider */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200" />
+                  <div className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="bg-white px-4 text-gray-500">or continue with email</span>
+                  <span className="surface px-4 text-muted">or continue with email</span>
                 </div>
               </div>
 
@@ -211,10 +211,10 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
               <button
                 onClick={() => setStep("email")}
                 disabled={busy}
-                className="w-full rounded-xl border-2 border-gray-200 bg-white px-6 py-4 font-semibold text-gray-700 hover:border-blue-300 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                className="w-full rounded-xl border border-border surface px-6 py-4 font-semibold text-foreground hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
                 <div className="flex items-center justify-center">
-                  <svg className="h-5 w-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5 mr-3 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   Use email (magic link)
@@ -228,7 +228,7 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
               {/* Back Button */}
               <button
                 onClick={() => setStep("pick")}
-                className="group flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                className="group flex items-center text-primary hover:opacity-90 font-medium transition-colors"
               >
                 <svg className="h-4 w-4 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -238,13 +238,13 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
 
               {/* Email Input */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Email address</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">Email address</label>
                 <input
                   type="email"
                   autoFocus
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border-2 border-gray-200 px-4 py-4 text-lg outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                  className="w-full rounded-xl border border-border px-4 py-4 text-lg outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] transition-all duration-200 surface"
                   placeholder="Enter your email"
                 />
               </div>
@@ -253,11 +253,11 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
               <button
                 onClick={sendMagic}
                 disabled={busy || !email}
-                className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 font-semibold text-white shadow-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] transition-all duration-200"
+                className="w-full rounded-xl bg-primary px-6 py-4 font-semibold text-primary-foreground shadow-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] transition-all duration-200"
               >
                 {busy ? (
                   <div className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary-foreground" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -272,11 +272,11 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
 
           {/* Footer */}
           <div className="mt-8 text-center">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted">
               By continuing you agree to our{" "}
-              <a href="#" className="text-blue-600 hover:underline">Terms</a>
+              <a href="#" className="text-primary hover:underline">Terms</a>
               {" "}and acknowledge our{" "}
-              <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>
+              <a href="#" className="text-primary hover:underline">Privacy Policy</a>
             </p>
           </div>
         </div>
