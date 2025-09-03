@@ -1,7 +1,6 @@
 'use client';
 import { ReactNode, useEffect, useState } from 'react';
-import { auth, ensureAdminClaim, fns } from '@/lib/firebase';
-import { httpsCallable } from 'firebase/functions';
+import { auth, ensureAdminClaim } from '@/lib/firebase';
 import { onAuthStateChanged, getIdTokenResult } from 'firebase/auth';
 import LoginModal from './LoginModal';
 
@@ -72,7 +71,34 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
       <div className="p-6 text-center">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Access Denied</h2>
         <p className="text-gray-600 mb-4">You don&apos;t have admin access to this area.</p>
-        <p className="text-sm text-gray-500">Contact your administrator to request access.</p>
+        <div className="mb-4 text-sm text-gray-500">
+          <div>Signed in as: {auth?.currentUser?.email ?? 'unknown'}</div>
+        </div>
+        <div className="flex items-center justify-center gap-3">
+          <button
+            onClick={async () => {
+              try {
+                const synced = await ensureAdminClaim();
+                await auth?.currentUser?.getIdToken(true);
+                const token = auth?.currentUser ? await getIdTokenResult(auth.currentUser, true) : null;
+                const isAdmin = token?.claims?.isAdmin === true;
+                setState(isAdmin || synced ? 'ok' : 'noadmin');
+              } catch {
+                // ignore
+              }
+            }}
+            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+          >
+            Retry admin sync
+          </button>
+          <button
+            onClick={() => auth?.signOut()}
+            className="px-4 py-2 rounded-lg border hover:bg-gray-50"
+          >
+            Sign out
+          </button>
+        </div>
+        <p className="mt-4 text-sm text-gray-500">If this persists, ensure an allowlist doc exists at admins/your-email with isActive: true.</p>
       </div>
     );
   }
