@@ -12,7 +12,7 @@ type ClubTile = {
   id: string;
   name: string;
   badgeUrl?: string;
-  latest?: UiArticle | null;
+  latest: UiArticle[]; // up to 3 latest articles
 };
 
 export default function Landing2(){
@@ -37,7 +37,7 @@ export default function Landing2(){
         const allClubs = clubsSnap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<Club, 'id'>) })) as Club[];
         const top = allClubs.filter(c => c.isTop6).slice(0, 6);
         const six = (top.length === 6 ? top : allClubs.sort((a,b)=>a.name.localeCompare(b.name)).slice(0,6))
-          .map(c => ({ id: c.id, name: c.name, badgeUrl: c.badgeUrl })) as ClubTile[];
+          .map(c => ({ id: c.id, name: c.name, badgeUrl: c.badgeUrl, latest: [] })) as ClubTile[];
 
         // For each club fetch its latest article
         const tiles: ClubTile[] = [];
@@ -47,11 +47,11 @@ export default function Landing2(){
             clubArticlesRef,
             where('clubs', 'array-contains', c.id),
             orderBy('publishedAt', 'desc'),
-            limit(1)
+            limit(3)
           );
           const aSnap = await getDocs(clubQ);
-          const a = aSnap.docs[0]?.data() as Omit<UiArticle, 'id'> | undefined;
-          tiles.push({ ...c, latest: a ? ({ id: aSnap.docs[0].id, ...a } as UiArticle) : null });
+          const list = aSnap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<UiArticle,'id'>) })) as UiArticle[];
+          tiles.push({ ...c, latest: list });
         }
 
         if (mounted){
@@ -128,8 +128,29 @@ export default function Landing2(){
                     {c?.name ?? 'Club'}
                   </Link>
                 </div>
-                <div className="text-sm text-foreground line-clamp-2">
-                  {c?.latest?.title ?? 'No recent article'}
+                {/* Articles list: show first on mobile, up to three on md+ with dividers */}
+                <div className="mt-1">
+                  {c?.latest && c.latest.length > 0 ? (
+                    <ul className="divide-y divide-border">
+                      {c.latest.slice(0,1).map((a, idx) => (
+                        <li key={a.id} className="py-2">
+                          <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2 hover:text-primary">
+                            {a.title}
+                          </Link>
+                        </li>
+                      ))}
+                      {/* Only visible on md+ */}
+                      {c.latest.slice(1,3).map((a) => (
+                        <li key={a.id} className="py-2 hidden md:block">
+                          <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2 hover:text-primary">
+                            {a.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">No recent article</div>
+                  )}
                 </div>
               </article>
             ))}
