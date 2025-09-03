@@ -65,17 +65,17 @@ export default function Landing() {
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {articles.slice(0, 6).map((article) => (
-                <article key={article.id} className="bg-card rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-border">
-                  <h3 className="text-xl font-semibold text-foreground mb-2 line-clamp-2">{article.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-4">{article.sourceName || article.source || ''}</p>
+                <article key={article.id} className="bg-card rounded-lg shadow-md p-3 sm:p-4 md:p-6 hover:shadow-lg transition-shadow border border-border">
+                  <h3 className="text-base sm:text-lg md:text-xl font-semibold text-foreground mb-1 sm:mb-2 line-clamp-2">{article.title}</h3>
+                  <p className="text-muted-foreground text-xs sm:text-sm mb-2 sm:mb-4">{article.sourceName || article.source || ''}</p>
                   {article.publishedAt?.toDate && (
-                    <p className="text-muted-foreground text-xs mb-4">{new Date(article.publishedAt.toDate()).toLocaleString()}</p>
+                    <p className="text-muted-foreground text-xs mb-2 sm:mb-4">{new Date(article.publishedAt.toDate()).toLocaleString()}</p>
                   )}
                   <a 
                     href={article.url} 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="text-primary hover:text-foreground text-sm font-medium"
+                    className="text-primary hover:text-foreground text-xs sm:text-sm font-medium"
                   >
                     Read more →
                   </a>
