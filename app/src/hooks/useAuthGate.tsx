@@ -1,15 +1,14 @@
 "use client";
 import { useCallback, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 // A simple hook that opens a login modal when the user is not authenticated.
 // It exposes: requireAuth(action) which ensures the user is logged in before running action().
 export function useAuthGate() {
   const [loginOpen, setLoginOpen] = useState(false);
-  const [pending, setPending] = useState<(() => Promise<any> | any) | null>(null);
+  const [pending, setPending] = useState<(() => Promise<unknown> | unknown) | null>(null);
 
-  const requireAuth = useCallback(async (fn: () => Promise<any> | any) => {
+  const requireAuth = useCallback(async (fn: () => Promise<unknown> | unknown) => {
     if (!auth) return;
     const user = auth.currentUser;
     if (user) return fn();

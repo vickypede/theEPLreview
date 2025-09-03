@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { auth } from "@/lib/firebase";
 import {
   GoogleAuthProvider,
@@ -72,8 +72,8 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
           const url = new URL(window.location.href);
           url.search = ""; url.hash = "";
           window.history.replaceState({}, document.title, url.toString());
-        } catch (e: any) {
-          setErr(e?.message ?? "Failed to complete sign-in");
+        } catch (e: unknown) {
+          setErr(e instanceof Error ? e.message : "Failed to complete sign-in");
         } finally {
           setBusy(false);
         }
@@ -100,8 +100,8 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       // onAuthStateChanged will close the modal
-    } catch (e: any) {
-      setErr(e?.message ?? "Google sign-in failed");
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Google sign-in failed");
     } finally {
       setBusy(false);
     }
@@ -120,8 +120,8 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
       window.localStorage.setItem("mf_auth_emailForSignIn", email);
       setMsg("Magic link sent! Check your inbox on this device or another.");
       setStep("pick");
-    } catch (e: any) {
-      setErr(e?.message ?? "Could not send magic link");
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Could not send magic link");
     } finally {
       setBusy(false);
     }

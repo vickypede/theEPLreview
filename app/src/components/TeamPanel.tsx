@@ -32,17 +32,7 @@ const SCOREAXIS_IDS: Record<string, number> = {
   "leeds": 71,
 };
 
-function saSrc(
-  type: "team-info" | "team-next-match",
-  teamId: number,
-  inst: string
-) {
-  // ScoreAxis supports auto height via postMessage; ?autoHeight=1 helps in some setups
-  // Additional parameters: teamLogo=1 (shows logo), statsTab=1 (shows stats), playersTab=1 (shows players)
-  return `https://www.scoreaxis.com/widget/${type}/${teamId}?autoHeight=1&teamLogo=1&statsTab=1&playersTab=1&inst=${encodeURIComponent(
-    inst
-  )}`;
-}
+
 
 function useScoreAxisAutoHeight() {
   useEffect(() => {
