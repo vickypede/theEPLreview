@@ -59,15 +59,25 @@ export default function ClubsList() {
     <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {clubs.map((club) => (
         <Link key={club.id} href={`/clubs/${club.id}`} className="block bg-card rounded-lg shadow p-5 hover:shadow-md transition-shadow border border-border">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-foreground">{club.name}</h3>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              {club.badgeUrl && (
+                <img 
+                  src={club.badgeUrl} 
+                  alt={`${club.name} crest`}
+                  className="w-8 h-8 object-contain"
+                  onError={(e) => {
+                    // Fallback to text if image fails to load
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
+              <h3 className="text-lg font-semibold text-foreground">{club.name}</h3>
+            </div>
             {club.isTop6 && (
               <span className="ml-3 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground border border-border">Top 6</span>
             )}
           </div>
-          {club.names?.length > 0 && (
-            <p className="mt-2 text-xs text-muted-foreground truncate">Also known as: {club.names.slice(0, 3).join(', ')}{club.names.length > 3 ? '…' : ''}</p>
-          )}
         </Link>
       ))}
     </div>

@@ -2,97 +2,116 @@
   "arsenal": {
     "name": "Arsenal",
     "isTop6": true,
-    "names": ["Arsenal", "Gunners", "AFC"]
+    "names": ["Arsenal", "Gunners", "AFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg"
   },
   "aston-villa": {
     "name": "Aston Villa",
     "isTop6": false,
-    "names": ["Aston Villa", "Villa", "Villans", "AVFC"]
+    "names": ["Aston Villa", "Villa", "Villans", "AVFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/9/9f/Aston_Villa_logo.svg"
   },
   "bournemouth": {
     "name": "AFC Bournemouth",
     "isTop6": false,
-    "names": ["Bournemouth", "AFC Bournemouth", "Cherries", "AFCB"]
+    "names": ["Bournemouth", "AFC Bournemouth", "Cherries", "AFCB"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/e/e5/AFC_Bournemouth_%282013%29.svg"
   },
   "brentford": {
     "name": "Brentford",
     "isTop6": false,
-    "names": ["Brentford", "Bees", "BFC"]
+    "names": ["Brentford", "Bees", "BFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg"
   },
   "brighton": {
     "name": "Brighton & Hove Albion",
     "isTop6": false,
-    "names": ["Brighton", "Brighton & Hove Albion", "Seagulls", "Albion"]
+    "names": ["Brighton", "Brighton & Hove Albion", "Seagulls", "Albion"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg"
   },
   "burnley": {
     "name": "Burnley",
     "isTop6": false,
-    "names": ["Burnley", "Clarets"]
+    "names": ["Burnley", "Clarets"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/6/6d/Burnley_FC_Logo.svg"
   },
   "chelsea": {
     "name": "Chelsea",
     "isTop6": true,
-    "names": ["Chelsea", "Blues", "CFC"]
+    "names": ["Chelsea", "Blues", "CFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg"
   },
   "crystal-palace": {
     "name": "Crystal Palace",
     "isTop6": false,
-    "names": ["Crystal Palace", "Palace", "Eagles", "CPFC"]
+    "names": ["Crystal Palace", "Palace", "Eagles", "CPFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/a/a2/Crystal_Palace_FC_logo_%282022%29.svg"
   },
   "everton": {
     "name": "Everton",
     "isTop6": false,
-    "names": ["Everton", "Toffees", "EFC"]
+    "names": ["Everton", "Toffees", "EFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/7/7c/Everton_FC_logo.svg"
   },
   "fulham": {
     "name": "Fulham",
     "isTop6": false,
-    "names": ["Fulham", "Cottagers", "FFC"]
+    "names": ["Fulham", "Cottagers", "FFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/e/eb/Fulham_FC_%28shield%29.svg"
   },
   "leeds": {
     "name": "Leeds United",
     "isTop6": false,
-    "names": ["Leeds", "Leeds United", "Whites", "LUFC", "Peacocks"]
+    "names": ["Leeds", "Leeds United", "Whites", "LUFC", "Peacocks"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg"
   },
   "liverpool": {
     "name": "Liverpool",
     "isTop6": true,
-    "names": ["Liverpool", "Reds", "LFC"]
+    "names": ["Liverpool", "Reds", "LFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg"
   },
   "manchester-city": {
     "name": "Manchester City",
     "isTop6": true,
-    "names": ["Manchester City", "Man City", "City", "Citizens", "Cityzens", "Sky Blues", "MCFC"]
+    "names": ["Manchester City", "Man City", "City", "Citizens", "Cityzens", "Sky Blues", "MCFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg"
   },
   "manchester-united": {
     "name": "Manchester United",
     "isTop6": true,
-    "names": ["Manchester United", "Man United", "United", "Red Devils", "MUFC"]
+    "names": ["Manchester United", "Man United", "United", "Red Devils", "MUFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg"
   },
   "newcastle": {
     "name": "Newcastle United",
     "isTop6": false,
-    "names": ["Newcastle", "Newcastle United", "Magpies", "Toon", "NUFC"]
+    "names": ["Newcastle", "Newcastle United", "Magpies", "Toon", "NUFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg"
   },
   "nottingham-forest": {
     "name": "Nottingham Forest",
     "isTop6": false,
-    "names": ["Nottingham Forest", "Forest", "Tricky Trees", "NFFC"]
+    "names": ["Nottingham Forest", "Forest", "Tricky Trees", "NFFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_logo.svg"
   },
   "tottenham": {
     "name": "Tottenham Hotspur",
     "isTop6": true,
-    "names": ["Tottenham", "Tottenham Hotspur", "Spurs", "Lilywhites", "THFC"]
+    "names": ["Tottenham", "Tottenham Hotspur", "Spurs", "Lilywhites", "THFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg"
   },
   "west-ham": {
     "name": "West Ham United",
     "isTop6": false,
-    "names": ["West Ham", "West Ham United", "Hammers", "Irons", "WHUFC"]
+    "names": ["West Ham", "West Ham United", "Hammers", "Irons", "WHUFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/c/c2/West_Ham_United_FC_logo.svg"
   },
   "wolves": {
     "name": "Wolverhampton Wanderers",
     "isTop6": false,
-    "names": ["Wolves", "Wolverhampton", "Wolverhampton Wanderers", "WWFC"]
+    "names": ["Wolves", "Wolverhampton", "Wolverhampton Wanderers", "WWFC"],
+    "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/f/fc/Wolverhampton_Wanderers.svg"
   }
 }
 
