@@ -134,17 +134,17 @@ function AdminEditor() {
   const isFormValid = title.trim() && content.trim() && excerpt.trim();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+    <div className="layer-1 min-h-screen p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-3xl shadow-lg p-8 mb-8">
+        <div className="card-bg rounded-3xl shadow-lg p-8 mb-8 border border-primary">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Create Publication</h1>
-              <p className="text-gray-600">Write and publish your Premier League content</p>
+              <h1 className="text-4xl font-bold text-primary mb-2">Create Publication</h1>
+              <p className="text-secondary">Write and publish your Premier League content</p>
             </div>
             <button 
               onClick={() => router.push('/')}
-              className="px-6 py-3 border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 rounded-2xl font-medium transition-all duration-200 hover:bg-gray-50"
+              className="px-6 py-3 border-2 border-primary hover:border-background-quaternary text-primary hover:text-background-quaternary rounded-2xl font-medium transition-all duration-200 hover:bg-muted"
             >
               Back to Home
             </button>
@@ -153,12 +153,12 @@ function AdminEditor() {
           <form onSubmit={(e) => { e.preventDefault(); create(); }} className="space-y-6">
             {/* Title */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">📝 Title *</label>
+              <label className="block text-sm font-semibold text-primary mb-2">📝 Title *</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-lg placeholder:text-gray-500 placeholder:font-medium"
+                className="w-full border-2 border-primary rounded-2xl p-4 focus:border-background-quaternary focus:ring-4 focus:ring-muted transition-all duration-200 text-lg bg-input text-primary placeholder:text-muted placeholder:font-medium"
                 placeholder="🔥 Enter your publication title here..."
                 required
               />
@@ -167,11 +167,11 @@ function AdminEditor() {
             {/* Type and Status */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">🏷️ Content Type *</label>
+                <label className="block text-sm font-semibold text-primary mb-2">🏷️ Content Type *</label>
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value as 'final-whistle' | 'matchday-radar' | 'big-match-review' | 'match-report' | 'editorial' | 'analysis')}
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-white"
+                  className="w-full border-2 border-primary rounded-2xl p-4 focus:border-background-quaternary focus:ring-4 focus:ring-muted transition-all duration-200 bg-input text-primary"
                 >
                   <option value="editorial">Editorial</option>
                   <option value="analysis">Analysis</option>
@@ -183,11 +183,11 @@ function AdminEditor() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">📊 Status *</label>
+                <label className="block text-sm font-semibold text-primary mb-2">📊 Status *</label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as 'draft' | 'review')}
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-white"
+                  className="w-full border-2 border-primary rounded-2xl p-4 focus:border-background-quaternary focus:ring-4 focus:ring-muted transition-all duration-200 bg-input text-primary"
                 >
                   <option value="draft">Draft</option>
                   <option value="review">Review</option>
@@ -197,18 +197,18 @@ function AdminEditor() {
 
             {/* Featured Image */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">🖼️ Featured Image</label>
+              <label className="block text-sm font-semibold text-primary mb-2">🖼️ Featured Image</label>
               <div className="space-y-4">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="w-full border-2 border-primary rounded-2xl p-4 focus:border-background-quaternary focus:ring-4 focus:ring-muted transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-muted file:text-primary hover:file:bg-background-quaternary bg-input"
                 />
                 
                 {imagePreview && (
-                  <div className="border-2 border-gray-200 rounded-2xl p-4">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Image Preview:</p>
+                  <div className="border-2 border-primary rounded-2xl p-4">
+                    <p className="text-sm font-medium text-primary mb-2">Image Preview:</p>
                     <img 
                       src={imagePreview} 
                       alt="Preview" 
@@ -221,12 +221,12 @@ function AdminEditor() {
 
             {/* Content */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">📝 Content *</label>
+              <label className="block text-sm font-semibold text-primary mb-2">📝 Content *</label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={12}
-                className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 font-mono text-sm placeholder:text-gray-500 placeholder:font-medium"
+                className="w-full border-2 border-primary rounded-2xl p-4 focus:border-background-quaternary focus:ring-4 focus:ring-muted transition-all duration-200 font-mono text-sm bg-input text-primary placeholder:text-muted placeholder:font-medium"
                 placeholder="📝 Write your content in markdown format here... Start with a compelling introduction..."
                 required
               />
@@ -235,11 +235,11 @@ function AdminEditor() {
             {/* Excerpt */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-semibold text-gray-700">📖 Excerpt *</label>
+                <label className="block text-sm font-semibold text-primary">📖 Excerpt *</label>
                 <button
                   type="button"
                   onClick={generateExcerpt}
-                  className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-all duration-200"
+                  className="px-3 py-1 bg-muted hover:bg-background-quaternary text-primary rounded-lg text-sm font-medium transition-all duration-200"
                 >
                   Auto-generate
                 </button>
@@ -248,7 +248,7 @@ function AdminEditor() {
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
                 rows={3}
-                className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 placeholder:text-gray-500 placeholder:font-medium"
+                className="w-full border-2 border-primary rounded-2xl p-4 focus:border-background-quaternary focus:ring-4 focus:ring-muted transition-all duration-200 bg-input text-primary placeholder:text-muted placeholder:font-medium"
                 placeholder="💬 Brief summary of your article (auto-generated if empty)..."
                 required
               />
@@ -257,23 +257,23 @@ function AdminEditor() {
             {/* SEO Fields */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">🔍 SEO Title</label>
+                <label className="block text-sm font-semibold text-primary mb-2">🔍 SEO Title</label>
                 <input
                   type="text"
                   value={seoTitle}
                   onChange={(e) => setSeoTitle(e.target.value)}
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 placeholder:text-gray-500 placeholder:font-medium"
+                  className="w-full border-2 border-primary rounded-2xl p-4 focus:border-background-quaternary focus:ring-4 focus:ring-muted transition-all duration-200 bg-input text-primary placeholder:text-muted placeholder:font-medium"
                   placeholder="🔍 SEO optimized title (defaults to main title)"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">📝 SEO Description</label>
+                <label className="block text-sm font-semibold text-primary mb-2">📝 SEO Description</label>
                 <textarea
                   value={seoDescription}
                   onChange={(e) => setSeoDescription(e.target.value)}
                   rows={2}
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 placeholder:text-gray-500 placeholder:font-medium"
+                  className="w-full border-2 border-primary rounded-2xl p-4 focus:border-background-quaternary focus:ring-4 focus:ring-muted transition-all duration-200 bg-input text-primary placeholder:text-muted placeholder:font-medium"
                   placeholder="🔍 SEO description for search engines (defaults to excerpt)..."
                 />
               </div>
@@ -284,7 +284,7 @@ function AdminEditor() {
               <button
                 type="submit"
                 disabled={!isFormValid || saving}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-12 rounded-2xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className="bg-gradient-to-r from-background-quaternary to-background-quinary hover:from-background-tertiary hover:to-background-quaternary disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-12 rounded-2xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 {saving ? (
                   <div className="flex items-center gap-3">

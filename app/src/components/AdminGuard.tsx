@@ -46,10 +46,15 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
 
   if (state === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-lg font-medium text-gray-700 dark:text-gray-300">Loading admin panel...</p>
+      <div className="layer-1 min-h-screen flex items-center justify-center p-6">
+        <div className="card-bg rounded-3xl shadow-2xl p-12 max-w-md w-full text-center border border-primary">
+          <div className="mb-8">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+            </div>
+            <h1 className="text-3xl font-bold text-primary mb-2">Checking Access</h1>
+            <p className="text-secondary">Verifying your admin permissions...</p>
+          </div>
         </div>
       </div>
     );
@@ -58,21 +63,21 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
   if (state === 'noauth') {
     return (
       <>
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="layer-1 min-h-screen flex items-center justify-center p-6">
           <div className="max-w-md w-full mx-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
+            <div className="card-bg rounded-2xl shadow-2xl p-8 border border-primary">
               <div className="text-center mb-8">
                 <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4">
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Admin Access Required</h2>
-                <p className="text-gray-600 dark:text-gray-400">Please sign in to access the admin area</p>
+                <h2 className="text-2xl font-bold text-primary mb-2">Admin Access Required</h2>
+                <p className="text-secondary">Please sign in to access the admin area</p>
               </div>
               <button
                 onClick={() => setShowLogin(true)}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
+                className="w-full bg-gradient-to-r from-background-quaternary to-background-quinary hover:from-background-tertiary hover:to-background-quaternary text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
               >
                 Sign In
               </button>
@@ -90,18 +95,18 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
   
   if (state === 'noadmin') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="layer-1 min-h-screen flex items-center justify-center p-6">
         <div className="max-w-2xl w-full mx-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
+          <div className="card-bg rounded-2xl shadow-2xl p-8 border border-primary">
             <div className="text-center mb-8">
               <div className="mx-auto w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center mb-4">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">You don&apos;t have admin access to this area</p>
-              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+              <h2 className="text-2xl font-bold text-primary mb-2">Access Denied</h2>
+              <p className="text-secondary mb-4">You don&apos;t have admin access to this area</p>
+              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-muted text-muted">
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
@@ -123,13 +128,13 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
                     // ignore
                   }
                 }}
-                className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md"
+                className="w-full sm:w-auto bg-gradient-to-r from-background-quaternary to-background-quinary hover:from-background-tertiary hover:to-background-quaternary text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md"
               >
                 Retry Admin Sync
               </button>
               <button
                 onClick={() => auth?.signOut()}
-                className="w-full sm:w-auto bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                className="w-full sm:w-auto bg-muted hover:bg-background-quaternary text-primary font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-primary"
               >
                 Sign Out
               </button>
@@ -144,7 +149,7 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
                     // ignore
                   }
                 }}
-                className="w-full sm:w-auto bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                className="w-full sm:w-auto bg-muted hover:bg-background-quaternary text-primary font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-primary"
               >
                 Show Debug
               </button>
@@ -152,16 +157,16 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
             
             {debugOpen && (
               <div className="mb-6">
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Debug Information</div>
-                  <pre className="whitespace-pre-wrap break-words text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 p-3 rounded border">{JSON.stringify(debug, null, 2)}</pre>
+                <div className="bg-muted rounded-lg border border-primary p-4">
+                  <div className="text-sm font-medium text-primary mb-2">Debug Information</div>
+                  <pre className="whitespace-pre-wrap break-words text-xs text-secondary bg-input p-3 rounded border border-primary">{JSON.stringify(debug, null, 2)}</pre>
                 </div>
               </div>
             )}
             
             <div className="text-center">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                If this persists, ensure an allowlist doc exists at <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">admins/your-email</code> with <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">isActive: true</code>.
+              <p className="text-sm text-muted">
+                If this persists, ensure an allowlist doc exists at <code className="bg-muted px-2 py-1 rounded text-xs">admins/your-email</code> with <code className="bg-muted px-2 py-1 rounded text-xs">isActive: true</code>.
               </p>
             </div>
           </div>

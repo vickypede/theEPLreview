@@ -100,23 +100,23 @@ export default function ProfilePage(){
     });
   };
 
-  if (!user) {
+  if (!auth) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center">
+      <div className="layer-1 min-h-screen flex items-center justify-center p-6">
+        <div className="card-bg rounded-3xl shadow-2xl p-12 max-w-md w-full text-center border border-primary">
           <div className="mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to Your Profile</h1>
-            <p className="text-gray-600">Sign in to customize your Premier League experience</p>
+            <h1 className="text-3xl font-bold text-primary mb-2">Welcome Back</h1>
+            <p className="text-secondary">Sign in to manage your Premier League preferences</p>
           </div>
           
-          <button 
-            onClick={signIn} 
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-2xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+          <button
+            onClick={signIn}
+            className="w-full bg-gradient-to-r from-background-quaternary to-background-quinary hover:from-background-tertiary hover:to-background-quaternary text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24">
               <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -127,8 +127,8 @@ export default function ProfilePage(){
             Sign in with Google
           </button>
           
-          <p className="text-sm text-gray-500 mt-6">
-            We&apos;ll create your profile automatically with smart defaults
+          <p className="text-muted text-sm mt-6">
+            We&apos;ll create your profile automatically on first sign-in
           </p>
         </div>
       </div>
@@ -145,59 +145,57 @@ export default function ProfilePage(){
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-6xl mx-auto p-6">
-        {/* Header */}
-        <div className="bg-white rounded-3xl shadow-lg p-8 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Your Profile</h1>
-              <p className="text-gray-600">Customize your Premier League experience</p>
+    <div className="layer-1 min-h-screen p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Profile Header */}
+        <div className="card-bg rounded-3xl shadow-lg p-8 mb-8 border border-primary">
+          <div className="text-center mb-8">
+            <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
             </div>
-            <button 
-              onClick={doSignOut} 
-              className="px-6 py-3 border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 rounded-2xl font-medium transition-all duration-200 hover:bg-gray-50"
-            >
-              Sign out
-            </button>
+            <h1 className="text-4xl font-bold text-primary mb-2">Your Profile</h1>
+            <p className="text-secondary text-lg">Customize your Premier League experience</p>
           </div>
-          
-          {/* User Info */}
+
           <div className="grid md:grid-cols-2 gap-8">
+            {/* User Info */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-                <input 
-                  value={profile.email || ''} 
-                  readOnly 
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 bg-gray-50 text-gray-600 cursor-not-allowed" 
+                <label className="block text-sm font-semibold text-primary mb-2">👤 Display Name</label>
+                <input
+                  type="text"
+                  value={profile.displayName}
+                  onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
+                  className="w-full border-2 border-primary rounded-2xl p-4 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-lg bg-input text-primary"
+                  placeholder="Enter your display name..."
                 />
+                {profile.displayName && (
+                  <p className="text-success text-sm mt-2">✓ Name set successfully!</p>
+                )}
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Display Name</label>
+                <label className="block text-sm font-semibold text-primary mb-2">📧 Email</label>
                 <input
-                  value={profile.displayName || ''}
-                  onChange={e => setProfile({ ...profile, displayName: e.target.value })}
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-lg font-medium text-gray-900 bg-white placeholder:text-gray-400"
-                  placeholder="Enter your display name"
+                  type="email"
+                  value={profile.email}
+                  disabled
+                  className="w-full border-2 border-primary rounded-2xl p-4 bg-muted text-muted cursor-not-allowed"
                 />
-                {profile.displayName && (
-                  <p className="text-sm text-green-600 mt-2 font-medium">
-                    ✓ Your display name is set to: <span className="font-semibold">{profile.displayName}</span>
-                  </p>
-                )}
+                <p className="text-muted text-sm mt-1">Email cannot be changed</p>
               </div>
             </div>
             
             <div className="space-y-4">
               {/* Followed Clubs */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">⚽ Followed Clubs</label>
-                <div className="max-h-48 overflow-y-auto border-2 border-gray-200 rounded-2xl p-4 bg-gray-50">
+                <label className="block text-sm font-semibold text-primary mb-3">⚽ Followed Clubs</label>
+                <div className="max-h-48 overflow-y-auto border-2 border-primary rounded-2xl p-4 bg-muted">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {clubs.map((club) => (
-                      <label key={club.id} className="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl hover:border-blue-300 transition-all duration-200 cursor-pointer bg-white">
+                      <label key={club.id} className="flex items-center gap-3 p-3 border-2 border-primary rounded-xl hover:border-background-quaternary transition-all duration-200 cursor-pointer card-bg">
                         <input
                           type="checkbox"
                           checked={profile.followedClubs.includes(club.id)}
@@ -208,7 +206,7 @@ export default function ProfilePage(){
                               setProfile({ ...profile, followedClubs: profile.followedClubs.filter(id => id !== club.id) });
                             }
                           }}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          className="w-4 h-4 text-primary border-primary rounded focus:ring-background-quaternary"
                         />
                         <div className="flex items-center gap-2 min-w-0">
                           {club.badgeUrl && (
@@ -222,7 +220,7 @@ export default function ProfilePage(){
                               }}
                             />
                           )}
-                          <span className="text-sm font-medium text-gray-700 truncate">{club.name}</span>
+                          <span className="text-sm font-medium text-primary truncate">{club.name}</span>
                         </div>
                       </label>
                     ))}
@@ -232,65 +230,65 @@ export default function ProfilePage(){
                   <button
                     type="button"
                     onClick={() => setProfile({ ...profile, followedClubs: clubs.map(c => c.id) })}
-                    className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-all duration-200"
+                    className="px-3 py-1 bg-muted hover:bg-background-quaternary text-primary rounded-lg text-sm font-medium transition-all duration-200"
                   >
                     Select All
                   </button>
                   <button
                     type="button"
                     onClick={() => setProfile({ ...profile, followedClubs: clubs.filter(c => c.isTop6).map(c => c.id) })}
-                    className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-sm font-medium transition-all duration-200"
+                    className="px-3 py-1 bg-muted hover:bg-background-quaternary text-primary rounded-lg text-sm font-medium transition-all duration-200"
                   >
                     Top 6
                   </button>
                   <button
                     type="button"
                     onClick={() => setProfile({ ...profile, followedClubs: [] })}
-                    className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-all duration-200"
+                    className="px-3 py-1 bg-muted hover:bg-background-quaternary text-primary rounded-lg text-sm font-medium transition-all duration-200"
                   >
                     Clear
                   </button>
                 </div>
               </div>
 
-              <label className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-2xl hover:border-blue-300 transition-all duration-200 cursor-pointer">
+              <label className="flex items-center gap-3 p-4 border-2 border-primary rounded-2xl hover:border-blue-400 transition-all duration-200 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={!!profile.includeGeneral}
                   onChange={e => setProfile({ ...profile, includeGeneral: e.target.checked })}
-                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-5 h-5 text-primary border-primary rounded focus:ring-background-quaternary"
                 />
-                <span className="text-sm font-medium text-gray-700">Follow breaking news and general league updates</span>
+                <span className="text-sm font-medium text-primary">Follow breaking news and general league updates</span>
               </label>
 
-              <label className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-2xl hover:border-blue-300 transition-all duration-200 cursor-pointer">
+              <label className="flex items-center gap-3 p-4 border-2 border-primary rounded-2xl hover:border-blue-400 transition-all duration-200 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={!!profile.emailNotifications}
                   onChange={e => setProfile({ ...profile, emailNotifications: e.target.checked })}
-                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-5 h-5 text-primary border-primary rounded focus:ring-background-quaternary"
                 />
-                <span className="text-sm font-medium text-gray-700">Send me breaking news via email</span>
+                <span className="text-sm font-medium text-primary">Send me breaking news via email</span>
               </label>
 
-              <label className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-2xl hover:border-gray-300 transition-all duration-200 cursor-pointer">
+              <label className="flex items-center gap-3 p-4 border-2 border-primary rounded-2xl hover:border-gray-400 transition-all duration-200 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={!!profile.marketingOptIn}
                   onChange={e => setProfile({ ...profile, marketingOptIn: e.target.checked })}
-                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-5 h-5 text-primary border-primary rounded focus:ring-background-quaternary"
                 />
-                <span className="text-sm font-medium text-gray-700">Send me product and marketing news via email</span>
+                <span className="text-sm font-medium text-primary">Send me product and marketing news via email</span>
               </label>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-3xl shadow-lg p-8 mb-8">
+        <div className="card-bg rounded-3xl shadow-lg p-8 mb-8 border border-primary">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Quick Actions</h2>
-            <p className="text-gray-600">Quickly set up your club preferences</p>
+            <h2 className="text-2xl font-bold text-primary mb-2">Quick Actions</h2>
+            <p className="text-secondary">Quickly set up your club preferences</p>
           </div>
           
           <div className="flex flex-wrap justify-center gap-4">
@@ -326,7 +324,7 @@ export default function ProfilePage(){
           <button
             disabled={saving}
             onClick={save}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-12 rounded-2xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+            className="bg-gradient-to-r from-background-quaternary to-background-quinary hover:from-background-tertiary hover:to-background-quaternary disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-12 rounded-2xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
           >
             {saving ? (
               <div className="flex items-center gap-3">
