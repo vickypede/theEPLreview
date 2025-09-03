@@ -68,18 +68,9 @@ export default function ProfilePage(){
     await signOut(auth); 
   };
 
-  const toggleFollow = (slug: string) => {
+  const setFollowed = (clubSlugs: string[]) => {
     if (!profile) return;
-    const exists = profile.followedClubs?.includes(slug);
-    const next = exists
-      ? profile.followedClubs.filter((s: string) => s !== slug)
-      : [...(profile.followedClubs || []), slug];
-    setProfile({ ...profile, followedClubs: next });
-  };
-
-  const setFollowed = (list: string[]) => {
-    if (!profile) return;
-    setProfile({ ...profile, followedClubs: Array.from(new Set(list)).slice(0, 20) });
+    setProfile({ ...profile, followedClubs: clubSlugs });
   };
 
   const save = async () => {
@@ -200,33 +191,68 @@ export default function ProfilePage(){
             </div>
             
             <div className="space-y-4">
+              {/* Followed Clubs */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Followed Clubs</label>
-                <div className="border-2 border-gray-200 rounded-2xl p-4 max-h-48 overflow-y-auto">
-                  <div className="space-y-2">
-                    {clubs.map(c => {
-                      const checked = (profile.followedClubs || []).includes(c.id);
-                      return (
-                        <label key={c.id} className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => toggleFollow(c.id)}
-                            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                          />
-                          <span className="text-sm font-medium text-gray-900">{c.name}</span>
-                          {c.isTop6 && (
-                            <span className="inline-block text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full font-medium ml-auto">
-                              Top 6
-                            </span>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">⚽ Followed Clubs</label>
+                <div className="max-h-48 overflow-y-auto border-2 border-gray-200 rounded-2xl p-4 bg-gray-50">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {clubs.map((club) => (
+                      <label key={club.id} className="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl hover:border-blue-300 transition-all duration-200 cursor-pointer bg-white">
+                        <input
+                          type="checkbox"
+                          checked={profile.followedClubs.includes(club.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setProfile({ ...profile, followedClubs: [...profile.followedClubs, club.id] });
+                            } else {
+                              setProfile({ ...profile, followedClubs: profile.followedClubs.filter(id => id !== club.id) });
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <div className="flex items-center gap-2 min-w-0">
+                          {club.badgeUrl && (
+                            <img 
+                              src={club.badgeUrl} 
+                              alt={`${club.name} badge`}
+                              className="w-6 h-6 object-contain flex-shrink-0"
+                              onError={(e) => {
+                                // Fallback if badge fails to load
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
                           )}
-                        </label>
-                      );
-                    })}
+                          <span className="text-sm font-medium text-gray-700 truncate">{club.name}</span>
+                        </div>
+                      </label>
+                    ))}
                   </div>
                 </div>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => setProfile({ ...profile, followedClubs: clubs.map(c => c.id) })}
+                    className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-all duration-200"
+                  >
+                    Select All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProfile({ ...profile, followedClubs: clubs.filter(c => c.isTop6).map(c => c.id) })}
+                    className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-sm font-medium transition-all duration-200"
+                  >
+                    Top 6
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProfile({ ...profile, followedClubs: [] })}
+                    className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-all duration-200"
+                  >
+                    Clear
+                  </button>
+                </div>
               </div>
-              
+
               <label className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-2xl hover:border-blue-300 transition-all duration-200 cursor-pointer">
                 <input
                   type="checkbox"

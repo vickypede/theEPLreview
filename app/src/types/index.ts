@@ -18,6 +18,7 @@ export interface Club {
   names: string[];
   ambiguous: string[];
   scoreAxisId?: number; // ScoreAxis widget ID for team stats
+  badgeUrl?: string; // Official club badge URL
 }
 
 // Profile system types
