@@ -1,6 +1,7 @@
 'use client';
 import { ReactNode, useEffect, useState } from 'react';
-import { auth, ensureAdminClaim } from '@/lib/firebase';
+import { auth, ensureAdminClaim, fns } from '@/lib/firebase';
+import { httpsCallable } from 'firebase/functions';
 import { onAuthStateChanged, getIdTokenResult } from 'firebase/auth';
 import LoginModal from './LoginModal';
 
@@ -13,14 +14,27 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
     
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) return setState('noauth');
-      // refresh token to pick up latest custom claims
-      const token = await getIdTokenResult(user, true);
-      const isAdmin = token.claims.isAdmin === true;
-      if (!isAdmin) {
+      
+      try {
+        // First, try to sync admin claim
         const synced = await ensureAdminClaim();
-        if (!synced) return setState('noadmin');
+        if (synced) {
+          setState('ok');
+          return;
+        }
+        
+        // If sync failed, check existing token
+        const token = await getIdTokenResult(user, true);
+        const isAdmin = token.claims.isAdmin === true;
+        if (isAdmin) {
+          setState('ok');
+        } else {
+          setState('noadmin');
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setState('noadmin');
       }
-      setState('ok');
     });
     return () => unsub();
   }, []);
