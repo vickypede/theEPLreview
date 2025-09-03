@@ -15,6 +15,30 @@ type ClubTile = {
   latest: UiArticle[]; // up to 3 latest articles
 };
 
+const CLUB_BRAND: Record<string, string> = {
+  'arsenal': '#EF0107',
+  'chelsea': '#034694',
+  'liverpool': '#C8102E',
+  'manchester-city': '#6CABDD',
+  'manchester-united': '#DA291C',
+  'tottenham': '#132257',
+  'aston-villa': '#670E36',
+  'newcastle': '#241F20',
+  'brighton': '#0057B8',
+  'west-ham': '#7A263A',
+  'wolves': '#FDB913',
+  'everton': '#003399',
+};
+
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#','');
+  const bigint = parseInt(h, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export default function Landing2(){
   const [latestNews, setLatestNews] = useState<UiArticle[]>([]);
   const [clubs, setClubs] = useState<ClubTile[]>([]);
@@ -116,25 +140,30 @@ export default function Landing2(){
 
           {/* Right: 6 club tiles */}
           <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {clubTiles.map((c, i) => (
-              <article key={c?.id ?? i} className="card p-4 flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  {c?.badgeUrl ? (
-                    <img src={c.badgeUrl} alt={`${c.name} crest`} className="w-9 h-9 object-contain" />
-                  ) : (
+            {clubTiles.map((c, i) => {
+              const brand = c?.id ? (CLUB_BRAND[c.id] ?? '#4f46e5') : '#4f46e5';
+              const tint = hexToRgba(brand, 0.08);
+              return (
+              <article key={c?.id ?? i} className="card p-0 flex flex-col" style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}>
+                <div className="h-1.5 rounded-t-md" style={{ backgroundColor: brand }} />
+                <div className="p-4 flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                    {c?.badgeUrl ? (
+                    <img src={c.badgeUrl} alt={`${c.name} crest`} className="w-9 h-9 object-contain rounded-full" style={{ outline: `2px solid ${hexToRgba(brand, 0.35)}`, outlineOffset: 0, backgroundColor: hexToRgba('#000000', 0.04) }} />
+                    ) : (
                     <div className="w-9 h-9 surface-2 rounded border border-border" />
-                  )}
-                  <Link href={c ? `/clubs/${c.id}` : '#'} className="text-sm font-semibold text-foreground hover:text-primary">
+                    )}
+                  <Link href={c ? `/clubs/${c.id}` : '#'} className="text-sm font-semibold hover:underline" style={{ color: brand }}>
                     {c?.name ?? 'Club'}
                   </Link>
-                </div>
-                {/* Articles list: show first on mobile, up to three on md+ with dividers */}
+                  </div>
+                  {/* Articles list: show first on mobile, up to three on md+ with dividers */}
                 <div className="mt-1">
                   {c?.latest && c.latest.length > 0 ? (
                     <ul className="divide-y divide-border">
                       {c.latest.slice(0,1).map((a, idx) => (
                         <li key={a.id} className="py-2">
-                          <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2 hover:text-primary">
+                          <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2" style={{ color: 'inherit' }}>
                             {a.title}
                           </Link>
                         </li>
@@ -142,7 +171,7 @@ export default function Landing2(){
                       {/* Only visible on md+ */}
                       {c.latest.slice(1,3).map((a) => (
                         <li key={a.id} className="py-2 hidden md:block">
-                          <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2 hover:text-primary">
+                          <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2" style={{ color: 'inherit' }}>
                             {a.title}
                           </Link>
                         </li>
@@ -152,8 +181,9 @@ export default function Landing2(){
                     <div className="text-sm text-muted-foreground">No recent article</div>
                   )}
                 </div>
+              </div>
               </article>
-            ))}
+            );})}
           </div>
         </div>
       </section>
