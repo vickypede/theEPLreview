@@ -142,7 +142,7 @@ export default function Landing2(){
           <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {clubTiles.map((c, i) => {
               const brand = c?.id ? (CLUB_BRAND[c.id] ?? '#4f46e5') : '#4f46e5';
-              const tint = hexToRgba(brand, 0.08);
+              const tint = hexToRgba(brand, 0.04);
               return (
               <article key={c?.id ?? i} className="card p-0 flex flex-col" style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}>
                 <div className="h-1.5 rounded-t-md" style={{ backgroundColor: brand }} />
@@ -153,7 +153,7 @@ export default function Landing2(){
                     ) : (
                     <div className="w-9 h-9 surface-2 rounded border border-border" />
                     )}
-                  <Link href={c ? `/clubs/${c.id}` : '#'} className="text-sm font-semibold hover:underline" style={{ color: brand }}>
+                  <Link href={c ? `/clubs/${c.id}` : '#'} className="text-base font-bold hover:underline text-white">
                     {c?.name ?? 'Club'}
                   </Link>
                   </div>
