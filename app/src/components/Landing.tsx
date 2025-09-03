@@ -39,36 +39,15 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-bold mb-6">The EPL Review</h1>
-          <p className="text-xl mb-8">Your comprehensive source for Premier League news, analysis, and insights</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link 
-              href="/clubs" 
-              className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-            >
-              Browse Clubs
-            </Link>
-            <Link 
-              href="/news" 
-              className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
-            >
-              Latest News
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* News Section */}
-      <section className="py-16">
+      <section className="py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Latest News</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Latest News</h2>
             <Link 
               href="/news" 
-              className="text-blue-600 hover:text-blue-800 font-semibold text-lg"
+              className="text-blue-600 hover:text-blue-800 font-semibold text-base"
             >
               View All News →
             </Link>
@@ -84,13 +63,13 @@ export default function Landing() {
               <p className="text-gray-500">Articles will appear here once the ingestion system is running.</p>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {articles.slice(0, 6).map((article) => (
-                <article key={article.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">{article.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{article.sourceName || article.source || ''}</p>
+                <article key={article.id} className="bg-white rounded-xl border p-4 hover:shadow-md transition-shadow">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{article.title}</h3>
+                  <p className="text-gray-600 text-xs mb-3">{article.sourceName || article.source || ''}</p>
                   {article.publishedAt?.toDate && (
-                    <p className="text-gray-500 text-xs mb-4">{new Date(article.publishedAt.toDate()).toLocaleString()}</p>
+                    <p className="text-gray-500 text-[11px] mb-3">{new Date(article.publishedAt.toDate()).toLocaleString()}</p>
                   )}
                   <a 
                     href={article.url} 
@@ -108,19 +87,19 @@ export default function Landing() {
       </section>
 
       {/* Editorials & Analysis Section - 6 tiles showing all publication types */}
-      <section className="py-16 bg-white">
+      <section className="py-10 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Editorials & Analysis</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Editorials & Analysis</h2>
             <Link 
               href="/editorials" 
-              className="text-blue-600 hover:text-blue-800 font-semibold text-lg"
+              className="text-blue-600 hover:text-blue-800 font-semibold text-base"
             >
               View All Editorials →
             </Link>
           </div>
           
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* 6 tiles showing all publication types */}
             {[
               { 
@@ -160,14 +139,14 @@ export default function Landing() {
                 color: "from-indigo-600 to-indigo-700"
               }
             ].map((publication, i) => (
-              <div key={i} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border-l-4 border-l-transparent hover:border-l-4 hover:border-l-blue-500">
-                <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white mb-3 bg-gradient-to-r ${publication.color}`}>
+              <div key={i} className="bg-white rounded-xl border p-4 hover:shadow-md transition-shadow">
+                <div className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-white mb-2 bg-gradient-to-r ${publication.color}`}>
                   {publication.type}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{publication.title}</h3>
-                <p className="text-gray-600 text-sm mb-4">{publication.desc}</p>
-                <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                  <p className="text-gray-500 text-xs">Content will appear here once publications are created</p>
+                <h3 className="text-base font-semibold text-gray-900 mb-1.5">{publication.title}</h3>
+                <p className="text-gray-600 text-xs mb-3">{publication.desc}</p>
+                <div className="bg-gray-50 rounded-lg p-2.5 mb-3">
+                  <p className="text-gray-500 text-[11px]">Content will appear here once publications are created</p>
                 </div>
                 <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                   Coming Soon →
@@ -179,34 +158,34 @@ export default function Landing() {
       </section>
 
       {/* Mailbox Section - 3 tiles */}
-      <section className="py-16">
+      <section className="py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Mailbox</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Mailbox</h2>
             <Link 
               href="/mailbox" 
-              className="text-blue-600 hover:text-blue-800 font-semibold text-lg"
+              className="text-blue-600 hover:text-blue-800 font-semibold text-base"
             >
               View All Letters →
             </Link>
           </div>
           
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* 3 Mailbox tiles */}
             {[
               { title: "Fan Question", desc: "Reader asks about tactical changes" },
               { title: "Transfer Talk", desc: "Fan perspective on latest rumors" },
               { title: "Match Reaction", desc: "Supporter thoughts on weekend games" }
             ].map((item, i) => (
-              <div key={i} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+              <div key={i} className="bg-white rounded-xl border p-4 hover:shadow-md transition-shadow">
                 <div className="text-center">
-                  <div className="bg-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <span className="text-blue-600 text-2xl">✉️</span>
+                  <div className="bg-blue-100 rounded-full w-12 h-12 mx-auto mb-3 flex items-center justify-center">
+                    <span className="text-blue-600 text-xl">✉️</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{item.desc}</p>
-                  <div className="bg-gray-100 rounded-lg p-3 mb-4">
-                    <p className="text-gray-500 text-xs">Fan letter content will appear here</p>
+                  <h3 className="text-base font-semibold text-gray-900 mb-1.5">{item.title}</h3>
+                  <p className="text-gray-600 text-xs mb-3">{item.desc}</p>
+                  <div className="bg-gray-100 rounded-lg p-2.5 mb-3">
+                    <p className="text-gray-500 text-[11px]">Fan letter content will appear here</p>
                   </div>
                   <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                     Coming Soon →
@@ -219,31 +198,31 @@ export default function Landing() {
       </section>
 
       {/* Match Reports Section - 3 tiles */}
-      <section className="py-16 bg-white">
+      <section className="py-10 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Match Reports</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Match Reports</h2>
             <Link 
               href="/match-reports" 
-              className="text-blue-600 hover:text-blue-800 font-semibold text-lg"
+              className="text-blue-600 hover:text-blue-800 font-semibold text-base"
             >
               View All Reports →
             </Link>
           </div>
           
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* 3 Match Report tiles */}
             {[
               { title: "Arsenal vs Chelsea", desc: "Tactical breakdown of key moments" },
               { title: "Manchester Derby", desc: "Analysis of United vs City clash" },
               { title: "Liverpool vs Tottenham", desc: "Post-match insights and stats" }
             ].map((report, i) => (
-              <div key={i} className="bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-300">
+              <div key={i} className="bg-gray-50 rounded-xl p-4 border border-dashed border-gray-300">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-gray-600 mb-2">{report.title}</h3>
-                  <p className="text-gray-500 text-sm mb-4">{report.desc}</p>
-                  <div className="bg-gray-200 rounded-lg p-4 mb-4">
-                    <p className="text-gray-500 text-xs">Match Report Content Placeholder</p>
+                  <h3 className="text-base font-semibold text-gray-600 mb-1.5">{report.title}</h3>
+                  <p className="text-gray-500 text-xs mb-3">{report.desc}</p>
+                  <div className="bg-gray-200 rounded-lg p-3 mb-3">
+                    <p className="text-gray-500 text-[11px]">Match Report Content Placeholder</p>
                   </div>
                   <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                     Coming Soon →
@@ -256,31 +235,31 @@ export default function Landing() {
       </section>
 
       {/* Big Match Review Section - 3 tiles */}
-      <section className="py-16">
+      <section className="py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Big Match Review</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Big Match Review</h2>
             <Link 
               href="/big-match-review" 
-              className="text-blue-600 hover:text-blue-800 font-semibold text-lg"
+              className="text-blue-600 hover:text-blue-800 font-semibold text-base"
             >
               View All Reviews →
             </Link>
           </div>
           
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* 3 Big Match Review tiles */}
             {[
               { title: "Title Race Analysis", desc: "Impact on Premier League standings" },
               { title: "Champions League Race", desc: "Top 4 battle implications" },
               { title: "Relegation Battle", desc: "Bottom of table drama" }
             ].map((review, i) => (
-              <div key={i} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+              <div key={i} className="bg-white rounded-xl border p-4 hover:shadow-md transition-shadow">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{review.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{review.desc}</p>
-                  <div className="bg-gray-100 rounded-lg p-4 mb-4">
-                    <p className="text-gray-500 text-xs">Big Match Review Content Placeholder</p>
+                  <h3 className="text-base font-semibold text-gray-900 mb-1.5">{review.title}</h3>
+                  <p className="text-gray-600 text-xs mb-3">{review.desc}</p>
+                  <div className="bg-gray-100 rounded-lg p-3 mb-3">
+                    <p className="text-gray-500 text-[11px]">Big Match Review Content Placeholder</p>
                   </div>
                   <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                     Coming Soon →
@@ -293,11 +272,11 @@ export default function Landing() {
       </section>
 
       {/* Site Products Section - 4 tiles */}
-      <section className="py-16 bg-white">
+      <section className="py-10 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Site Products</h2>
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-10">Site Products</h2>
           
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {/* 4 Site Product tiles */}
             {[
               { title: "Fantasy League", desc: "Premier League fantasy football", icon: "🏆" },
@@ -306,11 +285,11 @@ export default function Landing() {
               { title: "Live Scores", desc: "Real-time match updates and scores", icon: "⚽" }
             ].map((product, i) => (
               <div key={i} className="text-center">
-                <div className="bg-gray-100 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                  <span className="text-gray-500 text-2xl">{product.icon}</span>
+                <div className="bg-gray-100 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                  <span className="text-gray-500 text-xl">{product.icon}</span>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.title}</h3>
-                <p className="text-gray-600 text-sm mb-4">{product.desc}</p>
+                <h3 className="text-base font-semibold text-gray-900 mb-1.5">{product.title}</h3>
+                <p className="text-gray-600 text-xs mb-3">{product.desc}</p>
                 <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                   Coming Soon →
                 </button>
