@@ -106,12 +106,12 @@ export default function Landing2(){
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: Latest News list */}
           <aside className="lg:col-span-1 card">
-            <div className="px-4 py-4">
+            <div className="px-4 py-4 border-b border-border">
               <h2 className="text-lg font-bold text-foreground">LATEST NEWS</h2>
             </div>
             <ul>
               {latestForList.map((a, i) => (
-                <li key={a?.id ?? i} className="px-4 py-4 last:pb-4">
+                <li key={a?.id ?? i} className="px-4 py-4 border-b border-border last:border-0">
                   {a ? (
                     <Link href={a.url} target="_blank" rel="noopener noreferrer" className="block">
                       <div className="text-xs text-muted-foreground mb-1">{/* timestamp */}
@@ -127,9 +127,6 @@ export default function Landing2(){
                       <div className="h-4 w-5/6 surface-2 rounded" />
                     </div>
                   )}
-                  {i !== latestForList.length - 1 ? (
-                    <div className="mx-4 border-b border-border" />
-                  ) : null}
                 </li>
               ))}
             </ul>
@@ -149,7 +146,7 @@ export default function Landing2(){
               return (
               <article key={c?.id ?? i} className="card p-0 flex flex-col" style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}>
                 <div className="h-1.5 rounded-t-md" style={{ backgroundColor: brand }} />
-                <div className="p-3 flex flex-col gap-2">
+                <div className="p-4 flex flex-col gap-3">
                   <div className="flex items-center gap-3">
                     {c?.badgeUrl ? (
                     <img src={c.badgeUrl} alt={`${c.name} crest`} className="w-9 h-9 object-contain rounded-full" style={{ outline: `2px solid ${hexToRgba(brand, 0.35)}`, outlineOffset: 0, backgroundColor: hexToRgba('#000000', 0.04) }} />
