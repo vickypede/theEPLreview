@@ -107,6 +107,18 @@ export default function TeamPanel({ slug }: { slug: string }) {
     scoreAxisMapping: SCOREAXIS_IDS
   });
 
+  // Generate ScoreAxis URL with conditional parameters
+  // Liverpool (ID 8) only supports basic parameters, others support enhanced features
+  const generateScoreAxisUrl = (teamId: number, instanceId: string) => {
+    if (teamId === 8) {
+      // Liverpool ID 8 - basic parameters only
+      return `https://www.scoreaxis.com/widget/team-info/${teamId}?autoHeight=1&inst=${instanceId}`;
+    } else {
+      // Other teams - enhanced parameters
+      return `https://www.scoreaxis.com/widget/team-info/${teamId}?autoHeight=1&teamLogo=1&statsTab=1&playersTab=1&inst=${instanceId}`;
+    }
+  };
+
   if (loading) {
     return (
       <section className="mb-8">
@@ -177,7 +189,7 @@ export default function TeamPanel({ slug }: { slug: string }) {
             <iframe
               key={`info-${scoreAxisId}`}
               data-inst={instInfo}
-              src={saSrc("team-info", scoreAxisId, instInfo)}
+              src={generateScoreAxisUrl(scoreAxisId, instInfo)}
               title={`${team.name} – Team Info`}
               className="w-full rounded-lg border-0"
               style={{ height: 420 }}
