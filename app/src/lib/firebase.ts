@@ -30,13 +30,17 @@ const appInstance: FirebaseApp | undefined = isBrowser && hasConfig
 export const app: FirebaseApp | undefined = appInstance;
 export const auth: Auth | undefined = appInstance ? getAuth(appInstance) : (undefined as unknown as Auth);
 export const db: Firestore | undefined = appInstance ? getFirestore(appInstance) : (undefined as unknown as Firestore);
-export const fns: Functions | undefined = appInstance ? getFunctions(appInstance) : (undefined as unknown as Functions);
+// Ensure Functions client uses the same region as deployed functions
+export const fns: Functions | undefined = appInstance ? getFunctions(appInstance, 'us-central1') : (undefined as unknown as Functions);
 
 export async function ensureAdminClaim() {
   if (!fns) return false;
   const call = httpsCallable<Record<string, never>,{ isAdmin: boolean }>(fns, 'syncAdminClaim');
   try { 
-    return (await call({})).data.isAdmin; 
+    const res = await call({});
+    // After setting a new custom claim, force refresh the ID token so subsequent checks see it
+    try { await auth?.currentUser?.getIdToken(true); } catch {}
+    return res.data.isAdmin; 
   } catch { 
     return false; 
   }
