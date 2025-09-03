@@ -1,6 +1,7 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getFunctions, httpsCallable, type Functions } from 'firebase/functions';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY as string | undefined,
@@ -29,3 +30,14 @@ const appInstance: FirebaseApp | undefined = isBrowser && hasConfig
 export const app: FirebaseApp | undefined = appInstance;
 export const auth: Auth | undefined = appInstance ? getAuth(appInstance) : (undefined as unknown as Auth);
 export const db: Firestore | undefined = appInstance ? getFirestore(appInstance) : (undefined as unknown as Firestore);
+export const fns: Functions | undefined = appInstance ? getFunctions(appInstance) : (undefined as unknown as Functions);
+
+export async function ensureAdminClaim() {
+  if (!fns) return false;
+  const call = httpsCallable<{},{ isAdmin: boolean }>(fns, 'syncAdminClaim');
+  try { 
+    return (await call({})).data.isAdmin; 
+  } catch { 
+    return false; 
+  }
+}
