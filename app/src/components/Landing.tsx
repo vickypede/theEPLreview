@@ -44,12 +44,12 @@ export default function Landing() {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-foreground">Latest News</h2>
+            <h2 className="text-lg font-bold text-foreground">NEWS</h2>
             <Link 
               href="/news" 
               className="text-primary hover:text-foreground font-semibold text-lg"
             >
-              View All News →
+              see all →
             </Link>
           </div>
           
@@ -90,12 +90,12 @@ export default function Landing() {
       <section className="py-16 surface-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-foreground">Editorials & Analysis</h2>
+            <h2 className="text-lg font-bold text-foreground">EDITORIALS & ANALYSIS</h2>
             <Link 
               href="/editorials" 
               className="text-primary hover:text-foreground font-semibold text-lg"
             >
-              View All Editorials →
+              see all →
             </Link>
           </div>
           
@@ -155,12 +155,12 @@ export default function Landing() {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-foreground">Mailbox</h2>
+            <h2 className="text-lg font-bold text-foreground">MAILBOX</h2>
             <Link 
               href="/mailbox" 
               className="text-primary hover:text-foreground font-semibold text-lg"
             >
-              View All Letters →
+              see all →
             </Link>
           </div>
           
@@ -195,12 +195,12 @@ export default function Landing() {
       <section className="py-16 surface-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-foreground">Match Reports</h2>
+            <h2 className="text-lg font-bold text-foreground">MATCH REPORTS</h2>
             <Link 
               href="/match-reports" 
               className="text-primary hover:text-foreground font-semibold text-lg"
             >
-              View All Reports →
+              see all →
             </Link>
           </div>
           
@@ -232,12 +232,12 @@ export default function Landing() {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-foreground">Big Match Review</h2>
+            <h2 className="text-lg font-bold text-foreground">BIG MATCH REVIEW</h2>
             <Link 
               href="/big-match-review" 
               className="text-primary hover:text-foreground font-semibold text-lg"
             >
-              View All Reviews →
+              see all →
             </Link>
           </div>
           
@@ -268,7 +268,7 @@ export default function Landing() {
       {/* Site Products Section - 4 tiles */}
       <section className="py-16 surface-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-foreground text-center mb-12">Site Products</h2>
+          <h2 className="text-lg font-bold text-foreground text-center mb-12">SITE PRODUCTS</h2>
           
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {/* 4 Site Product tiles */}

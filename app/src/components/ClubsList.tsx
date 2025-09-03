@@ -56,25 +56,30 @@ export default function ClubsList() {
   }
 
   return (
-    <div className="grid gap-3 sm:gap-4 md:gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-      {clubs.map((club) => (
-        <Link key={club.id} href={`/clubs/${club.id}`} className="block bg-card rounded-lg shadow p-3 sm:p-4 md:p-5 hover:shadow-md transition-shadow border border-border">
-          <div className="flex items-center gap-2 sm:gap-3">
-            {club.badgeUrl && (
-              <img 
-                src={club.badgeUrl} 
-                alt={`${club.name} crest`}
-                className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 object-contain flex-shrink-0"
-                onError={(e) => {
-                  // Fallback to text if image fails to load
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            )}
-            <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground truncate">{club.name}</h3>
-          </div>
-        </Link>
-      ))}
+    <div>
+      <div className="mb-8">
+        <h1 className="text-lg font-bold text-foreground">Premier League Clubs</h1>
+      </div>
+      <div className="grid gap-3 sm:gap-4 md:gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {clubs.map((club) => (
+          <Link key={club.id} href={`/clubs/${club.id}`} className="block bg-card rounded-lg shadow p-3 sm:p-4 md:p-5 hover:shadow-md transition-shadow border border-border">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {club.badgeUrl && (
+                <img 
+                  src={club.badgeUrl} 
+                  alt={`${club.name} crest`}
+                  className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 object-contain flex-shrink-0"
+                  onError={(e) => {
+                    // Fallback to text if image fails to load
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
+              <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground truncate">{club.name}</h3>
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

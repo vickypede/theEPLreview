@@ -74,6 +74,9 @@ export default function ArticlesList() {
 
   return (
     <div>
+      <div className="mb-8">
+        <h1 className="text-lg font-bold text-foreground">Latest Football News</h1>
+      </div>
       {/* Articles Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
         {articles.map((article) => (
