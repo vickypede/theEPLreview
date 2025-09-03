@@ -105,13 +105,13 @@ export default function Landing2(){
       <section className="py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: Latest News list */}
-          <aside className="lg:col-span-1 card">
-            <div className="px-4 py-4 border-b border-border">
+          <aside className="lg:col-span-1 card border-0">
+            <div className="px-4 py-4 border-b border-[#1c1c1c]">
               <h2 className="text-lg font-bold text-foreground">LATEST NEWS</h2>
             </div>
             <ul>
               {latestForList.map((a, i) => (
-                <li key={a?.id ?? i} className="px-4 py-4 relative after:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border last:after:hidden">
+                <li key={a?.id ?? i} className="px-4 py-4 relative after:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-[#1c1c1c] last:after:hidden">
                   {a ? (
                     <Link href={a.url} target="_blank" rel="noopener noreferrer" className="block">
                       <div className="text-xs text-muted-foreground mb-1">{/* timestamp */}
@@ -144,7 +144,7 @@ export default function Landing2(){
               const brand = c?.id ? (CLUB_BRAND[c.id] ?? '#4f46e5') : '#4f46e5';
               const tint = hexToRgba(brand, 0.04);
               return (
-              <article key={c?.id ?? i} className="card p-0 flex flex-col" style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}>
+              <article key={c?.id ?? i} className="card border-0 p-0 flex flex-col" style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}>
                 <div className="h-1.5 rounded-t-md" style={{ backgroundColor: brand }} />
                 <div className="p-4 flex flex-col gap-3">
                   <div className="flex items-center gap-3">
