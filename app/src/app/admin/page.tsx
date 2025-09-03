@@ -21,8 +21,7 @@ function Editor() {
   const [featuredImage, setFeaturedImage] = useState('');
   const [clubs, setClubs] = useState<string>('arsenal, chelsea');
   const [tags, setTags] = useState<string>('opinion, week-4');
-  const [status, setStatus] = useState<'draft'|'review'|'scheduled'|'published'|'archived'>('draft');
-  const [scheduledAt, setScheduledAt] = useState<string>('');
+  const [status, setStatus] = useState<'draft'|'review'>('draft');
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
   const [saving, setSaving] = useState(false);
@@ -56,12 +55,7 @@ function Editor() {
     }
 
     // Validation
-    if (status === 'scheduled' && !scheduledAt) {
-      alert('Please set a schedule date when status is "scheduled"');
-      return;
-    }
-
-    if (status === 'published' && !excerpt) {
+    if (!excerpt) {
       setExcerpt(generateExcerpt(content));
     }
 
@@ -89,11 +83,7 @@ function Editor() {
         readingTime,
         seoTitle: seoTitle || title,
         seoDescription: seoDescription || (excerpt || generateExcerpt(content)),
-        ...(status === 'published' && { publishedAt: serverTimestamp() }),
-        ...(status === 'scheduled' && scheduledAt && { 
-          scheduledAt: Timestamp.fromDate(new Date(scheduledAt)),
-          scheduledAtDate: new Date(scheduledAt)
-        })
+        // Publishing and scheduling are controlled by editors on the backend
       };
 
       const docRef = await addDoc(collection(db, 'publications'), publicationData);
@@ -108,7 +98,6 @@ function Editor() {
       setClubs('arsenal, chelsea');
       setTags('opinion, week-4');
       setStatus('draft');
-      setScheduledAt('');
       setSeoTitle('');
       setSeoDescription('');
       
@@ -233,36 +222,17 @@ function Editor() {
               />
             </div>
 
-            {/* Status */}
+            {/* Status (editor-facing only) */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Status *</label>
               <select 
                 className="border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
                 value={status} 
-                onChange={e => setStatus(e.target.value as 'draft'|'review'|'scheduled'|'published'|'archived')}
+                onChange={e => setStatus(e.target.value as 'draft'|'review')}
               >
                 <option value="draft">📝 Draft</option>
                 <option value="review">👀 Review</option>
-                <option value="scheduled">⏰ Scheduled</option>
-                <option value="published">✅ Published</option>
-                <option value="archived">📦 Archived</option>
               </select>
-            </div>
-
-            {/* Schedule */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Schedule for Later {status === 'scheduled' && <span className="text-red-500">*</span>}
-              </label>
-              <input 
-                type="datetime-local" 
-                className="border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
-                value={scheduledAt} 
-                onChange={e => setScheduledAt(e.target.value)} 
-              />
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {status === 'scheduled' ? '⏰ Required when status is "Scheduled"' : '⏰ Leave empty to publish immediately'}
-              </p>
             </div>
 
             {/* SEO Title */}
