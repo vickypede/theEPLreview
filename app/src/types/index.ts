@@ -15,4 +15,5 @@ export interface Club {
   isTop6: boolean;
   names: string[];
   ambiguous: string[];
+  scoreAxisId?: number; // ScoreAxis widget ID for team stats
 }

@@ -107,7 +107,118 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Match Reports Section */}
+      {/* Editorials & Analysis Section - 6 tiles showing all publication types */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900">Editorials & Analysis</h2>
+            <Link 
+              href="/editorials" 
+              className="text-blue-600 hover:text-blue-800 font-semibold text-lg"
+            >
+              View All Editorials →
+            </Link>
+          </div>
+          
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* 6 tiles showing all publication types */}
+            {[
+              { 
+                type: "Final Whistle", 
+                title: "Victors & Vanquished", 
+                desc: "Weekend conclusions and key takeaways",
+                color: "from-green-600 to-green-700"
+              },
+              { 
+                type: "Matchday Radar", 
+                title: "Pre-Match Analysis", 
+                desc: "Storylines and tactics ahead of fixtures",
+                color: "from-blue-600 to-blue-700"
+              },
+              { 
+                type: "Full-Time Verdict", 
+                title: "Post-Match Review", 
+                desc: "Big-match analysis ~2 hours after FT",
+                color: "from-purple-600 to-purple-700"
+              },
+              { 
+                type: "Pretender List", 
+                title: "Fraud Watch", 
+                desc: "Call-outs of overrated players/managers",
+                color: "from-red-600 to-red-700"
+              },
+              { 
+                type: "High Press", 
+                title: "House Opinion", 
+                desc: "Punchy takes and editorial voice",
+                color: "from-orange-600 to-orange-700"
+              },
+              { 
+                type: "Weekend Roundup", 
+                title: "Complete Coverage", 
+                desc: "All the weekend's biggest stories",
+                color: "from-indigo-600 to-indigo-700"
+              }
+            ].map((publication, i) => (
+              <div key={i} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border-l-4 border-l-transparent hover:border-l-4 hover:border-l-blue-500">
+                <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white mb-3 bg-gradient-to-r ${publication.color}`}>
+                  {publication.type}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{publication.title}</h3>
+                <p className="text-gray-600 text-sm mb-4">{publication.desc}</p>
+                <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                  <p className="text-gray-500 text-xs">Content will appear here once publications are created</p>
+                </div>
+                <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                  Coming Soon →
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Mailbox Section - 3 tiles */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900">Mailbox</h2>
+            <Link 
+              href="/mailbox" 
+              className="text-blue-600 hover:text-blue-800 font-semibold text-lg"
+            >
+              View All Letters →
+            </Link>
+          </div>
+          
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* 3 Mailbox tiles */}
+            {[
+              { title: "Fan Question", desc: "Reader asks about tactical changes" },
+              { title: "Transfer Talk", desc: "Fan perspective on latest rumors" },
+              { title: "Match Reaction", desc: "Supporter thoughts on weekend games" }
+            ].map((item, i) => (
+              <div key={i} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div className="text-center">
+                  <div className="bg-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <span className="text-blue-600 text-2xl">✉️</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
+                  <p className="text-gray-600 text-sm mb-4">{item.desc}</p>
+                  <div className="bg-gray-100 rounded-lg p-3 mb-4">
+                    <p className="text-gray-500 text-xs">Fan letter content will appear here</p>
+                  </div>
+                  <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    Coming Soon →
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Match Reports Section - 3 tiles */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
@@ -121,12 +232,16 @@ export default function Landing() {
           </div>
           
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Placeholder Match Reports */}
-            {[1, 2, 3].map((i) => (
+            {/* 3 Match Report tiles */}
+            {[
+              { title: "Arsenal vs Chelsea", desc: "Tactical breakdown of key moments" },
+              { title: "Manchester Derby", desc: "Analysis of United vs City clash" },
+              { title: "Liverpool vs Tottenham", desc: "Post-match insights and stats" }
+            ].map((report, i) => (
               <div key={i} className="bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-300">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-gray-600 mb-2">Match Report {i}</h3>
-                  <p className="text-gray-500 text-sm mb-4">Detailed analysis of recent Premier League matches</p>
+                  <h3 className="text-lg font-semibold text-gray-600 mb-2">{report.title}</h3>
+                  <p className="text-gray-500 text-sm mb-4">{report.desc}</p>
                   <div className="bg-gray-200 rounded-lg p-4 mb-4">
                     <p className="text-gray-500 text-xs">Match Report Content Placeholder</p>
                   </div>
@@ -140,7 +255,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Big Match Review Section */}
+      {/* Big Match Review Section - 3 tiles */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
@@ -154,12 +269,16 @@ export default function Landing() {
           </div>
           
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Placeholder Big Match Reviews */}
-            {[1, 2, 3].map((i) => (
+            {/* 3 Big Match Review tiles */}
+            {[
+              { title: "Title Race Analysis", desc: "Impact on Premier League standings" },
+              { title: "Champions League Race", desc: "Top 4 battle implications" },
+              { title: "Relegation Battle", desc: "Bottom of table drama" }
+            ].map((review, i) => (
               <div key={i} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Big Match Review {i}</h3>
-                  <p className="text-gray-600 text-sm mb-4">In-depth analysis of key Premier League fixtures</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{review.title}</h3>
+                  <p className="text-gray-600 text-sm mb-4">{review.desc}</p>
                   <div className="bg-gray-100 rounded-lg p-4 mb-4">
                     <p className="text-gray-500 text-xs">Big Match Review Content Placeholder</p>
                   </div>
@@ -173,88 +292,22 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Mailbox Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Mailbox</h2>
-            <Link 
-              href="/mailbox" 
-              className="text-blue-600 hover:text-blue-800 font-semibold text-lg"
-            >
-              View All Letters →
-            </Link>
-          </div>
-          
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Placeholder Mailbox Items */}
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-300">
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold text-gray-600 mb-2">Fan Letter {i}</h3>
-                  <p className="text-gray-500 text-sm mb-4">Reader questions and fan perspectives</p>
-                  <div className="bg-gray-200 rounded-lg p-4 mb-4">
-                    <p className="text-gray-500 text-xs">Mailbox Content Placeholder</p>
-                  </div>
-                  <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                    Coming Soon →
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Editorials Section */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Editorials & Analysis</h2>
-            <Link 
-              href="/editorials" 
-              className="text-blue-600 hover:text-blue-800 font-semibold text-lg"
-            >
-              View All Editorials →
-            </Link>
-          </div>
-          
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Placeholder Editorials */}
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Editorial {i}</h3>
-                  <p className="text-gray-600 text-sm mb-4">Expert opinion and tactical analysis</p>
-                  <div className="bg-gray-100 rounded-lg p-4 mb-4">
-                    <p className="text-gray-500 text-xs">Editorial Content Placeholder</p>
-                  </div>
-                  <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                    Coming Soon →
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Site Products Section */}
+      {/* Site Products Section - 4 tiles */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Site Products</h2>
           
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            {/* Placeholder Site Products */}
+            {/* 4 Site Product tiles */}
             {[
-              { title: "Fantasy League", desc: "Premier League fantasy football" },
-              { title: "Transfer Tracker", desc: "Live transfer updates and rumors" },
-              { title: "Stats Hub", desc: "Comprehensive player and team statistics" },
-              { title: "Live Scores", desc: "Real-time match updates and scores" }
+              { title: "Fantasy League", desc: "Premier League fantasy football", icon: "🏆" },
+              { title: "Transfer Tracker", desc: "Live transfer updates and rumors", icon: "🔄" },
+              { title: "Stats Hub", desc: "Comprehensive player and team statistics", icon: "📊" },
+              { title: "Live Scores", desc: "Real-time match updates and scores", icon: "⚽" }
             ].map((product, i) => (
               <div key={i} className="text-center">
                 <div className="bg-gray-100 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                  <span className="text-gray-500 text-2xl">📊</span>
+                  <span className="text-gray-500 text-2xl">{product.icon}</span>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.title}</h3>
                 <p className="text-gray-600 text-sm mb-4">{product.desc}</p>
