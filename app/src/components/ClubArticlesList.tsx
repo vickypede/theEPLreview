@@ -84,11 +84,6 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-2">{club?.name || slug}</h1>
-        <p className="text-muted-foreground">Latest news and updates</p>
-      </div>
-      
       {allArticles.length === 0 ? (
         <div className="text-center py-12">
           <h2 className="text-2xl font-semibold text-muted-foreground mb-4">No articles yet</h2>
