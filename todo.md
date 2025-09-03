@@ -118,3 +118,16 @@ Scheduling needs a function. Firestore doesn’t self-publish; the scheduler pro
 Reads are public; writes are admin-only (enforced by Firestore Rules).
 
 If you want, I can also paste a middleware.ts for server-side gating later, or a slightly richer admin that lists drafts and adds one-click Publish/Schedule actions.
+
+---
+
+Deferred (Later)
+
+- Implement publications display queries on pages
+  - Home/products: where(status=='published').orderBy(publishedAt,'desc').limit(20)
+  - Club pages: add where('clubs','array-contains', clubSlug)
+  - Product pages: add where('type','==', productType)
+- Verify/deploy Functions for publications (if not already): publicationsTidy, publishDue, syncAdminClaim
+- Add analytics (GA4 or Plausible)
+- Add simple admin listing: drafts + review queue + promote to publish/schedule
+- Theme toggle (light/dark) wired to globals

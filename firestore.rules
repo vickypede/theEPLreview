@@ -69,6 +69,30 @@ service cloud.firestore {
     }
 
     // -----------------------------
+    // User Profiles: users can read/write only their own profile
+    // -----------------------------
+    match /user_profiles/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow create: if isSignedIn() 
+        && request.auth.uid == uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.displayName is string
+        && request.resource.data.followedClubs is list
+        && request.resource.data.followedClubs.size() <= 20
+        && request.resource.data.includeGeneral is bool;
+
+      // Keep email immutable; basic type/size guards
+      allow update: if isSignedIn()
+        && request.auth.uid == uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 100
+        && request.resource.data.followedClubs is list
+        && request.resource.data.followedClubs.size() <= 20
+        && request.resource.data.includeGeneral is bool;
+    }
+
+    // -----------------------------
     // Publications (new): public read, admin write
     // Safe to add; does not affect existing collections.
     // -----------------------------

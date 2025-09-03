@@ -2,16 +2,25 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { useEnsureProfile } from '@/lib/useEnsureProfile';
 
 const nav = [
   { href: '/', label: 'Home' },
   { href: '/clubs', label: 'Clubs' },
   { href: '/news', label: 'News' },
   { href: '/table', label: 'Table' },
+  { href: '/profile', label: 'Profile' },
 ];
 
 export default function Header() {
   const pathname = usePathname();
+  
+  // Auto-create profile on first login
+  useEffect(() => { 
+    useEnsureProfile(); 
+  }, []);
+
   return (
     <header className="bg-white border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
