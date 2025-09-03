@@ -29,7 +29,8 @@ export interface UserProfile {
   favoriteClub: ClubSlug | null;    // one main club
   followedClubs: ClubSlug[];        // multi-select
   includeGeneral: boolean;          // show general league-wide items
-  marketingOptIn: boolean;
+  emailNotifications: boolean;       // send breaking news via email
+  marketingOptIn: boolean;          // send product and marketing news via email
   createdAt: Timestamp | Date;
   updatedAt: Timestamp | Date;
 }

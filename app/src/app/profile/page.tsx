@@ -32,7 +32,8 @@ export default function ProfilePage(){
           favoriteClub: null,
           followedClubs: [],
           includeGeneral: true,
-          marketingOptIn: false,
+          emailNotifications: true, // Breaking news via email - on by default
+          marketingOptIn: false, // Product and marketing news - off by default
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -89,6 +90,8 @@ export default function ProfilePage(){
       displayName: profile.displayName || '',
       followedClubs: profile.followedClubs || [],
       includeGeneral: !!profile.includeGeneral,
+      emailNotifications: !!profile.emailNotifications,
+      marketingOptIn: !!profile.marketingOptIn,
       updatedAt: new Date(),
     });
     setSaving(false);
@@ -101,6 +104,8 @@ export default function ProfilePage(){
       ...profile,
       includeGeneral: true,
       followedClubs: top6Slugs,
+      emailNotifications: true,
+      marketingOptIn: false,
     });
   };
 
@@ -183,9 +188,14 @@ export default function ProfilePage(){
                 <input
                   value={profile.displayName || ''}
                   onChange={e => setProfile({ ...profile, displayName: e.target.value })}
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-lg font-medium text-gray-900 bg-white placeholder:text-gray-400"
                   placeholder="Enter your display name"
                 />
+                {profile.displayName && (
+                  <p className="text-sm text-green-600 mt-2 font-medium">
+                    ✓ Your display name is set to: <span className="font-semibold">{profile.displayName}</span>
+                  </p>
+                )}
               </div>
             </div>
             
@@ -225,6 +235,26 @@ export default function ProfilePage(){
                   className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <span className="text-sm font-medium text-gray-700">Follow breaking news and general league updates</span>
+              </label>
+
+              <label className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-2xl hover:border-blue-300 transition-all duration-200 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={!!profile.emailNotifications}
+                  onChange={e => setProfile({ ...profile, emailNotifications: e.target.checked })}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-700">Send me breaking news via email</span>
+              </label>
+
+              <label className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-2xl hover:border-gray-300 transition-all duration-200 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={!!profile.marketingOptIn}
+                  onChange={e => setProfile({ ...profile, marketingOptIn: e.target.checked })}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-700">Send me product and marketing news via email</span>
               </label>
             </div>
           </div>
