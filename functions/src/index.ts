@@ -6,14 +6,19 @@
  * - Hardens HTML ingestion to avoid non-news pages
  * - Adds per-source badPathRegex + maxAgeHours (optional)
  * - Default HTML freshness window = 48h
+ * - NEW: Publications system (editorial content management)
  */
 
 import { setGlobalOptions } from "firebase-functions";
 import { onRequest } from "firebase-functions/https";
+import { onDocumentWritten } from "firebase-functions/v2/firestore";
+import { onSchedule } from "firebase-functions/v2/scheduler";
+import { https } from "firebase-functions/v2";
 import * as admin from "firebase-admin";
 import Parser from "rss-parser";
 import * as cheerio from "cheerio";
 import * as crypto from "crypto";
+import slugify from "slugify";
 import sourcesPayload from "./seed/sources.json";
 import clubsPayload from "./seed/clubs.json";
 export { cleanupOldArticles } from "./cleanup";
@@ -224,14 +229,7 @@ function filterLinks(
   const includeRe = options.includePathRegex ? new RegExp(options.includePathRegex, "i") : null;
 
   // Robust default denylist for non-article/utility sections
-  const DEFAULT_BAD = /\/(?:
-      about|contact|privacy|cookies|terms|advertis|marketing|promo|newsletter|subscribe|
-      authors?|contributors?|editorial|policy|brand|company|careers|
-      fixtures?|results?|table|standings|scores?|live(?:-blog)?|
-      video|videos|photo|gallery|galleries|multimedia|
-      podcasts?|shows?|
-      tag|tags|category|categories|topic|topics|search|sitemap|index
-    )(?:\/|$)|(\.xml|\.rss|\.jpg|\.jpeg|\.png|\.gif|\.webp|\.svg)$/ix;
+  const DEFAULT_BAD = /\/(about|contact|privacy|cookies|terms|advertis|marketing|promo|newsletter|subscribe|authors?|contributors?|editorial|policy|brand|company|careers|fixtures?|results?|table|standings|scores?|live(?:-blog)?|video|videos|photo|gallery|galleries|multimedia|podcasts?|shows?|tag|tags|category|categories|topic|topics|search|sitemap|index)(?:\/|$)|(\.xml|\.rss|\.jpg|\.jpeg|\.png|\.gif|\.webp|\.svg)$/i;
 
   const mergedBad = options.badPathRegex
     ? new RegExp(options.badPathRegex, "i")
@@ -766,4 +764,141 @@ export const seedClubsHttp = onRequest({ timeoutSeconds: 300 }, async (_req, res
   } catch (e: any) {
     res.status(500).json({ ok: false, error: e?.message || String(e) });
   }
+});
+
+// -----------------------------------------------------------------------------
+// NEW: Publications system (editorial content management)
+// -----------------------------------------------------------------------------
+
+function makeSlug(input: string) {
+  const base = slugify(input, { lower: true, strict: true, trim: true });
+  const short = Math.random().toString(36).slice(2, 6);
+  return `${base}-${short}`;
+}
+
+function stripMd(md: string) {
+  return md
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/\!\[[^\]]*\]\([^\)]*\)/g, ' ')
+    .replace(/\[[^\]]*\]\([^\)]*\)/g, ' ')
+    .replace(/[#>*_~`\-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function calcReading(data: { content?: string }) {
+  const text = stripMd(data.content ?? '');
+  const words = text ? text.split(/\s+/).length : 0;
+  const wpm = 220; // conservative default
+  const mins = Math.max(1, Math.round(words / wpm));
+  return { wordCount: words, readingTime: mins, excerpt: text.slice(0, 160) };
+}
+
+// 1) Tidy / enrich on create/update
+export const publicationsTidy = onDocumentWritten(
+  {
+    document: 'publications/{id}',
+    region: 'us-central1'
+  },
+  async (event) => {
+    const before = event.data?.before?.data() as any | undefined;
+    const after = event.data?.after?.data() as any | undefined;
+    if (!after) return; // deleted
+
+    const ref = event.data!.after!.ref; // current doc ref
+    const updates: Record<string, any> = {};
+
+    // timestamps
+    const now = admin.firestore.FieldValue.serverTimestamp();
+    if (!before) updates.createdAt = now;
+    updates.updatedAt = now;
+
+    // slug (generate once, reserve)
+    if (!after.slug || (before && before.title !== after.title && !before.slug)) {
+      // If slug missing (new doc) or legacy doc changed title without slug, generate
+      let slug = makeSlug(after.title || 'post');
+      let tries = 0;
+      while (tries < 5) {
+        const reserve = db.doc(`slugs/${slug}`);
+        const snap = await reserve.get();
+        if (!snap.exists) {
+          await reserve.set({ publicationId: ref.id, createdAt: admin.firestore.FieldValue.serverTimestamp() });
+          break;
+        }
+        slug = makeSlug(after.title || 'post');
+        tries++;
+      }
+      updates.slug = slug;
+    } else if (before && before.slug && before.slug !== after.slug) {
+      // Prevent manual slug changes
+      updates.slug = before.slug;
+    }
+
+    // content niceties
+    const { wordCount, readingTime, excerpt } = calcReading(after);
+    if (!after.excerpt && excerpt) updates.excerpt = excerpt;
+    updates.wordCount = wordCount;
+    updates.readingTime = readingTime;
+
+    // status sanity: published must have publishedAt
+    if (after.status === 'published' && !after.publishedAt) {
+      updates.publishedAt = admin.firestore.FieldValue.serverTimestamp();
+    }
+
+    if (Object.keys(updates).length) {
+      await ref.set(updates, { merge: true });
+    }
+  }
+);
+
+// 2) Scheduled publisher (runs every minute)
+export const publishDue = onSchedule(
+  {
+    schedule: 'every 1 minutes',
+    timeZone: 'America/Toronto',
+    region: 'us-central1'
+  },
+  async () => {
+    const now = admin.firestore.Timestamp.now();
+    const snap = await db
+      .collection('publications')
+      .where('status', '==', 'scheduled')
+      .where('scheduledAt', '<=', now)
+      .orderBy('scheduledAt', 'asc')
+      .limit(50)
+      .get();
+
+    const batch = db.batch();
+    snap.docs.forEach((doc) => {
+      batch.update(doc.ref, {
+        status: 'published',
+        publishedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    });
+    if (!snap.empty) await batch.commit();
+  }
+);
+
+// 3) Callable to sync admin custom claim based on allowlist
+export const syncAdminClaim = https.onCall({ region: 'us-central1' }, async (req) => {
+  const uid = req.auth?.uid;
+  const email = (req.auth?.token?.email as string | undefined)?.toLowerCase();
+  if (!uid || !email) throw new https.HttpsError('unauthenticated', 'Sign in first');
+
+  // Accept either: admins/{email} doc OR a doc in admins collection with field email == email
+  const directDoc = await db.doc(`admins/${email}`).get();
+  let shouldBeAdmin = directDoc.exists && directDoc.get('isActive') === true;
+  if (!shouldBeAdmin) {
+    const q = await db
+      .collection('admins')
+      .where('email', '==', email)
+      .where('isActive', '==', true)
+      .limit(1)
+      .get();
+    shouldBeAdmin = !q.empty;
+  }
+
+  await admin.auth().setCustomUserClaims(uid, { isAdmin: shouldBeAdmin });
+  return { isAdmin: shouldBeAdmin };
 });

@@ -7,7 +7,7 @@
         "isActive": true
     },
     "guardian-football": {
-        "name": "The Guardian Football",
+        "name": "The Guardian – Football",
         "type": "rss",
         "url": "https://www.theguardian.com/football/rss",
         "clubSlugs": [],
@@ -22,29 +22,29 @@
     },
     "football365": {
         "name": "Football365",
-        "type": "html",
-        "url": "https://www.football365.com/",
+        "type": "rss",
+        "url": "https://www.football365.com/feed",
         "clubSlugs": [],
         "isActive": true
     },
     "skysports-football": {
         "name": "Sky Sports Football",
-        "type": "html",
-        "url": "https://www.skysports.com/football/news",
+        "type": "rss",
+        "url": "https://www.skysports.com/rss/12040",
         "clubSlugs": [],
         "isActive": true
     },
     "talksport-football": {
         "name": "talkSPORT Football",
-        "type": "html",
-        "url": "https://talksport.com/football/",
+        "type": "rss",
+        "url": "https://talksport.com/feed/football/",
         "clubSlugs": [],
         "isActive": true
     },
     "espn-soccer": {
         "name": "ESPN Soccer",
-        "type": "html",
-        "url": "https://www.espn.com/soccer/",
+        "type": "rss",
+        "url": "https://www.espn.com/espn/rss/soccer/news",
         "clubSlugs": [],
         "isActive": true
     },
@@ -70,9 +70,23 @@
         "isActive": true
     },
     "independent-football": {
-        "name": "The Independent Football",
-        "type": "html",
-        "url": "https://www.independent.co.uk/sport/football",
+        "name": "The Independent – Football",
+        "type": "rss",
+        "url": "https://www.independent.co.uk/sport/football/rss",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "standard-football": {
+        "name": "Evening Standard – Football",
+        "type": "rss",
+        "url": "https://www.standard.co.uk/sport/football/rss",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "soccernews": {
+        "name": "SoccerNews",
+        "type": "rss",
+        "url": "https://www.soccernews.com/feed",
         "clubSlugs": [],
         "isActive": true
     },
@@ -179,6 +193,342 @@
         "type": "html",
         "url": "https://www.nottinghampost.com/all-about/nottingham-forest-fc",
         "clubSlugs": ["nottingham-forest"],
+        "isActive": true
+    },
+    "fourfourtwo": {
+        "name": "FourFourTwo",
+        "type": "html",
+        "url": "https://www.fourfourtwo.com/news",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "goal": {
+        "name": "Goal",
+        "type": "html",
+        "url": "https://www.goal.com/en",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "sportsmole": {
+        "name": "Sports Mole",
+        "type": "html",
+        "url": "https://www.sportsmole.co.uk/football/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "yahoo-sports-soccer": {
+        "name": "Yahoo Sports Soccer",
+        "type": "html",
+        "url": "https://sports.yahoo.com/soccer/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "eurosport": {
+        "name": "Eurosport Football",
+        "type": "html",
+        "url": "https://www.eurosport.com/football/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "premierleague-official": {
+        "name": "Premier League",
+        "type": "html",
+        "url": "https://www.premierleague.com/news",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "football-london-brentford": {
+        "name": "Football.London (Brentford)",
+        "type": "html",
+        "url": "https://www.football.london/brentford-fc/",
+        "clubSlugs": ["brentford"],
+        "isActive": true
+    },
+    "football-london-fulham": {
+        "name": "Football.London (Fulham)",
+        "type": "html",
+        "url": "https://www.football.london/fulham-fc/",
+        "clubSlugs": ["fulham"],
+        "isActive": true
+    },
+    "football-london-crystalpalace": {
+        "name": "Football.London (Crystal Palace)",
+        "type": "html",
+        "url": "https://www.football.london/crystal-palace-fc/",
+        "clubSlugs": ["crystal-palace"],
+        "isActive": true
+    },
+    "football-london-bournemouth": {
+        "name": "Football.London (Bournemouth)",
+        "type": "html",
+        "url": "https://www.football.london/afc-bournemouth/",
+        "clubSlugs": ["bournemouth"],
+        "isActive": true
+    },
+    "everton-liverpoolecho": {
+        "name": "Liverpool Echo (Everton)",
+        "type": "html",
+        "url": "https://www.liverpoolecho.co.uk/all-about/everton-fc",
+        "clubSlugs": ["everton"],
+        "isActive": true
+    },
+    "sportwitness-arsenal": {
+        "name": "Sport Witness (Arsenal)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/arsenal/",
+        "clubSlugs": ["arsenal"],
+        "isActive": true
+    },
+    "sportwitness-aston-villa": {
+        "name": "Sport Witness (Aston Villa)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/aston-villa/",
+        "clubSlugs": ["aston-villa"],
+        "isActive": true
+    },
+    "sportwitness-brentford": {
+        "name": "Sport Witness (Brentford)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/brentford/",
+        "clubSlugs": ["brentford"],
+        "isActive": true
+    },
+    "sportwitness-brighton": {
+        "name": "Sport Witness (Brighton)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/brighton/",
+        "clubSlugs": ["brighton"],
+        "isActive": true
+    },
+    "sportwitness-chelsea": {
+        "name": "Sport Witness (Chelsea)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/chelsea/",
+        "clubSlugs": ["chelsea"],
+        "isActive": true
+    },
+    "sportwitness-crystal-palace": {
+        "name": "Sport Witness (Crystal Palace)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/crystal-palace/",
+        "clubSlugs": ["crystal-palace"],
+        "isActive": true
+    },
+    "sportwitness-everton": {
+        "name": "Sport Witness (Everton)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/everton/",
+        "clubSlugs": ["everton"],
+        "isActive": true
+    },
+    "sportwitness-fulham": {
+        "name": "Sport Witness (Fulham)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/fulham/",
+        "clubSlugs": ["fulham"],
+        "isActive": true
+    },
+    "sportwitness-liverpool": {
+        "name": "Sport Witness (Liverpool)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/liverpool/",
+        "clubSlugs": ["liverpool"],
+        "isActive": true
+    },
+    "sportwitness-manchester-city": {
+        "name": "Sport Witness (Manchester City)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/manchester-city/",
+        "clubSlugs": ["manchester-city"],
+        "isActive": true
+    },
+    "sportwitness-manchester-united": {
+        "name": "Sport Witness (Manchester United)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/manchester-united/",
+        "clubSlugs": ["manchester-united"],
+        "isActive": true
+    },
+    "sportwitness-newcastle": {
+        "name": "Sport Witness (Newcastle)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/newcastle/",
+        "clubSlugs": ["newcastle"],
+        "isActive": true
+    },
+    "sportwitness-nottingham-forest": {
+        "name": "Sport Witness (Nottingham Forest)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/nottingham-forest/",
+        "clubSlugs": ["nottingham-forest"],
+        "isActive": true
+    },
+    "sportwitness-wolves": {
+        "name": "Sport Witness (Wolves)",
+        "type": "html",
+        "url": "https://sportwitness.co.uk/category/premier-league/wolves/",
+        "clubSlugs": ["wolves"],
+        "isActive": true
+    },
+    "chelsea-prideoflondon": {
+        "name": "The Pride of London",
+        "type": "html",
+        "url": "https://theprideoflondon.com/",
+        "clubSlugs": ["chelsea"],
+        "isActive": true
+    },
+    "chelsea-thechelseachronicle": {
+        "name": "The Chelsea Chronicle",
+        "type": "html",
+        "url": "https://www.thechelseachronicle.com/news/",
+        "clubSlugs": ["chelsea"],
+        "isActive": true
+    },
+    "chelsea-chelseanews": {
+        "name": "Chelsea News",
+        "type": "html",
+        "url": "https://chelsea.news/category/news/",
+        "clubSlugs": ["chelsea"],
+        "isActive": true
+    },
+    "footballinsider": {
+        "name": "Football Insider 247",
+        "type": "html",
+        "url": "https://www.footballinsider247.com/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "caughtoffside-premier-league": {
+        "name": "CaughtOffside (Premier League)",
+        "type": "html",
+        "url": "https://www.caughtoffside.com/tags/premier-league/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "metro-premier-league": {
+        "name": "Metro (Premier League)",
+        "type": "html",
+        "url": "https://metro.co.uk/tag/premier-league/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "arsenal-justarsenal": {
+        "name": "JustArsenal",
+        "type": "html",
+        "url": "https://www.justarsenal.com/",
+        "clubSlugs": ["arsenal"],
+        "isActive": true
+    },
+    "newcastle-geordiebootboys": {
+        "name": "Geordie Boot Boys",
+        "type": "html",
+        "url": "https://www.geordiebootboys.com/news/",
+        "clubSlugs": ["newcastle"],
+        "isActive": true
+    },
+    "football365-bournemouth": {
+        "name": "Football365 (Bournemouth)",
+        "type": "html",
+        "url": "https://www.football365.com/bournemouth/",
+        "clubSlugs": ["bournemouth"],
+        "isActive": true
+    },
+    "football365-arsenal": {
+        "name": "Football365 (Arsenal)",
+        "type": "html",
+        "url": "https://www.football365.com/arsenal/",
+        "clubSlugs": ["arsenal"],
+        "isActive": true
+    },
+    "football365-aston-villa": {
+        "name": "Football365 (Aston Villa)",
+        "type": "html",
+        "url": "https://www.football365.com/aston-villa/",
+        "clubSlugs": ["aston-villa"],
+        "isActive": true
+    },
+    "football365-brentford": {
+        "name": "Football365 (Brentford)",
+        "type": "html",
+        "url": "https://www.football365.com/brentford/",
+        "clubSlugs": ["brentford"],
+        "isActive": true
+    },
+    "football365-brighton": {
+        "name": "Football365 (Brighton)",
+        "type": "html",
+        "url": "https://www.football365.com/brighton/",
+        "clubSlugs": ["brighton"],
+        "isActive": true
+    },
+    "football365-chelsea": {
+        "name": "Football365 (Chelsea)",
+        "type": "html",
+        "url": "https://www.football365.com/chelsea/",
+        "clubSlugs": ["chelsea"],
+        "isActive": true
+    },
+    "football365-crystal-palace": {
+        "name": "Football365 (Crystal Palace)",
+        "type": "html",
+        "url": "https://www.football365.com/crystal-palace/",
+        "clubSlugs": ["crystal-palace"],
+        "isActive": true
+    },
+    "football365-everton": {
+        "name": "Football365 (Everton)",
+        "type": "html",
+        "url": "https://www.football365.com/everton/",
+        "clubSlugs": ["everton"],
+        "isActive": true
+    },
+    "football365-fulham": {
+        "name": "Football365 (Fulham)",
+        "type": "html",
+        "url": "https://www.football365.com/fulham/",
+        "clubSlugs": ["fulham"],
+        "isActive": true
+    },
+    "football365-liverpool": {
+        "name": "Football365 (Liverpool)",
+        "type": "html",
+        "url": "https://www.football365.com/liverpool/",
+        "clubSlugs": ["liverpool"],
+        "isActive": true
+    },
+    "football365-manchester-city": {
+        "name": "Football365 (Manchester City)",
+        "type": "html",
+        "url": "https://www.football365.com/manchester-city/",
+        "clubSlugs": ["manchester-city"],
+        "isActive": true
+    },
+    "football365-manchester-united": {
+        "name": "Football365 (Manchester United)",
+        "type": "html",
+        "url": "https://www.football365.com/manchester-united/",
+        "clubSlugs": ["manchester-united"],
+        "isActive": true
+    },
+    "football365-newcastle-united": {
+        "name": "Football365 (Newcastle United)",
+        "type": "html",
+        "url": "https://www.football365.com/newcastle-united/",
+        "clubSlugs": ["newcastle"],
+        "isActive": true
+    },
+    "football365-nottingham-forest": {
+        "name": "Football365 (Nottingham Forest)",
+        "type": "html",
+        "url": "https://www.football365.com/nottingham-forest/",
+        "clubSlugs": ["nottingham-forest"],
+        "isActive": true
+    },
+    "football365-wolves": {
+        "name": "Football365 (Wolves)",
+        "type": "html",
+        "url": "https://www.football365.com/wolves/",
+        "clubSlugs": ["wolves"],
         "isActive": true
     }
 }

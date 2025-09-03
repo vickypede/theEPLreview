@@ -24,7 +24,8 @@
     "firebase-functions": "^6.0.1",
     "genkit": "^1.18.0",
     "puppeteer": "^24.17.1",
-    "rss-parser": "^3.13.0"
+    "rss-parser": "^3.13.0",
+    "slugify": "^1.6.6"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.12.0",
