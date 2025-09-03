@@ -98,6 +98,15 @@ export default function TeamPanel({ slug }: { slug: string }) {
   // Get ScoreAxis ID for this team
   const scoreAxisId = team ? SCOREAXIS_IDS[team.id] : null;
 
+  // Debug logging
+  console.log('TeamPanel Debug:', {
+    slug,
+    team,
+    scoreAxisId,
+    allClubs: clubs.map(c => ({ id: c.id, name: c.name })),
+    scoreAxisMapping: SCOREAXIS_IDS
+  });
+
   if (loading) {
     return (
       <section className="mb-8">
