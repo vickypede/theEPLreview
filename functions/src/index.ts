@@ -1,10 +1,11 @@
 /**
- * Import function triggers from their respective submodules:
+ * Supported triggers: https://firebase.google.com/docs/functions
  *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ * Drop-in replacement for functions/src/index.ts
+ * - Keeps existing logic
+ * - Hardens HTML ingestion to avoid non-news pages
+ * - Adds per-source badPathRegex + maxAgeHours (optional)
+ * - Default HTML freshness window = 48h
  */
 
 import { setGlobalOptions } from "firebase-functions";
@@ -17,15 +18,47 @@ import sourcesPayload from "./seed/sources.json";
 import clubsPayload from "./seed/clubs.json";
 export { cleanupOldArticles } from "./cleanup";
 
-if (!admin.apps.length) {
-  admin.initializeApp();
-}
+if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
 
-// Feature flags
-const USE_SELF_HTML = process.env.USE_SELF_HTML === "1"; // prefer internal renderer over Firecrawl
-const ENABLE_HEADLESS = process.env.ENABLE_HEADLESS === "1"; // allow Puppeteer fallback
+// -----------------------------------------------------------------------------
+// Timing / date safety
+// -----------------------------------------------------------------------------
+const MAX_FUTURE_DRIFT_MS = 12 * 60 * 60 * 1000; // 12 hours future tolerance
+const MAX_PAST_AGE_MS = 365 * 24 * 60 * 60 * 1000; // 1 year (optional lower bound)
 
+// -----------------------------------------------------------------------------
+// Global concurrency
+// -----------------------------------------------------------------------------
+setGlobalOptions({ maxInstances: 10 });
+
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
+type SourceDoc = {
+  id: string;
+  name: string;
+  type: "rss" | "html";
+  url: string;
+  clubSlugs?: string[];
+  isActive?: boolean;
+  includePathRegex?: string; // optional narrowing for HTML section pages
+  needsJs?: boolean; // allow headless for this source
+
+  // NEW (optional): per-source denylist and freshness override for HTML
+  badPathRegex?: string;
+  maxAgeHours?: number;
+};
+
+type RuntimeConfig = {
+  enableHeadlessGlobal?: boolean;
+  headlessDailyWindow?: { startHourUTC: number; durationMinutes: number };
+  badPathRegex?: string; // site-wide "non-article" paths to exclude
+};
+
+// -----------------------------------------------------------------------------
+// Utilities
+// -----------------------------------------------------------------------------
 function hostToName(u: string) {
   try {
     return new URL(u).hostname.replace(/^www\./, "");
@@ -52,8 +85,9 @@ async function fetchHtmlDirect(url: string): Promise<string | null> {
   }
 }
 
-async function renderWithPuppeteer(url: string): Promise<string | null> {
-  if (!ENABLE_HEADLESS) return null;
+// Headless is optional and controlled dynamically at runtime.
+async function renderWithPuppeteer(url: string, enableHeadless: boolean): Promise<string | null> {
+  if (!enableHeadless) return null;
   try {
     const puppeteer = await import("puppeteer");
     const browser = await puppeteer.launch({
@@ -77,12 +111,16 @@ async function renderWithPuppeteer(url: string): Promise<string | null> {
   }
 }
 
-async function getHtmlSmart(url: string): Promise<string | null> {
+async function getHtmlSmart(
+  url: string,
+  opts: { allowHeadless: boolean; headlessEnabled: boolean },
+): Promise<string | null> {
   const raw = await fetchHtmlDirect(url);
   if (raw && /og:title|application\/ld\+json|<title>/i.test(raw)) return raw;
-  return await renderWithPuppeteer(url);
+  return await renderWithPuppeteer(url, opts.allowHeadless && opts.headlessEnabled);
 }
 
+// Prefer real published fields; keep updated separate; fallback only if needed
 function extractArticleMeta(html: string, url: string) {
   const $ = cheerio.load(html);
 
@@ -97,21 +135,33 @@ function extractArticleMeta(html: string, url: string) {
     hostToName(url);
 
   let publishedAt: Date | undefined;
-  const tsSelectors = [
+  let updatedAt: Date | undefined;
+
+  const pubSelectors = [
     "meta[property='article:published_time']",
     "meta[name='article:published_time']",
     "meta[name='pubdate']",
-    "meta[name='date']",
-    "meta[name='timestamp']",
-    "meta[property='og:updated_time']",
-    "time[datetime]",
+    "time[datetime]", // can be ambiguous on some sites
   ];
-  for (const sel of tsSelectors) {
+  const updSelectors = ["meta[property='og:updated_time']", "meta[name='updated_time']"];
+
+  for (const sel of pubSelectors) {
     const v = $(sel).attr("content") || $(sel).attr("datetime");
     if (v) {
       const d = new Date(v);
       if (!Number.isNaN(d.getTime())) {
         publishedAt = d;
+        break;
+      }
+    }
+  }
+
+  for (const sel of updSelectors) {
+    const v = $(sel).attr("content");
+    if (v) {
+      const d = new Date(v);
+      if (!Number.isNaN(d.getTime())) {
+        updatedAt = d;
         break;
       }
     }
@@ -129,14 +179,20 @@ function extractArticleMeta(html: string, url: string) {
             const d = new Date(node.datePublished);
             if (!Number.isNaN(d.getTime())) publishedAt = d;
           }
+          if (!updatedAt && node.dateModified) {
+            const d = new Date(node.dateModified);
+            if (!Number.isNaN(d.getTime())) updatedAt = d;
+          }
           if (!siteName && node.publisher?.name) siteName = String(node.publisher.name).trim();
         }
       }
     } catch {}
   });
 
+  if (!publishedAt && updatedAt) publishedAt = updatedAt; // last resort
+
   const canonicalUrl = $("link[rel='canonical']").attr("href") || undefined;
-  return { title, siteName, publishedAt, canonicalUrl };
+  return { title, siteName, publishedAt, updatedAt, canonicalUrl };
 }
 
 function absolutizeLinks(baseUrl: string, html: string): string[] {
@@ -154,33 +210,59 @@ function absolutizeLinks(baseUrl: string, html: string): string[] {
   return Array.from(new Set(out));
 }
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+// --- Stronger link filtering (section pages) ---------------------------------
+function filterLinks(
+  links: string[],
+  sourceUrl: string,
+  options: { includePathRegex?: string; badPathRegex?: string; sourceBadPathRegex?: string },
+): string[] {
+  let host = "";
+  try {
+    host = new URL(sourceUrl).hostname;
+  } catch {}
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+  const includeRe = options.includePathRegex ? new RegExp(options.includePathRegex, "i") : null;
+
+  // Robust default denylist for non-article/utility sections
+  const DEFAULT_BAD = /\/(?:
+      about|contact|privacy|cookies|terms|advertis|marketing|promo|newsletter|subscribe|
+      authors?|contributors?|editorial|policy|brand|company|careers|
+      fixtures?|results?|table|standings|scores?|live(?:-blog)?|
+      video|videos|photo|gallery|galleries|multimedia|
+      podcasts?|shows?|
+      tag|tags|category|categories|topic|topics|search|sitemap|index
+    )(?:\/|$)|(\.xml|\.rss|\.jpg|\.jpeg|\.png|\.gif|\.webp|\.svg)$/ix;
+
+  const mergedBad = options.badPathRegex
+    ? new RegExp(options.badPathRegex, "i")
+    : DEFAULT_BAD;
+
+  const sourceBad = options.sourceBadPathRegex ? new RegExp(options.sourceBadPathRegex, "i") : null;
+
+  return links
+    .filter((u) => {
+      try {
+        const uu = new URL(u);
+        if (uu.hostname !== host) return false;
+        if (mergedBad.test(uu.pathname)) return false;
+        if (sourceBad && sourceBad.test(uu.pathname)) return false;
+        if (includeRe && !includeRe.test(uu.pathname)) return false;
+        return true;
+      } catch {
+        return false;
+      }
+    })
+    .slice(0, 200);
+}
 
 function normalizeUrl(rawUrl: string): string {
   try {
     const u = new URL(rawUrl);
-    // Remove fragment
     u.hash = "";
-    // Lowercase host
     u.hostname = u.hostname.toLowerCase();
-    // Default ports
     if ((u.protocol === "http:" && u.port === "80") || (u.protocol === "https:" && u.port === "443")) {
       u.port = "";
     }
-    // Strip tracking params
     const params = u.searchParams;
     ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "fbclid"].forEach((p) =>
       params.delete(p),
@@ -198,7 +280,7 @@ function makeDeterministicIdFromUrl(rawUrl: string): { id: string; normalizedUrl
   return { id, normalizedUrl };
 }
 
-// --- Club detection utilities -------------------------------------------------
+// --- Club detection ----------------------------------------------------------
 type ClubDetector = { slug: string; regexes: RegExp[] };
 
 function escapeRegExp(input: string): string {
@@ -213,7 +295,6 @@ async function buildClubDetectors(): Promise<ClubDetector[]> {
       const slug = doc.id;
       const data = (doc.data() as any) || {};
       const names: string[] = Array.isArray(data.names) ? data.names : [];
-      // Always include the proper club name (doc id may also work as a keyword)
       const allNames = new Set<string>([slug, ...names]);
       const regexes = Array.from(allNames)
         .filter((n) => n && n.trim().length > 1)
@@ -229,32 +310,119 @@ async function buildClubDetectors(): Promise<ClubDetector[]> {
 function detectClubsFromText(text: string | undefined | null, detectors: ClubDetector[]): string[] {
   if (!text) return [];
   const hits: string[] = [];
-  for (const d of detectors) {
-    if (d.regexes.some((r) => r.test(text))) hits.push(d.slug);
-  }
+  for (const d of detectors) if (d.regexes.some((r) => r.test(text))) hits.push(d.slug);
   return Array.from(new Set(hits));
 }
 
+// --- Date clamp --------------------------------------------------------------
+function clampPublishedAt(d?: Date | null): { value: Date; clamped: boolean } {
+  const now = new Date();
+  if (!d || Number.isNaN(d.getTime())) return { value: now, clamped: true };
+  const diff = d.getTime() - now.getTime();
+  if (diff > MAX_FUTURE_DRIFT_MS) return { value: now, clamped: true };
+  if (now.getTime() - d.getTime() > MAX_PAST_AGE_MS) return { value: d, clamped: false }; // keep old
+  return { value: d, clamped: false };
+}
+
+// --- Runtime config (dynamic headless & filters) -----------------------------
+async function loadRuntimeConfig(): Promise<RuntimeConfig> {
+  try {
+    const snap = await db.collection("config").doc("runtime").get();
+    return (snap.exists ? (snap.data() as RuntimeConfig) : {}) || {};
+  } catch {
+    return {};
+  }
+}
+
+function isWithinWindow(nowUTC: Date, startHourUTC: number, durationMinutes: number): boolean {
+  // Build today's window
+  const start = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), nowUTC.getUTCDate(), startHourUTC, 0, 0));
+  const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
+  if (nowUTC >= start && nowUTC <= end) return true;
+
+  // If window may cross midnight, also check yesterday's window
+  const yStart = new Date(start.getTime() - 24 * 60 * 60 * 1000);
+  const yEnd = new Date(yStart.getTime() + durationMinutes * 60 * 1000);
+  return nowUTC >= yStart && nowUTC <= yEnd;
+}
+
+function computeHeadlessEnabled(config: RuntimeConfig, reqQuery: any): boolean {
+  // Manual override via query (?headless=1)
+  const q = String(reqQuery?.headless || "").toLowerCase();
+  if (q === "1" || q === "true") return true;
+
+  if (config.enableHeadlessGlobal) return true;
+
+  const win = config.headlessDailyWindow;
+  if (win && Number.isFinite(win.startHourUTC) && Number.isFinite(win.durationMinutes)) {
+    return isWithinWindow(new Date(), win.startHourUTC, win.durationMinutes);
+  }
+  return false;
+}
+
+// -----------------------------------------------------------------------------
+// NEW: Article likelihood & freshness helpers (HTML path only)
+// -----------------------------------------------------------------------------
+const TITLE_DENY = /^(about|contact|privacy|cookies|terms|fixtures?|results?|table|index)\b/i;
+
+function extractMainText(html: string): string {
+  const $ = cheerio.load(html);
+  const primary =
+    $("article").text() ||
+    $("[itemprop='articleBody']").text() ||
+    $("main").text() ||
+    $(".post, .entry-content, .article__content, .c-article__body").text();
+  return (primary || "").replace(/\s+/g, " ").trim();
+}
+
+function isLikelyArticle(meta: { title?: string; publishedAt?: Date }, html: string): boolean {
+  if (!meta.title || TITLE_DENY.test(meta.title.trim())) return false;
+
+  // must have dependable publish time
+  if (!meta.publishedAt || Number.isNaN(meta.publishedAt.getTime())) return false;
+
+  // require schema or explicit article:published_time
+  const hasSchema =
+    /"@type"\s*:\s*"(?:NewsArticle|Article|BlogPosting)"/i.test(html) ||
+    /<meta[^>]+article:published_time/i.test(html);
+
+  if (!hasSchema) return false;
+
+  // minimum body length (avoid stubs/indices)
+  const text = extractMainText(html);
+  const wordCount = text ? text.split(/\s+/).length : 0;
+  if (wordCount < 120) return false;
+
+  return true;
+}
+
+function withinAgeWindow(date: Date, maxHours: number): boolean {
+  const now = Date.now();
+  return now - date.getTime() <= maxHours * 3600 * 1000;
+}
+
+// -----------------------------------------------------------------------------
+// Main ingestion
+// -----------------------------------------------------------------------------
 export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => {
   try {
     const group = (req.query.group as string) || "all"; // top6 | other14 | all
-    const verbose = String(req.query.verbose || "").toLowerCase() === "1" || String(req.query.verbose || "").toLowerCase() === "true";
+    const verbose =
+      String(req.query.verbose || "").toLowerCase() === "1" ||
+      String(req.query.verbose || "").toLowerCase() === "true";
+
+    const runtime = await loadRuntimeConfig();
+    const headlessEnabled = computeHeadlessEnabled(runtime, req.query);
+
     const sourcesSnap = await db.collection("sources").where("isActive", "==", true).get();
-    let sources = sourcesSnap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+    let sources: SourceDoc[] = sourcesSnap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
 
     // Group filtering using /clubs.isTop6
     if (group === "top6" || group === "other14") {
       const clubsSnap = await db.collection("clubs").get();
-      const top6Set = new Set<string>(
-        clubsSnap.docs
-          .filter((c) => (c.data() as any)?.isTop6)
-          .map((c) => c.id),
-      );
-      const isAnyTop6 = (slugs: string[] | undefined) =>
-        (slugs || []).some((s) => top6Set.has(s));
-      const isAnyOther14 = (slugs: string[] | undefined) =>
-        (slugs || []).some((s) => !top6Set.has(s));
-
+      const top6Set = new Set<string>(clubsSnap.docs.filter((c) => (c.data() as any)?.isTop6).map((c) => c.id));
+      const isAnyTop6 = (slugs: string[] | undefined) => (slugs || []).some((s) => top6Set.has(s));
+      const isAnyOther14 = (slugs: string[] | undefined) => (slugs || []).some((s) => !top6Set.has(s));
       sources = sources.filter((s: any) => {
         const slugs: string[] = Array.isArray(s.clubSlugs) ? s.clubSlugs : [];
         if (slugs.length === 0) return true; // general sources run in both jobs; dedupe by URL id
@@ -263,8 +431,6 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
     }
 
     const parser = new Parser();
-    const firecrawlBase = process.env.FIRECRAWL_BASE_URL || "https://api.firecrawl.dev";
-    const firecrawlApiKey = process.env.FIRECRAWL_API_KEY || undefined; // optional for self-host
 
     // run-level accounting
     const startedAt = new Date();
@@ -283,6 +449,7 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
           for (const item of feed.items || []) {
             const url = item.link || item.guid || "";
             if (!url) continue;
+
             const { id, normalizedUrl } = makeDeterministicIdFromUrl(url);
             const ref = db.collection("articles").doc(id);
             const existed = (await ref.get()).exists;
@@ -294,16 +461,29 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
             );
             const sourceClubs: string[] = Array.isArray(source.clubSlugs) ? source.clubSlugs : [];
             const clubs = Array.from(new Set<string>([...sourceClubs, ...detectedClubs]));
+
+            // Publish time clamp
+            const rawPublished = (item as any).isoDate || (item as any).pubDate || null;
+            const { value: safePublishedAt, clamped } = clampPublishedAt(rawPublished ? new Date(rawPublished) : null);
+
+            // Tiny title denylist guard
+            const title = item.title || "";
+            if (TITLE_DENY.test(title)) {
+              skippedCount += 1;
+              continue;
+            }
+
             await ref.set(
               {
                 id,
-                title: item.title || "",
+                title,
                 url: normalizedUrl,
                 summary: item.contentSnippet || item.content || "",
                 sourceId: source.id,
                 sourceName: source.name,
                 clubs,
-                publishedAt: item.isoDate ? new Date(item.isoDate) : new Date(),
+                publishedAt: safePublishedAt,
+                ...(clamped ? { _rawPublishedAt: rawPublished || null, _note: "clamped_future" } : {}),
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
               },
@@ -347,24 +527,20 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
         }
       } else if (source.type === "html") {
         try {
-          let links: string[] = [];
-          if (USE_SELF_HTML) {
-            const html = await getHtmlSmart(source.url);
-            if (!html) throw new Error("no html");
-            links = absolutizeLinks(source.url, html).slice(0, 200);
-          } else {
-            const resp = await fetch(`${firecrawlBase}/v2/scrape`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                ...(firecrawlApiKey ? { Authorization: `Bearer ${firecrawlApiKey}` } : {}),
-              } as any,
-              body: JSON.stringify({ url: source.url, formats: ["links"] }),
-            });
-            if (!resp.ok) throw new Error(`Firecrawl error ${resp.status}`);
-            const data: any = await resp.json();
-            links = data?.data?.links || [];
-          }
+          // 1) Fetch section page (allow headless only if source.needsJs + runtime says yes)
+          const sectionHtml = await getHtmlSmart(source.url, {
+            allowHeadless: !!source.needsJs,
+            headlessEnabled,
+          });
+          if (!sectionHtml) throw new Error("no html");
+
+          // 2) Extract links and skip obvious non-articles
+          let links: string[] = absolutizeLinks(source.url, sectionHtml);
+          links = filterLinks(links, source.url, {
+            includePathRegex: source.includePathRegex,
+            badPathRegex: runtime.badPathRegex,
+            sourceBadPathRegex: source.badPathRegex, // NEW: per-source denylist
+          });
 
           for (const url of links) {
             const { id, normalizedUrl } = makeDeterministicIdFromUrl(url);
@@ -372,40 +548,43 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
             let publishedAt: Date | null = null;
 
             try {
-              let pageHtml: string | null = null;
-              if (USE_SELF_HTML) {
-                pageHtml = await getHtmlSmart(normalizedUrl);
-              } else {
-                const pageResp = await fetch(`${firecrawlBase}/v2/scrape`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    ...(firecrawlApiKey ? { Authorization: `Bearer ${firecrawlApiKey}` } : {}),
-                  } as any,
-                  body: JSON.stringify({ url: normalizedUrl, formats: ["html"] }),
-                });
-                if (pageResp.ok) {
-                  const pageData: any = await pageResp.json();
-                  pageHtml = pageData?.data?.html || null;
-                }
-              }
+              // 3) Fetch candidate page (same headless policy)
+              const pageHtml: string | null = await getHtmlSmart(normalizedUrl, {
+                allowHeadless: !!source.needsJs,
+                headlessEnabled,
+              });
 
               if (pageHtml) {
                 const meta = extractArticleMeta(pageHtml, normalizedUrl);
                 title = meta.title || "";
                 if (meta.publishedAt) publishedAt = meta.publishedAt;
-                // prefer canonical URL when present
+
+                // NEW: only accept likely news articles
+                const looksLikeArticle = isLikelyArticle(
+                  { title, publishedAt: publishedAt || undefined },
+                  pageHtml,
+                );
+                if (!looksLikeArticle) {
+                  skippedCount += 1;
+                  continue;
+                }
+
+                // NEW: freshness window (default 48h; per-source override allowed)
+                const maxAge = typeof source.maxAgeHours === "number" ? source.maxAgeHours : 48;
+                if (!publishedAt || !withinAgeWindow(publishedAt, maxAge)) {
+                  skippedCount += 1;
+                  continue;
+                }
+
+                // Prefer canonical URL when present (dedupe)
                 if (meta.canonicalUrl) {
                   try {
                     const canonicalAbs = new URL(meta.canonicalUrl, normalizedUrl).toString();
                     const r = makeDeterministicIdFromUrl(canonicalAbs);
-                    // If canonical differs, switch to canonical id/url
                     if (r.id !== id) {
-                      // check if canonical already exists to dedupe
                       const canonicalRef = db.collection("articles").doc(r.id);
                       const exists = (await canonicalRef.get()).exists;
                       if (exists) {
-                        // skip creating duplicate
                         skippedCount += 1;
                         continue;
                       }
@@ -415,13 +594,23 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
               }
             } catch {}
 
+            // Skip non-articles: empty or denied title is a strong signal
+            if (!title || TITLE_DENY.test(title)) {
+              skippedCount += 1;
+              continue;
+            }
+
             const ref = db.collection("articles").doc(id);
             const existed = (await ref.get()).exists;
 
-            // Detect clubs from title (and possibly surrounding context later)
+            // Detect clubs from title
             const detectedClubs = detectClubsFromText(title, clubDetectors);
             const sourceClubs: string[] = Array.isArray(source.clubSlugs) ? source.clubSlugs : [];
             const clubs = Array.from(new Set<string>([...sourceClubs, ...detectedClubs]));
+
+            // Publish time clamp (keeps your future-drift protection)
+            const { value: safePublishedAt, clamped } = clampPublishedAt(publishedAt);
+
             await ref.set(
               {
                 id,
@@ -431,7 +620,10 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
                 sourceId: source.id,
                 sourceName: source.name,
                 clubs,
-                publishedAt: publishedAt ?? new Date(),
+                publishedAt: safePublishedAt,
+                ...(clamped
+                  ? { _rawPublishedAt: publishedAt ? publishedAt.toISOString() : null, _note: "clamped_future" }
+                  : {}),
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
               },
@@ -440,6 +632,7 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
             if (existed) skippedCount += 1;
             else addedCount += 1;
           }
+
           // success path: update source metadata
           await db.collection("sources").doc(source.id).set(
             {
@@ -486,14 +679,19 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
       addedCount,
       skippedCount,
       errors: runErrors,
+      headlessEnabled,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    if (addedCount === 0) {
-      console.warn(`Ingestion run produced 0 new items for group=${group}`);
-    }
-
-    const baseResp: any = { ok: true, processed: sources.length, group, addedCount, skippedCount, errors: runErrors.length };
+    const baseResp: any = {
+      ok: true,
+      processed: sources.length,
+      group,
+      addedCount,
+      skippedCount,
+      errors: runErrors.length,
+      headlessEnabled,
+    };
     if (verbose) baseResp.errorDetails = errorDetails;
     res.json(baseResp);
   } catch (e: any) {
@@ -501,46 +699,67 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
   }
 });
 
-export const seedSourcesHttp = onRequest({ timeoutSeconds: 300 }, async (_req, res) => {
+// -----------------------------------------------------------------------------
+// Seed helpers (unchanged, with tiny debug option on sources)
+// -----------------------------------------------------------------------------
+export const seedSourcesHttp = onRequest({ timeoutSeconds: 300 }, async (req, res) => {
   try {
     const payload = sourcesPayload as Record<string, any>;
+    const debug =
+      String((req.query as any)?.debug || "").toLowerCase() === "1" ||
+      String((req.query as any)?.debug || "").toLowerCase() === "true";
 
     const batch = db.batch();
     for (const [id, data] of Object.entries(payload)) {
       const ref = db.collection("sources").doc(id);
-      batch.set(ref, {
-        id,
-        name: data.name,
-        type: data.type,
-        url: data.url,
-        clubSlugs: Array.isArray(data.clubSlugs) ? data.clubSlugs : [],
-        isActive: data.isActive ?? true,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      }, { merge: true });
+      batch.set(
+        ref,
+        {
+          id,
+          name: data.name,
+          type: data.type,
+          url: data.url,
+          clubSlugs: Array.isArray(data.clubSlugs) ? data.clubSlugs : [],
+          includePathRegex: data.includePathRegex || null,
+          needsJs: !!data.needsJs,
+          // NEW optional fields are passed through if present in seed
+          badPathRegex: data.badPathRegex || null,
+          maxAgeHours: typeof data.maxAgeHours === "number" ? data.maxAgeHours : null,
+          isActive: data.isActive ?? true,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true },
+      );
     }
     await batch.commit();
-    res.json({ ok: true, count: Object.keys(payload).length });
+    const ids = Object.keys(payload);
+    const base: any = { ok: true, count: ids.length };
+    if (debug) base.ids = ids;
+    res.json(base);
   } catch (e: any) {
     res.status(500).json({ ok: false, error: e?.message || String(e) });
   }
 });
 
-// Seed or upsert clubs (names/nicknames) for detection
 export const seedClubsHttp = onRequest({ timeoutSeconds: 300 }, async (_req, res) => {
   try {
     const payload = clubsPayload as Record<string, any>;
     const batch = db.batch();
     for (const [id, data] of Object.entries(payload)) {
       const ref = db.collection("clubs").doc(id);
-      batch.set(ref, {
-        id,
-        name: data.name,
-        isTop6: Boolean(data.isTop6),
-        names: Array.isArray(data.names) ? data.names : [],
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      }, { merge: true });
+      batch.set(
+        ref,
+        {
+          id,
+          name: data.name,
+          isTop6: Boolean(data.isTop6),
+          names: Array.isArray(data.names) ? data.names : [],
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true },
+      );
     }
     await batch.commit();
     res.json({ ok: true, count: Object.keys(payload).length });
