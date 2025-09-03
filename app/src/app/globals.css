@@ -33,7 +33,7 @@
 
   /* New deep blue primary */
   --blue-primary: 210 100% 18%;  /* #003f5c */
-  --blue-secondary: 210 100% 25%; /* Slightly lighter variant */
+  --blue-secondary: 200 70% 48%; /* Brighter variant for readable links */
   
   --primary: var(--blue-primary);
   --primary-foreground: var(--foreground);
@@ -112,6 +112,10 @@
   }
 
   ::selection { background: hsl(var(--primary) / 0.28); color: hsl(var(--foreground)); }
+
+  /* Global link styling to surface accent across the app */
+  a { color: hsl(var(--accent)); text-underline-offset: 3px; }
+  a:hover { color: hsl(var(--foreground)); }
 
   /* Clean, dark scrollbars */
   * { scrollbar-width: thin; scrollbar-color: hsl(var(--bg-3)) transparent; }
