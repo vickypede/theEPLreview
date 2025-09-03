@@ -2,40 +2,91 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Public articles (read‑only)
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Backward-compatible admin check:
+    // - Custom claim 'admin' (your current usage)
+    // - Custom claim 'isAdmin' (newer pattern)
+    // - Allowlist doc at admins/{email}
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.admin == true ||
+        request.auth.token.isAdmin == true ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.token.email))
+      );
+    }
+
+    // -----------------------------
+    // Public articles (read-only)
+    // -----------------------------
     match /articles/{doc} {
       allow read: if true;
       allow write: if false;
     }
 
-    // Admin‑only operational collections
+    // -----------------------------
+    // Admin-only operational collections
+    // -----------------------------
     match /sources/{doc} {
-      allow read, write: if request.auth.token.admin == true;
-    }
-    
-    match /ingestion_runs/{doc} {
-      allow read, write: if request.auth.token.admin == true;
-    }
-    
-    match /mailboxes/{doc} {
-      allow read, write: if request.auth.token.admin == true;
-    }
-    
-    match /config/{doc} {
-      allow read, write: if request.auth.token.admin == true;
+      allow read, write: if isAdmin();
     }
 
-    // Clubs are readable; writes by admin only
+    match /ingestion_runs/{doc} {
+      allow read, write: if isAdmin();
+    }
+
+    match /mailboxes/{doc} {
+      allow read, write: if isAdmin();
+    }
+
+    match /config/{doc} {
+      allow read, write: if isAdmin();
+    }
+
+    // -----------------------------
+    // Clubs: public read, admin write
+    // -----------------------------
     match /clubs/{doc} {
       allow read: if true;
-      allow write: if request.auth.token.admin == true;
+      allow write: if isAdmin();
     }
 
+    // -----------------------------
     // Letters submissions
+    // (keep existing behavior exactly)
+    // -----------------------------
     match /letters_submissions/{doc} {
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow update, delete: if request.auth.token.admin == true;
+      // create: signed-in user creating their own record
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+
+      // read: only the owner can read their own submission
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      // update/delete: admins only
+      allow update, delete: if isAdmin();
+    }
+
+    // -----------------------------
+    // Publications (new): public read, admin write
+    // Safe to add; does not affect existing collections.
+    // -----------------------------
+    match /publications/{id} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Slug reservation docs (created by Functions)
+    match /slugs/{slug} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Admin allowlist (readable by admins; edits via Console/Admin SDK)
+    match /admins/{email} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
   }
 }
