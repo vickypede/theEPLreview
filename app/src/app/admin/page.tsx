@@ -157,7 +157,7 @@ function Editor() {
               <select 
                 className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
                 value={type} 
-                onChange={e => setType(e.target.value as any)}
+                onChange={e => setType(e.target.value as 'final-whistle'|'matchday-radar'|'full-time-verdict'|'pretender-list'|'high-press'|'mailbox')}
               >
                 <option value="final-whistle">Final Whistle - Weekend conclusions</option>
                 <option value="matchday-radar">Matchday Radar - Pre-match analysis</option>
@@ -239,7 +239,7 @@ function Editor() {
               <select 
                 className="border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
                 value={status} 
-                onChange={e => setStatus(e.target.value as any)}
+                onChange={e => setStatus(e.target.value as 'draft'|'review'|'scheduled'|'published'|'archived')}
               >
                 <option value="draft">📝 Draft</option>
                 <option value="review">👀 Review</option>
