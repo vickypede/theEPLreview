@@ -1,7 +1,7 @@
 'use client';
 import AdminGuard from '@/components/AdminGuard';
 import { db, auth } from '@/lib/firebase';
-import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useState } from 'react';
 import { signOut } from 'firebase/auth';
 
@@ -264,11 +264,11 @@ function Editor() {
             {/* Action Buttons */}
             <div className="flex gap-4 pt-6">
               <button 
-                disabled={saving || !title || !content || (status === 'scheduled' && !scheduledAt)} 
+                disabled={saving || !title || !content} 
                 onClick={create} 
                 className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-lg"
               >
-                {saving ? '⏳ Creating...' : `🚀 Create ${status === 'draft' ? 'Draft' : status === 'published' ? 'Publication' : status === 'scheduled' ? 'Scheduled Post' : 'Publication'}`}
+                {saving ? '⏳ Creating...' : status === 'draft' ? '🚀 Create Draft' : '✅ Submit for Review'}
               </button>
             </div>
 
