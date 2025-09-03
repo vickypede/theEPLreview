@@ -7,6 +7,8 @@ import LoginModal from './LoginModal';
 export default function AdminGuard({ children }: { children: ReactNode }) {
   const [state, setState] = useState<'loading'|'noauth'|'noadmin'|'ok'>('loading');
   const [showLogin, setShowLogin] = useState(false);
+  const [debugOpen, setDebugOpen] = useState(false);
+  const [debug, setDebug] = useState<{ synced?: boolean; isAdminClaim?: boolean; claims?: Record<string, unknown> } | null>(null);
 
   useEffect(() => {
     if (!auth) return setState('noauth');
@@ -82,6 +84,7 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
                 await auth?.currentUser?.getIdToken(true);
                 const token = auth?.currentUser ? await getIdTokenResult(auth.currentUser, true) : null;
                 const isAdmin = token?.claims?.isAdmin === true;
+                setDebug({ synced, isAdminClaim: isAdmin, claims: token?.claims as any });
                 setState(isAdmin || synced ? 'ok' : 'noadmin');
               } catch {
                 // ignore
@@ -97,7 +100,30 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
           >
             Sign out
           </button>
+          <button
+            onClick={async () => {
+              try {
+                const token = auth?.currentUser ? await getIdTokenResult(auth.currentUser, true) : null;
+                const isAdmin = token?.claims?.isAdmin === true;
+                setDebug({ ...debug, isAdminClaim: isAdmin, claims: token?.claims as any });
+                setDebugOpen(true);
+              } catch {
+                // ignore
+              }
+            }}
+            className="px-4 py-2 rounded-lg border hover:bg-gray-50"
+          >
+            Show debug
+          </button>
         </div>
+        {debugOpen && (
+          <div className="mx-auto mt-4 max-w-2xl text-left">
+            <div className="rounded-lg border bg-gray-50 p-3 text-left">
+              <div className="text-sm text-gray-700 mb-2">Debug</div>
+              <pre className="whitespace-pre-wrap break-words text-xs text-gray-700">{JSON.stringify(debug, null, 2)}</pre>
+            </div>
+          </div>
+        )}
         <p className="mt-4 text-sm text-gray-500">If this persists, ensure an allowlist doc exists at admins/your-email with isActive: true.</p>
       </div>
     );

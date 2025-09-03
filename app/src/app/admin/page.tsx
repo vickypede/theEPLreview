@@ -1,8 +1,9 @@
 'use client';
 import AdminGuard from '@/components/AdminGuard';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useState } from 'react';
+import { signOut } from 'firebase/auth';
 
 export default function AdminPage() {
   return (
@@ -67,7 +68,19 @@ function Editor() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">New Publication</h1>
+          {/* Header with Logout Button */}
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">New Publication</h1>
+            <button
+              onClick={() => signOut(auth!)}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Sign Out
+            </button>
+          </div>
           
           <div className="space-y-6">
             {/* Title */}
