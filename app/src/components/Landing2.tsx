@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Article, Club } from '@/types';
@@ -29,15 +29,15 @@ export default function Landing2(){
         const newsRef = collection(db, 'articles');
         const newsQ = query(newsRef, orderBy('publishedAt', 'desc'), limit(8));
         const newsSnap = await getDocs(newsQ);
-        const newsList = newsSnap.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as UiArticle[];
+        const newsList = newsSnap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<UiArticle, 'id'>) })) as UiArticle[];
 
         // Choose 6 clubs (top6 if flagged, else first 6 alphabetically)
         const clubsRef = collection(db, 'clubs');
         const clubsSnap = await getDocs(clubsRef);
-        const allClubs = clubsSnap.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Club[];
+        const allClubs = clubsSnap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<Club, 'id'>) })) as Club[];
         const top = allClubs.filter(c => c.isTop6).slice(0, 6);
         const six = (top.length === 6 ? top : allClubs.sort((a,b)=>a.name.localeCompare(b.name)).slice(0,6))
-          .map(c => ({ id: c.id, name: c.name, badgeUrl: (c as any).badgeUrl })) as ClubTile[];
+          .map(c => ({ id: c.id, name: c.name, badgeUrl: c.badgeUrl })) as ClubTile[];
 
         // For each club fetch its latest article
         const tiles: ClubTile[] = [];
@@ -50,8 +50,8 @@ export default function Landing2(){
             limit(1)
           );
           const aSnap = await getDocs(clubQ);
-          const a = aSnap.docs[0]?.data() as UiArticle | undefined;
-          tiles.push({ ...c, latest: a ? { id: aSnap.docs[0].id, ...(a as any) } : null });
+          const a = aSnap.docs[0]?.data() as Omit<UiArticle, 'id'> | undefined;
+          tiles.push({ ...c, latest: a ? ({ id: aSnap.docs[0].id, ...a } as UiArticle) : null });
         }
 
         if (mounted){

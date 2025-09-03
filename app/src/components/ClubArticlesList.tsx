@@ -8,7 +8,6 @@ import type { Article, Club } from '@/types';
 type UiArticle = Article & { sourceName?: string; source?: string };
 
 export default function ClubArticlesList({ slug }: { slug: string }) {
-  const [club, setClub] = useState<Club | null>(null);
   const [articles, setArticles] = useState<UiArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,16 +20,6 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
     async function load() {
       try {
         if (!db) return;
-        // Load club by id (slug)
-        const clubsRef = collection(db, 'clubs');
-        const clubQ = query(clubsRef, where('id', '==', slug));
-        const clubSnap = await getDocs(clubQ);
-        const clubDoc = clubSnap.docs[0];
-        if (clubDoc) {
-          const data = clubDoc.data() as Omit<Club, 'id'>;
-          if (mounted) setClub({ id: slug, ...data });
-        }
-
         // Load ALL articles for this club (no limit for pagination)
         const articlesRef = collection(db, 'articles');
         const articlesQ = query(
