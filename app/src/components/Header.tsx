@@ -30,7 +30,7 @@ export default function Header() {
                 key={item.href}
                 href={item.href}
                 className={
-                  `text-sm font-medium ${active ? 'text-primary' : 'text-muted hover:text-foreground'}`
+                  `text-sm font-medium ${active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`
                 }
               >
                 {item.label}

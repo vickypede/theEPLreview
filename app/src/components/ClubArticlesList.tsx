@@ -77,7 +77,7 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-muted mb-4">Loading…</h2>
+        <h2 className="text-2xl font-semibold text-muted-foreground mb-4">Loading…</h2>
       </div>
     );
   }
@@ -86,13 +86,13 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
     <div>
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-foreground mb-2">{club?.name || slug}</h1>
-        <p className="text-muted">Latest news and updates</p>
+        <p className="text-muted-foreground">Latest news and updates</p>
       </div>
       
       {allArticles.length === 0 ? (
         <div className="text-center py-12">
-          <h2 className="text-2xl font-semibold text-muted mb-4">No articles yet</h2>
-          <p className="text-muted">Articles will appear here once the ingestion system is running.</p>
+          <h2 className="text-2xl font-semibold text-muted-foreground mb-4">No articles yet</h2>
+          <p className="text-muted-foreground">Articles will appear here once the ingestion system is running.</p>
         </div>
       ) : (
         <>
@@ -101,9 +101,9 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
             {articles.map((article) => (
               <article key={article.id} className="bg-card rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-border">
                 <h2 className="text-xl font-semibold text-foreground mb-2 line-clamp-2">{article.title}</h2>
-                <p className="text-muted text-sm mb-4">{article.sourceName || article.source || ''}</p>
+                <p className="text-muted-foreground text-sm mb-4">{article.sourceName || article.source || ''}</p>
                 {article.publishedAt?.toDate && (
-                  <p className="text-muted text-xs mb-4">{new Date(article.publishedAt.toDate()).toLocaleString()}</p>
+                  <p className="text-muted-foreground text-xs mb-4">{new Date(article.publishedAt.toDate()).toLocaleString()}</p>
                 )}
                 <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-foreground text-sm font-medium">Read more →</a>
               </article>
@@ -121,7 +121,7 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
                   disabled={currentPage === 1}
                   className={`px-4 py-2 rounded-lg font-medium ${
                     currentPage === 1
-                      ? 'surface-2 text-muted cursor-not-allowed'
+                      ? 'surface-2 text-muted-foreground cursor-not-allowed'
                       : 'bg-primary text-primary-foreground hover:text-foreground'
                   }`}
                 >
@@ -149,7 +149,7 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
                   disabled={currentPage === totalPages}
                   className={`px-4 py-2 rounded-lg font-medium ${
                     currentPage === totalPages
-                      ? 'surface-2 text-muted cursor-not-allowed'
+                      ? 'surface-2 text-muted-foreground cursor-not-allowed'
                       : 'bg-primary text-primary-foreground hover:text-foreground'
                   }`}
                 >
@@ -158,7 +158,7 @@ export default function ClubArticlesList({ slug }: { slug: string }) {
               </div>
 
               {/* Page Info */}
-              <div className="text-center text-muted mb-8">
+              <div className="text-center text-muted-foreground mb-8">
                 <p>
                   Showing page {currentPage} of {totalPages} •
                   Articles {((currentPage - 1) * articlesPerPage) + 1} - {Math.min(currentPage * articlesPerPage, allArticles.length)} of {allArticles.length}

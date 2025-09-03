@@ -114,7 +114,7 @@ export default function TeamPanel({ slug }: { slug: string }) {
       <section className="mb-8">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-foreground">Loading...</h1>
-          <p className="text-muted">Loading team information...</p>
+          <p className="text-muted-foreground">Loading team information...</p>
         </div>
       </section>
     );
@@ -125,7 +125,7 @@ export default function TeamPanel({ slug }: { slug: string }) {
       <section className="mb-8">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-foreground">Team Not Found</h1>
-          <p className="text-muted">Could not find team information for this club.</p>
+          <p className="text-muted-foreground">Could not find team information for this club.</p>
         </div>
       </section>
     );
@@ -137,7 +137,7 @@ export default function TeamPanel({ slug }: { slug: string }) {
       <section className="mb-8">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-foreground">{team.name}</h1>
-          <p className="text-muted">Team information and statistics</p>
+          <p className="text-muted-foreground">Team information and statistics</p>
         </div>
         <div className="max-w-4xl mx-auto">
           <article className="bg-card rounded-lg shadow-md border overflow-hidden border-border">
@@ -145,11 +145,11 @@ export default function TeamPanel({ slug }: { slug: string }) {
               <h3 className="font-semibold">ScoreAxis Not Configured</h3>
             </div>
             <div className="p-6 text-center">
-              <p className="text-muted mb-4">
+              <p className="text-muted-foreground mb-4">
                 Team stats widget not yet configured for <strong className="text-foreground">{team.name}</strong>. 
                 Please add this team to the <code className="px-2 py-1 rounded surface-2 border border-border">SCOREAXIS_IDS</code> mapping in the code.
               </p>
-              <p className="text-sm text-muted">
+              <p className="text-sm text-muted-foreground">
                 To get the ID: visit <a href="https://www.scoreaxis.com/free-soccer-widgets/team-info-widget/" target="_blank" rel="noreferrer" className="underline text-primary">ScoreAxis Team Info Widget</a>, select {team.name}, and copy the number from the iframe src.
               </p>
             </div>
@@ -166,7 +166,7 @@ export default function TeamPanel({ slug }: { slug: string }) {
     <section className="mb-8">
       <div className="text-center mb-6">
         <h1 className="text-3xl font-bold text-foreground">{team.name}</h1>
-        <p className="text-muted">Team information and statistics</p>
+        <p className="text-muted-foreground">Team information and statistics</p>
       </div>
 
       <div className="max-w-4xl mx-auto">
@@ -187,7 +187,7 @@ export default function TeamPanel({ slug }: { slug: string }) {
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
-          <div className="px-4 pb-3 text-xs text-muted">
+          <div className="px-4 pb-3 text-xs text-muted-foreground">
             Team data by{" "}
             <a
               className="underline text-primary hover:text-foreground"

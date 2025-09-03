@@ -111,7 +111,7 @@ export default function ProfilePage(){
               </svg>
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Welcome to Your Profile</h1>
-            <p className="text-muted">Sign in to customize your Premier League experience</p>
+            <p className="text-muted-foreground">Sign in to customize your Premier League experience</p>
           </div>
           
           <button 
@@ -127,7 +127,7 @@ export default function ProfilePage(){
             Sign in with Google
           </button>
           
-          <p className="text-sm text-muted mt-6">
+          <p className="text-sm text-muted-foreground mt-6">
             We&apos;ll create your profile automatically with smart defaults
           </p>
         </div>
@@ -139,7 +139,7 @@ export default function ProfilePage(){
     <div className="min-h-screen surface flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-border mx-auto mb-4"></div>
-        <p className="text-muted">Loading your profile...</p>
+        <p className="text-muted-foreground">Loading your profile...</p>
       </div>
     </div>
   );
@@ -152,7 +152,7 @@ export default function ProfilePage(){
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-4xl font-bold text-foreground mb-2">Your Profile</h1>
-              <p className="text-muted">Customize your Premier League experience</p>
+              <p className="text-muted-foreground">Customize your Premier League experience</p>
             </div>
             <button 
               onClick={doSignOut} 
@@ -170,7 +170,7 @@ export default function ProfilePage(){
                 <input 
                   value={profile.email || ''} 
                   readOnly 
-                  className="w-full border border-border rounded-2xl p-4 surface-2 text-muted cursor-not-allowed" 
+                  className="w-full border border-border rounded-2xl p-4 surface-2 text-muted-foreground cursor-not-allowed" 
                 />
               </div>
               
@@ -287,7 +287,7 @@ export default function ProfilePage(){
         <div className="bg-card rounded-3xl shadow-lg p-8 mb-8 border border-border">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-foreground mb-2">Quick Actions</h2>
-            <p className="text-muted">Quickly set up your club preferences</p>
+            <p className="text-muted-foreground">Quickly set up your club preferences</p>
           </div>
           
           <div className="flex flex-wrap justify-center gap-4">

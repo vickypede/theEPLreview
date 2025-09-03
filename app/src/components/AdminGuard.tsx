@@ -68,7 +68,7 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
                   </svg>
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">Admin Access Required</h2>
-                <p className="text-muted">Please sign in to access the admin area</p>
+                <p className="text-muted-foreground">Please sign in to access the admin area</p>
               </div>
               <button
                 onClick={() => setShowLogin(true)}
@@ -100,7 +100,7 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-foreground mb-2">Access Denied</h2>
-              <p className="text-muted mb-4">You don&apos;t have admin access to this area</p>
+              <p className="text-muted-foreground mb-4">You don&apos;t have admin access to this area</p>
               <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium surface-2 text-foreground border border-border">
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -160,7 +160,7 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
             )}
             
             <div className="text-center">
-              <p className="text-sm text-muted">
+              <p className="text-sm text-muted-foreground">
                 If this persists, ensure an allowlist doc exists at <code className="surface-2 px-2 py-1 rounded text-xs border border-border">admins/your-email</code> with <code className="surface-2 px-2 py-1 rounded text-xs border border-border">isActive: true</code>.
               </p>
             </div>

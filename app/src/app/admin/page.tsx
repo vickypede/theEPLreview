@@ -140,7 +140,7 @@ function AdminEditor() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-4xl font-bold text-foreground mb-2">Create Publication</h1>
-              <p className="text-muted">Write and publish your Premier League content</p>
+              <p className="text-muted-foreground">Write and publish your Premier League content</p>
             </div>
             <button 
               onClick={() => router.push('/')}
@@ -158,7 +158,7 @@ function AdminEditor() {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full border border-border rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] transition-all duration-200 placeholder:text-muted surface"
+                className="w-full border border-border rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] transition-all duration-200 placeholder:text-muted-foreground surface"
                 placeholder="🔥 Enter your publication title here..."
                 required
               />
@@ -226,7 +226,7 @@ function AdminEditor() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={12}
-                className="w-full border border-border rounded-2xl p-4 font-mono text-sm placeholder:text-muted surface"
+                className="w-full border border-border rounded-2xl p-4 font-mono text-sm placeholder:text-muted-foreground surface"
                 placeholder="📝 Write your content in markdown format here... Start with a compelling introduction..."
                 required
               />
@@ -248,7 +248,7 @@ function AdminEditor() {
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
                 rows={3}
-                className="w-full border border-border rounded-2xl p-4 placeholder:text-muted surface"
+                className="w-full border border-border rounded-2xl p-4 placeholder:text-muted-foreground surface"
                 placeholder="💬 Brief summary of your article (auto-generated if empty)..."
                 required
               />
@@ -262,7 +262,7 @@ function AdminEditor() {
                   type="text"
                   value={seoTitle}
                   onChange={(e) => setSeoTitle(e.target.value)}
-                  className="w-full border border-border rounded-2xl p-4 placeholder:text-muted surface"
+                  className="w-full border border-border rounded-2xl p-4 placeholder:text-muted-foreground surface"
                   placeholder="🔍 SEO optimized title (defaults to main title)"
                 />
               </div>
@@ -273,7 +273,7 @@ function AdminEditor() {
                   value={seoDescription}
                   onChange={(e) => setSeoDescription(e.target.value)}
                   rows={2}
-                  className="w-full border border-border rounded-2xl p-4 placeholder:text-muted surface"
+                  className="w-full border border-border rounded-2xl p-4 placeholder:text-muted-foreground surface"
                   placeholder="🔍 SEO description for search engines (defaults to excerpt)..."
                 />
               </div>

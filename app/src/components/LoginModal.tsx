@@ -149,7 +149,7 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
               </svg>
             </div>
             <h2 className="text-2xl font-bold">Welcome Back</h2>
-            <p className="mt-2 text-muted">Sign in to access your account</p>
+            <p className="mt-2 text-muted-foreground">Sign in to access your account</p>
           </div>
         </div>
 
@@ -203,7 +203,7 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
                   <div className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="surface px-4 text-muted">or continue with email</span>
+                  <span className="surface px-4 text-muted-foreground">or continue with email</span>
                 </div>
               </div>
 
@@ -214,7 +214,7 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
                 className="w-full rounded-xl border border-border surface px-6 py-4 font-semibold text-foreground hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
                 <div className="flex items-center justify-center">
-                  <svg className="h-5 w-5 mr-3 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5 mr-3 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   Use email (magic link)
@@ -272,7 +272,7 @@ export default function LoginModal({ open, onClose, onAuthed, returnUrl }: Login
 
           {/* Footer */}
           <div className="mt-8 text-center">
-            <p className="text-xs text-muted">
+            <p className="text-xs text-muted-foreground">
               By continuing you agree to our{" "}
               <a href="#" className="text-primary hover:underline">Terms</a>
               {" "}and acknowledge our{" "}

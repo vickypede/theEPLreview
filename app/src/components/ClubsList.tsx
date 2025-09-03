@@ -41,7 +41,7 @@ export default function ClubsList() {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-muted mb-4">Loading…</h2>
+        <h2 className="text-2xl font-semibold text-muted-foreground mb-4">Loading…</h2>
       </div>
     );
   }
@@ -49,8 +49,8 @@ export default function ClubsList() {
   if (clubs.length === 0) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-muted mb-4">No clubs found</h2>
-        <p className="text-muted">Seed the clubs collection to view club pages.</p>
+        <h2 className="text-2xl font-semibold text-muted-foreground mb-4">No clubs found</h2>
+        <p className="text-muted-foreground">Seed the clubs collection to view club pages.</p>
       </div>
     );
   }
@@ -66,7 +66,7 @@ export default function ClubsList() {
             )}
           </div>
           {club.names?.length > 0 && (
-            <p className="mt-2 text-xs text-muted truncate">Also known as: {club.names.slice(0, 3).join(', ')}{club.names.length > 3 ? '…' : ''}</p>
+            <p className="mt-2 text-xs text-muted-foreground truncate">Also known as: {club.names.slice(0, 3).join(', ')}{club.names.length > 3 ? '…' : ''}</p>
           )}
         </Link>
       ))}

@@ -1,228 +1,385 @@
-Absolutely. I’ve turned your palette into **HSL tokens** (so `hsl(var(--…))` works everywhere), added soft “matte” shadows, proper focus rings, scrollbars, selection color, and handy component/util classes. It stays pure Tailwind-friendly and dark by default.
+Nice upgrade — you’ve basically done the hard part 🎯
+A few tiny fixes + optional polish will make it rock-solid with Tailwind v4 and your matte theme.
 
-Drop-in replacement for `globals.css`:
+## Quick fixes (do these)
+
+1. **Add the missing tokens to `@theme inline`**
+   You defined `--destructive` but didn’t map it, and Tailwind’s radius utilities (`rounded`, `rounded-lg`, etc.) won’t use your custom radii unless you expose them as theme tokens.
 
 ```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme inline {
+  /* …your existing color tokens… */
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--foreground));
 
-/* ========= THEME TOKENS (HSL triples) ========= */
-:root {
-  color-scheme: dark;
-
-  /* Matte greys from your spec (#1c1c1c → #8c8c8c) */
-  --bg-0: 0 0% 11%;  /* #1c1c1c */
-  --bg-1: 0 0% 18%;  /* #2e2e2e */
-  --bg-2: 0 0% 29%;  /* #4a4a4a */
-  --bg-3: 0 0% 42%;  /* #6b6b6b */
-  --bg-4: 0 0% 55%;  /* #8c8c8c */
-
-  /* Semantic surfaces */
-  --background: var(--bg-0);
-  --background-secondary: var(--bg-1);
-  --background-tertiary: var(--bg-2);
-  --background-quaternary: var(--bg-3);
-  --background-quinary: var(--bg-4);
-
-  /* “white” + “cloud white” text */
-  --foreground: 0 0% 100%;
-  --foreground-secondary: 210 20% 98%;
-  --foreground-muted: 210 15% 92%;
-
-  /* Components */
-  --card: var(--bg-1);
-  --card-foreground: var(--foreground);
-
-  --border: 0 0% 28%;   /* pairs with bg-2 */
-  --input: var(--border);
-  --ring: 0 0% 65%;     /* light-grey focus ring */
-
-  --primary: var(--bg-4);
-  --primary-foreground: var(--foreground);
-  --secondary: var(--bg-3);
-  --secondary-foreground: var(--foreground);
-  --muted: var(--bg-2);
-  --muted-foreground: var(--foreground-muted);
-  --accent: var(--bg-2);
-  --accent-foreground: var(--foreground);
-
-  /* Subtle status greys (kept neutral) */
-  --success: 140 3% 46%;
-  --warning: 45 3% 60%;
-  --info: 210 3% 52%;
-  --destructive: 0 0% 26%;
-
-  /* Radii + shadows for a soft matte feel */
-  --radius: 16px;
-  --radius-md: 12px;
-  --radius-sm: 10px;
-  --shadow-1: 0 1px 0 0 hsl(var(--border) / 0.6), 0 1px 2px 0 hsl(0 0% 0% / 0.25);
-  --shadow-2: 0 2px 0 0 hsl(var(--border) / 0.6), 0 6px 12px -2px hsl(0 0% 0% / 0.35);
-
-  --transition-theme: 220ms ease;
+  /* Radius tokens so `rounded`, `rounded-lg/md/sm` use your values */
+  --radius: var(--radius);        /* maps to `rounded` */
+  --radius-lg: var(--radius);     /* maps to `rounded-lg` */
+  --radius-md: var(--radius-md);  /* maps to `rounded-md` */
+  --radius-sm: var(--radius-sm);  /* maps to `rounded-sm` */
 }
+```
 
-/* Optional class-based dark toggle support */
-.dark { color-scheme: dark; }
+2. **Fix the tiny SVG alpha in `.bg-noise`**
+   `rgb(255,255,255,0.02)` isn’t valid for SVG. Use `rgba` or the modern `rgb /` syntax.
 
-/* ========= BASE ========= */
-@layer base {
-  * { @apply border-border; }
-  html{ -webkit-text-size-adjust:100%; }
-  html, body { height: 100%; }
+```diff
+- url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='6'><rect width='1' height='1' fill='rgb(255,255,255,0.02)'/></svg>");
++ url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='6'><rect width='1' height='1' fill='rgba(255,255,255,0.02)'/></svg>");
+```
 
-  body{
-    @apply text-foreground;
-    background:
-      radial-gradient(1200px 800px at 10% -20%, hsl(var(--background) / 0.0) 0%, hsl(var(--background-secondary) / 0.35) 100%),
-      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background-secondary)) 100%);
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    transition: background-color var(--transition-theme),
-                color var(--transition-theme),
-                border-color var(--transition-theme);
-  }
+3. **Avoid redefining `text-muted`**
+   Right now you have a custom `.text-muted` **and** a Tailwind color `text-muted` (from `--color-muted`). That’s confusing. Use the semantically clear pair:
 
-  ::selection { background: hsl(var(--primary) / 0.28); color: hsl(var(--foreground)); }
+* `bg-muted` for surfaces
+* `text-muted-foreground` for text on muted surfaces
 
-  /* Clean, dark scrollbars */
-  * { scrollbar-width: thin; scrollbar-color: hsl(var(--bg-3)) transparent; }
-  *::-webkit-scrollbar { width: 10px; height: 10px; }
-  *::-webkit-scrollbar-thumb { background: hsl(var(--bg-3)); border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
-  *::-webkit-scrollbar-track { background: transparent; }
+So, remove or rename your custom `.text-muted` utility and change usages like:
 
-  h1,h2,h3,h4 { letter-spacing: -0.01em; }
-  code,kbd,pre { background: hsl(var(--muted) / 0.35); border-radius: 8px; padding: .125rem .375rem; }
+```diff
+- <p className="text-muted text-sm">
++ <p className="text-muted-foreground text-sm">
+```
 
-  /* Accessible focus */
-  :focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; border-radius: 8px; }
+4. **Line clamp without a plugin (fallback)**
+   If you’re not using the line-clamp plugin in v4, add a tiny utility so `line-clamp-2` works:
 
-  /* Motion safety */
-  @media (prefers-reduced-motion: reduce) {
-    * { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
-    html { scroll-behavior: auto; }
-  }
-}
-
-/* ========= COMPONENT PRESETS (handy with Tailwind) ========= */
-@layer components {
-  .surface   { background: hsl(var(--background)); }
-  .surface-2 { background: hsl(var(--background-secondary)); }
-  .surface-3 { background: hsl(var(--background-tertiary)); }
-
-  .card {
-    background: hsl(var(--card));
-    color: hsl(var(--card-foreground));
-    border: 1px solid hsl(var(--border));
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-1);
-  }
-  .card-hover:hover { box-shadow: var(--shadow-2); }
-
-  .btn {
-    display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
-    padding:.55rem .9rem; border-radius: var(--radius-md);
-    border:1px solid hsl(var(--border));
-    background:hsl(var(--secondary)); color:hsl(var(--secondary-foreground));
-    transition: background-color var(--transition-theme), border-color var(--transition-theme),
-                color var(--transition-theme), transform 120ms ease;
-  }
-  .btn:hover { background:hsl(var(--bg-2)); }
-  .btn:active { transform: translateY(1px); }
-  .btn-primary { background:hsl(var(--primary)); color:hsl(var(--primary-foreground)); }
-  .btn-ghost { background:transparent; border-color:hsl(var(--border) / 0.6); }
-
-  .input,.select,.textarea{
-    width:100%; border-radius: var(--radius-sm);
-    background:hsl(var(--input) / 0.25); color:hsl(var(--foreground));
-    border:1px solid hsl(var(--border));
-    padding:.6rem .75rem;
-  }
-  .input::placeholder,.textarea::placeholder{ color:hsl(var(--foreground-muted)); }
-
-  .badge{
-    display:inline-flex; align-items:center; gap:.375rem; height:1.6rem;
-    padding:0 .6rem; border-radius:999px;
-    background:hsl(var(--muted)); color:hsl(var(--muted-foreground));
-    border:1px solid hsl(var(--border));
-  }
-
-  /* Optional matte grain: add .bg-noise to a section */
-  .bg-noise{
-    background-image:
-      radial-gradient(1000px 600px at 20% -20%, hsl(0 0% 100% / 0.02), transparent 60%),
-      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='6'><rect width='1' height='1' fill='rgb(255,255,255,0.02)'/></svg>");
-    background-blend-mode: overlay, normal;
-  }
-}
-
-/* ========= UTILITIES ========= */
+```css
 @layer utilities {
-  .layer-1 { background: hsl(var(--background)); }
-  .layer-2 { background: hsl(var(--background-secondary)); }
-  .layer-3 { background: hsl(var(--background-tertiary)); }
-  .layer-4 { background: hsl(var(--background-quaternary)); }
-  .layer-5 { background: hsl(var(--background-quinary)); }
-
-  .text-primary   { color: hsl(var(--foreground)); }
-  .text-secondary { color: hsl(var(--foreground-secondary)); }
-  .text-muted     { color: hsl(var(--foreground-muted)); }
-
-  .border-primary   { border-color: hsl(var(--border)); }
-  .border-secondary { border-color: hsl(var(--background-quaternary)); }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }
 ```
 
-### (Optional) Tailwind mapping
+## Optional polish (nice to have)
 
-If you haven’t already, map the CSS variables so Tailwind classes like `bg-background`/`text-foreground` work:
+* **Reusable card preset:** You already have a `.card`. Use it to simplify repeated `bg-card … border` stacks:
 
-```ts
-// tailwind.config.ts
-export default {
-  darkMode: ["class"],
-  content: ["./app/**/*.{ts,tsx}","./components/**/*.{ts,tsx}"],
-  theme: {
-    extend: {
-      colors: {
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        card: "hsl(var(--card))",
-        "card-foreground": "hsl(var(--card-foreground))",
-        primary: "hsl(var(--primary))",
-        "primary-foreground": "hsl(var(--primary-foreground))",
-        secondary: "hsl(var(--secondary))",
-        "secondary-foreground": "hsl(var(--secondary-foreground))",
-        muted: "hsl(var(--muted))",
-        "muted-foreground": "hsl(var(--muted-foreground))",
-        accent: "hsl(var(--accent))",
-        "accent-foreground": "hsl(var(--accent-foreground))",
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "var(--radius-md)",
-        sm: "var(--radius-sm)",
-      },
-      boxShadow: {
-        card: "var(--shadow-1)",
-        "card-lg": "var(--shadow-2)",
-      },
-    },
-  },
-  plugins: [],
-};
+  ```diff
+  - <article className="bg-card rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-border">
+  + <article className="card p-6 card-hover transition-shadow">
+  ```
+* **Link affordance:** Add a universal link style for better a11y and a matte vibe.
+
+  ```css
+  @layer utilities {
+    .link {
+      text-underline-offset: 3px;
+      text-decoration-thickness: 0.08em;
+      text-decoration-color: hsl(var(--border) / 0.7);
+    }
+    .link:hover, .link:focus-visible {
+      text-decoration-color: hsl(var(--foreground));
+    }
+  }
+  ```
+
+  Then:
+
+  ```diff
+  - className="text-primary hover:text-foreground text-sm font-medium"
+  + className="text-primary hover:text-foreground text-sm font-medium link"
+  ```
+* **Typography for long reads:** If you don’t want the `@tailwindcss/typography` plugin, a minimal prose preset keeps editorials tidy:
+
+  ```css
+  @layer components {
+    .prose-dark {
+      color: hsl(var(--foreground));
+    }
+    .prose-dark p { color: hsl(var(--foreground-secondary)); }
+    .prose-dark h1,.prose-dark h2,.prose-dark h3 { color: hsl(var(--foreground)); }
+    .prose-dark a { color: hsl(var(--primary)); text-decoration: underline; text-underline-offset: 3px; }
+    .prose-dark blockquote { color: hsl(var(--foreground-secondary)); border-left-color: hsl(var(--border)); }
+    .prose-dark code { background: hsl(var(--muted)/.35); }
+  }
+  ```
+* **Dark mode toggle (if you want user control):** You already support `.dark`. If you later add `next-themes`, this will work out of the box.
+
+## Your component changes look good
+
+* Swapping `bg-gray-*`/`text-gray-*` → semantic tokens (`surface`, `bg-card`, `text-foreground`, `text-primary`, `border-border`) is exactly right.
+* The matte layers `surface / surface-2 / surface-3` are consistent and read well.
+* Consider using `text-muted-foreground` (see fix #3) wherever you used `text-muted` for copy text.
+
+If you want, I can refactor the Landing cards to the `.card` preset and update the muted text classes in one go.
+
+
+Here’s a drop-in refactor of your `Landing` component using the `.card` preset and `text-muted-foreground` everywhere (plus `link` on links). I left the dashed placeholders as-is.
+
+```tsx
+"use client";
+
+import { useEffect, useState } from 'react';
+import { collection, getDocs, orderBy, limit, query } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Article } from '@/types';
+import Link from 'next/link';
+
+type UiArticle = Article & { sourceName?: string; source?: string };
+
+export default function Landing() {
+  const [articles, setArticles] = useState<UiArticle[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      try {
+        if (!db) return;
+        const articlesRef = collection(db, 'articles');
+        const q = query(articlesRef, orderBy('publishedAt', 'desc'), limit(6));
+        const snapshot = await getDocs(q);
+        const list = snapshot.docs.map((d) => {
+          const data = d.data() as Omit<Article, 'id'> & { sourceName?: string; source?: string };
+          return { id: d.id, ...data } as UiArticle;
+        });
+        if (mounted) setArticles(list);
+      } catch {
+        // ignore
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    load();
+    return () => { mounted = false; };
+  }, []);
+
+  if (!db) return null;
+
+  return (
+    <div className="min-h-screen surface">
+
+      {/* News Section */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-foreground">Latest News</h2>
+            <Link
+              href="/news"
+              className="text-primary hover:text-foreground font-semibold text-lg link"
+            >
+              View All News →
+            </Link>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-12">
+              <h3 className="text-2xl font-semibold text-muted-foreground mb-4">Loading latest news…</h3>
+            </div>
+          ) : articles.length === 0 ? (
+            <div className="text-center py-12">
+              <h3 className="text-2xl font-semibold text-muted-foreground mb-4">No articles yet</h3>
+              <p className="text-muted-foreground">Articles will appear here once the ingestion system is running.</p>
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {articles.slice(0, 6).map((article) => (
+                <article key={article.id} className="card p-6 card-hover transition-shadow">
+                  <h3 className="text-xl font-semibold text-foreground mb-2 line-clamp-2">{article.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-4">{article.sourceName || article.source || ''}</p>
+                  {article.publishedAt?.toDate && (
+                    <p className="text-muted-foreground text-xs mb-4">
+                      {new Date(article.publishedAt.toDate()).toLocaleString()}
+                    </p>
+                  )}
+                  <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:text-foreground text-sm font-medium link"
+                  >
+                    Read more →
+                  </a>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Editorials & Analysis Section - 6 tiles showing all publication types */}
+      <section className="py-16 surface-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-foreground">Editorials & Analysis</h2>
+            <Link
+              href="/editorials"
+              className="text-primary hover:text-foreground font-semibold text-lg link"
+            >
+              View All Editorials →
+            </Link>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              { type: "Final Whistle", title: "Victors & Vanquished", desc: "Weekend conclusions and key takeaways" },
+              { type: "Matchday Radar", title: "Pre-Match Analysis", desc: "Storylines and tactics ahead of fixtures" },
+              { type: "Full-Time Verdict", title: "Post-Match Review", desc: "Big-match analysis ~2 hours after FT" },
+              { type: "Pretender List", title: "Fraud Watch", desc: "Call-outs of overrated players/managers" },
+              { type: "High Press", title: "House Opinion", desc: "Punchy takes and editorial voice" },
+              { type: "Weekend Roundup", title: "Complete Coverage", desc: "All the weekend's biggest stories" }
+            ].map((publication, i) => (
+              <div key={i} className="card p-6 card-hover transition-shadow">
+                <div className="badge mb-3">{publication.type}</div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{publication.title}</h3>
+                <p className="text-muted-foreground text-sm mb-4">{publication.desc}</p>
+                <div className="surface-3 rounded-lg p-3 mb-4 border border-border">
+                  <p className="text-muted-foreground text-xs">Content will appear here once publications are created</p>
+                </div>
+                <button className="text-primary hover:text-foreground text-sm font-medium link">
+                  Coming Soon →
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Mailbox Section - 3 tiles */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-foreground">Mailbox</h2>
+            <Link
+              href="/mailbox"
+              className="text-primary hover:text-foreground font-semibold text-lg link"
+            >
+              View All Letters →
+            </Link>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              { title: "Fan Question", desc: "Reader asks about tactical changes" },
+              { title: "Transfer Talk", desc: "Fan perspective on latest rumors" },
+              { title: "Match Reaction", desc: "Supporter thoughts on weekend games" }
+            ].map((item, i) => (
+              <div key={i} className="card p-6 card-hover transition-shadow">
+                <div className="text-center">
+                  <div className="surface-2 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center border border-border">
+                    <span className="text-2xl">✉️</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{item.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-4">{item.desc}</p>
+                  <div className="surface-3 rounded-lg p-3 mb-4 border border-border">
+                    <p className="text-muted-foreground text-xs">Fan letter content will appear here</p>
+                  </div>
+                  <button className="text-primary hover:text-foreground text-sm font-medium link">
+                    Coming Soon →
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Match Reports Section - 3 tiles */}
+      <section className="py-16 surface-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-foreground">Match Reports</h2>
+            <Link
+              href="/match-reports"
+              className="text-primary hover:text-foreground font-semibold text-lg link"
+            >
+              View All Reports →
+            </Link>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              { title: "Arsenal vs Chelsea", desc: "Tactical breakdown of key moments" },
+              { title: "Manchester Derby", desc: "Analysis of United vs City clash" },
+              { title: "Liverpool vs Tottenham", desc: "Post-match insights and stats" }
+            ].map((report, i) => (
+              <div key={i} className="surface-3 rounded-lg p-6 border-2 border-dashed border-border">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{report.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-4">{report.desc}</p>
+                  <div className="surface-2 rounded-lg p-4 mb-4 border border-border">
+                    <p className="text-muted-foreground text-xs">Match Report Content Placeholder</p>
+                  </div>
+                  <button className="text-primary hover:text-foreground text-sm font-medium link">
+                    Coming Soon →
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Big Match Review Section - 3 tiles */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-foreground">Big Match Review</h2>
+            <Link
+              href="/big-match-review"
+              className="text-primary hover:text-foreground font-semibold text-lg link"
+            >
+              View All Reviews →
+            </Link>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              { title: "Title Race Analysis", desc: "Impact on Premier League standings" },
+              { title: "Champions League Race", desc: "Top 4 battle implications" },
+              { title: "Relegation Battle", desc: "Bottom of table drama" }
+            ].map((review, i) => (
+              <div key={i} className="card p-6 card-hover transition-shadow">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{review.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-4">{review.desc}</p>
+                  <div className="surface-2 rounded-lg p-4 mb-4 border border-border">
+                    <p className="text-muted-foreground text-xs">Big Match Review Content Placeholder</p>
+                  </div>
+                  <button className="text-primary hover:text-foreground text-sm font-medium link">
+                    Coming Soon →
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Site Products Section - 4 tiles */}
+      <section className="py-16 surface-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-foreground text-center mb-12">Site Products</h2>
+
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              { title: "Fantasy League", desc: "Premier League fantasy football", icon: "🏆" },
+              { title: "Transfer Tracker", desc: "Live transfer updates and rumors", icon: "🔄" },
+              { title: "Stats Hub", desc: "Comprehensive player and team statistics", icon: "📊" },
+              { title: "Live Scores", desc: "Real-time match updates and scores", icon: "⚽" }
+            ].map((product, i) => (
+              <div key={i} className="text-center">
+                <div className="surface-2 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center border border-border">
+                  <span className="text-2xl">{product.icon}</span>
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{product.title}</h3>
+                <p className="text-muted-foreground text-sm mb-4">{product.desc}</p>
+                <button className="text-primary hover:text-foreground text-sm font-medium link">
+                  Coming Soon →
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
 ```
 
-### Why this is better (quick hits)
-
-* Your previous `hsl(var(--border))` used **hexes** — switching to **HSL triples** fixes that and enables alpha (`/ 0.35`) everywhere.
-* Adds **accessible focus**, **reduced-motion** support, and **dark scrollbars**.
-* Ready-made **`.card`**, **`.btn*`**, **`.badge`**, and **layer** utilities keep things consistent.
-* Subtle **radial + linear gradient** background (and optional `.bg-noise`) = modern matte without glare.
-
-If you want, tell me your preferred **brand accent** (e.g., a soft teal for links/CTAs), and I’ll wire a tasteful color into `--accent` to lift key actions while keeping that matte vibe.
+> Note: since we switched to `text-muted-foreground`, make sure you’ve removed/renamed any custom `.text-muted` utility in your CSS to avoid ambiguity. If you haven’t added the `line-clamp-2` utility or plugin yet, include that tiny CSS utility we discussed so the titles clamp correctly.

@@ -7,7 +7,7 @@ export default function Stats() {
       <section className="surface-2 text-foreground py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl font-bold mb-4">Premier League Hub</h1>
-          <p className="text-xl text-muted">Live table and top scorers & assists</p>
+          <p className="text-xl text-muted-foreground">Live table and top scorers & assists</p>
         </div>
       </section>
 
@@ -31,7 +31,7 @@ export default function Stats() {
                 />
               </div>
               <footer className="px-6 py-3 surface-2 border-t border-border text-center">
-                <small className="text-muted">
+                <small className="text-muted-foreground">
                   Data by <a href="https://www.scoreaxis.com/" target="_blank" rel="noopener" className="text-primary hover:text-foreground">ScoreAxis</a>
                 </small>
               </footer>
@@ -52,7 +52,7 @@ export default function Stats() {
                 />
               </div>
               <footer className="px-6 py-3 surface-2 border-t border-border text-center">
-                <small className="text-muted">
+                <small className="text-muted-foreground">
                   Data by <a href="https://www.scoreaxis.com/" target="_blank" rel="noopener" className="text-primary hover:text-foreground">ScoreAxis</a>
                 </small>
               </footer>

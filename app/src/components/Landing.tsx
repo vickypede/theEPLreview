@@ -55,21 +55,21 @@ export default function Landing() {
           
           {loading ? (
             <div className="text-center py-12">
-              <h3 className="text-2xl font-semibold text-muted mb-4">Loading latest news…</h3>
+              <h3 className="text-2xl font-semibold text-muted-foreground mb-4">Loading latest news…</h3>
             </div>
           ) : articles.length === 0 ? (
             <div className="text-center py-12">
-              <h3 className="text-2xl font-semibold text-muted mb-4">No articles yet</h3>
-              <p className="text-muted">Articles will appear here once the ingestion system is running.</p>
+              <h3 className="text-2xl font-semibold text-muted-foreground mb-4">No articles yet</h3>
+              <p className="text-muted-foreground">Articles will appear here once the ingestion system is running.</p>
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {articles.slice(0, 6).map((article) => (
                 <article key={article.id} className="bg-card rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-border">
                   <h3 className="text-xl font-semibold text-foreground mb-2 line-clamp-2">{article.title}</h3>
-                  <p className="text-muted text-sm mb-4">{article.sourceName || article.source || ''}</p>
+                  <p className="text-muted-foreground text-sm mb-4">{article.sourceName || article.source || ''}</p>
                   {article.publishedAt?.toDate && (
-                    <p className="text-muted text-xs mb-4">{new Date(article.publishedAt.toDate()).toLocaleString()}</p>
+                    <p className="text-muted-foreground text-xs mb-4">{new Date(article.publishedAt.toDate()).toLocaleString()}</p>
                   )}
                   <a 
                     href={article.url} 
@@ -138,9 +138,9 @@ export default function Landing() {
                   {publication.type}
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">{publication.title}</h3>
-                <p className="text-muted text-sm mb-4">{publication.desc}</p>
+                <p className="text-muted-foreground text-sm mb-4">{publication.desc}</p>
                 <div className="surface-3 rounded-lg p-3 mb-4 border border-border">
-                  <p className="text-muted text-xs">Content will appear here once publications are created</p>
+                  <p className="text-muted-foreground text-xs">Content will appear here once publications are created</p>
                 </div>
                 <button className="text-primary hover:text-foreground text-sm font-medium">
                   Coming Soon →
@@ -177,9 +177,9 @@ export default function Landing() {
                     <span className="text-2xl">✉️</span>
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">{item.title}</h3>
-                  <p className="text-muted text-sm mb-4">{item.desc}</p>
+                  <p className="text-muted-foreground text-sm mb-4">{item.desc}</p>
                   <div className="surface-3 rounded-lg p-3 mb-4 border border-border">
-                    <p className="text-muted text-xs">Fan letter content will appear here</p>
+                    <p className="text-muted-foreground text-xs">Fan letter content will appear here</p>
                   </div>
                   <button className="text-primary hover:text-foreground text-sm font-medium">
                     Coming Soon →
@@ -214,9 +214,9 @@ export default function Landing() {
               <div key={i} className="surface-3 rounded-lg p-6 border-2 border-dashed border-border">
                 <div className="text-center">
                   <h3 className="text-lg font-semibold text-foreground mb-2">{report.title}</h3>
-                  <p className="text-muted text-sm mb-4">{report.desc}</p>
+                  <p className="text-muted-foreground text-sm mb-4">{report.desc}</p>
                   <div className="surface-2 rounded-lg p-4 mb-4 border border-border">
-                    <p className="text-muted text-xs">Match Report Content Placeholder</p>
+                    <p className="text-muted-foreground text-xs">Match Report Content Placeholder</p>
                   </div>
                   <button className="text-primary hover:text-foreground text-sm font-medium">
                     Coming Soon →
@@ -251,9 +251,9 @@ export default function Landing() {
               <div key={i} className="bg-card rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                 <div className="text-center">
                   <h3 className="text-lg font-semibold text-foreground mb-2">{review.title}</h3>
-                  <p className="text-muted text-sm mb-4">{review.desc}</p>
+                  <p className="text-muted-foreground text-sm mb-4">{review.desc}</p>
                   <div className="surface-2 rounded-lg p-4 mb-4 border border-border">
-                    <p className="text-muted text-xs">Big Match Review Content Placeholder</p>
+                    <p className="text-muted-foreground text-xs">Big Match Review Content Placeholder</p>
                   </div>
                   <button className="text-primary hover:text-foreground text-sm font-medium">
                     Coming Soon →
@@ -283,7 +283,7 @@ export default function Landing() {
                   <span className="text-2xl">{product.icon}</span>
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">{product.title}</h3>
-                <p className="text-muted text-sm mb-4">{product.desc}</p>
+                <p className="text-muted-foreground text-sm mb-4">{product.desc}</p>
                 <button className="text-primary hover:text-foreground text-sm font-medium">
                   Coming Soon →
                 </button>
