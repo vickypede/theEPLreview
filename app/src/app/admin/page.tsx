@@ -134,7 +134,7 @@ function AdminEditor() {
   const isFormValid = title.trim() && content.trim() && excerpt.trim();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-3xl shadow-lg p-8 mb-8">
           <div className="flex items-center justify-between mb-8">
@@ -158,8 +158,8 @@ function AdminEditor() {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-lg"
-                placeholder="Enter your publication title..."
+                className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-lg placeholder:text-gray-500 placeholder:font-medium"
+                placeholder="🔥 Enter your publication title here..."
                 required
               />
             </div>
@@ -171,7 +171,7 @@ function AdminEditor() {
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value as 'final-whistle' | 'matchday-radar' | 'big-match-review' | 'match-report' | 'editorial' | 'analysis')}
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-white"
                 >
                   <option value="editorial">Editorial</option>
                   <option value="analysis">Analysis</option>
@@ -187,7 +187,7 @@ function AdminEditor() {
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as 'draft' | 'review')}
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-white"
                 >
                   <option value="draft">Draft</option>
                   <option value="review">Review</option>
@@ -226,8 +226,8 @@ function AdminEditor() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={12}
-                className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 font-mono text-sm"
-                placeholder="Write your publication content here... (Markdown supported)"
+                className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 font-mono text-sm placeholder:text-gray-500 placeholder:font-medium"
+                placeholder="📝 Write your content in markdown format here... Start with a compelling introduction..."
                 required
               />
             </div>
@@ -248,8 +248,8 @@ function AdminEditor() {
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
                 rows={3}
-                className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
-                placeholder="Brief summary of your publication..."
+                className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 placeholder:text-gray-500 placeholder:font-medium"
+                placeholder="💬 Brief summary of your article (auto-generated if empty)..."
                 required
               />
             </div>
@@ -262,8 +262,8 @@ function AdminEditor() {
                   type="text"
                   value={seoTitle}
                   onChange={(e) => setSeoTitle(e.target.value)}
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
-                  placeholder="SEO-optimized title (optional)"
+                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 placeholder:text-gray-500 placeholder:font-medium"
+                  placeholder="🔍 SEO optimized title (defaults to main title)"
                 />
               </div>
 
@@ -273,8 +273,8 @@ function AdminEditor() {
                   value={seoDescription}
                   onChange={(e) => setSeoDescription(e.target.value)}
                   rows={2}
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
-                  placeholder="SEO description (optional)"
+                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 placeholder:text-gray-500 placeholder:font-medium"
+                  placeholder="🔍 SEO description for search engines (defaults to excerpt)..."
                 />
               </div>
             </div>
