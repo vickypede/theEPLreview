@@ -134,7 +134,7 @@ export default function ProfilePage(){
           </button>
           
           <p className="text-sm text-gray-500 mt-6">
-            We'll create your profile automatically with smart defaults
+            We&apos;ll create your profile automatically with smart defaults
           </p>
         </div>
       </div>
