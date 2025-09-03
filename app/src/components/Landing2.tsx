@@ -111,7 +111,7 @@ export default function Landing2(){
             </div>
             <ul>
               {latestForList.map((a, i) => (
-                <li key={a?.id ?? i} className="px-4 py-4 mx-4 border-b border-border last:border-0">
+                <li key={a?.id ?? i} className="px-4 py-4 last:border-0" style={{ borderBottom: '1px solid hsl(var(--border))', marginLeft: '16px', marginRight: '16px' }}>
                   {a ? (
                     <Link href={a.url} target="_blank" rel="noopener noreferrer" className="block">
                       <div className="text-xs text-muted-foreground mb-1">{/* timestamp */}
