@@ -34,7 +34,7 @@ export const fns: Functions | undefined = appInstance ? getFunctions(appInstance
 
 export async function ensureAdminClaim() {
   if (!fns) return false;
-  const call = httpsCallable<{},{ isAdmin: boolean }>(fns, 'syncAdminClaim');
+  const call = httpsCallable<Record<string, never>,{ isAdmin: boolean }>(fns, 'syncAdminClaim');
   try { 
     return (await call({})).data.isAdmin; 
   } catch { 

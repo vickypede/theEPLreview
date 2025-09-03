@@ -1,7 +1,7 @@
 'use client';
 import AdminGuard from '@/components/AdminGuard';
 import { db } from '@/lib/firebase';
-import { addDoc, collection, doc, serverTimestamp, Timestamp, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useState } from 'react';
 
 export default function AdminPage() {
@@ -23,6 +23,11 @@ function Editor() {
   const [saving, setSaving] = useState(false);
 
   async function create() {
+    if (!db) {
+      alert('Database not available');
+      return;
+    }
+    
     setSaving(true);
     const docRef = await addDoc(collection(db, 'publications'), {
       title,
@@ -38,24 +43,25 @@ function Editor() {
     alert(`Created: ${docRef.id}`);
   }
 
-  async function publishNow(id: string) {
-    setSaving(true);
-    await updateDoc(doc(db, 'publications', id), {
-      status: 'published',
-      publishedAt: serverTimestamp()
-    });
-    setSaving(false);
-  }
+  // These functions are for future use when we add publication management
+  // async function publishNow(id: string) {
+  //   setSaving(true);
+  //   await updateDoc(doc(db, 'publications', id), {
+  //     status: 'published',
+  //     publishedAt: serverTimestamp()
+  //   });
+  //   setSaving(false);
+  // }
 
-  async function schedule(id: string) {
-    if (!scheduledAt) return alert('Pick a date/time');
-    setSaving(true);
-    await updateDoc(doc(db, 'publications', id), {
-      status: 'scheduled',
-      scheduledAt: Timestamp.fromDate(new Date(scheduledAt))
-    });
-    setSaving(false);
-  }
+  // async function schedule(id: string) {
+  //   if (!scheduledAt) return alert('Pick a date/time');
+  //   setSaving(true);
+  //   await updateDoc(doc(db, 'publications', id), {
+  //     status: 'scheduled',
+  //     scheduledAt: Timestamp.fromDate(new Date(scheduledAt))
+  //   });
+  //   setSaving(false);
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

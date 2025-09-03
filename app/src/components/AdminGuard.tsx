@@ -25,6 +25,6 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
 
   if (state === 'loading') return <div className="p-6">Loading…</div>;
   if (state === 'noauth') return <div className="p-6">Please sign in to continue.</div>;
-  if (state === 'noadmin') return <div className="p-6">You don't have admin access.</div>;
+  if (state === 'noadmin') return <div className="p-6">You don&apos;t have admin access.</div>;
   return <>{children}</>;
 }
