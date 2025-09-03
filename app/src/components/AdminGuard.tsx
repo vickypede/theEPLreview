@@ -100,7 +100,7 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">You don't have admin access to this area</p>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">You don&apos;t have admin access to this area</p>
               <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
