@@ -87,7 +87,6 @@ export default function ProfilePage(){
     const prefRef = doc(db!, 'user_profiles', user.uid);
     await updateDoc(prefRef, {
       displayName: profile.displayName || '',
-      favoriteClub: profile.favoriteClub || null,
       followedClubs: profile.followedClubs || [],
       includeGeneral: !!profile.includeGeneral,
       updatedAt: new Date(),
@@ -102,7 +101,6 @@ export default function ProfilePage(){
       ...profile,
       includeGeneral: true,
       followedClubs: top6Slugs,
-      favoriteClub: top6Slugs[0] || null,
     });
   };
 
@@ -193,15 +191,30 @@ export default function ProfilePage(){
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Favourite Club</label>
-                <select
-                  value={profile.favoriteClub || ''}
-                  onChange={e => setProfile({ ...profile, favoriteClub: e.target.value || null })}
-                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
-                >
-                  <option value="">Select your favourite club</option>
-                  {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Followed Clubs</label>
+                <div className="border-2 border-gray-200 rounded-2xl p-4 max-h-48 overflow-y-auto">
+                  <div className="space-y-2">
+                    {clubs.map(c => {
+                      const checked = (profile.followedClubs || []).includes(c.id);
+                      return (
+                        <label key={c.id} className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleFollow(c.id)}
+                            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <span className="text-sm font-medium text-gray-900">{c.name}</span>
+                          {c.isTop6 && (
+                            <span className="inline-block text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full font-medium ml-auto">
+                              Top 6
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
               
               <label className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-2xl hover:border-blue-300 transition-all duration-200 cursor-pointer">
@@ -211,78 +224,44 @@ export default function ProfilePage(){
                   onChange={e => setProfile({ ...profile, includeGeneral: e.target.checked })}
                   className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <span className="text-sm font-medium text-gray-700">Include General League News</span>
+                <span className="text-sm font-medium text-gray-700">Follow breaking news and general league updates</span>
               </label>
             </div>
           </div>
         </div>
 
-        {/* Followed Clubs */}
+        {/* Quick Actions */}
         <div className="bg-white rounded-3xl shadow-lg p-8 mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Followed Clubs</h2>
-              <p className="text-gray-600">Choose which clubs you want to follow for personalized news</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button 
-                className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl font-medium transition-all duration-200"
-                onClick={() => setFollowed(allSlugs)}
-              >
-                Select All
-              </button>
-              <button 
-                className="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-xl font-medium transition-all duration-200"
-                onClick={() => setFollowed(top6Slugs)}
-              >
-                Top 6
-              </button>
-              <button 
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-200"
-                onClick={() => setFollowed([])}
-              >
-                Clear
-              </button>
-              <button 
-                className="px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-xl font-medium transition-all duration-200"
-                onClick={resetDefaults}
-              >
-                Reset Defaults
-              </button>
-            </div>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Quick Actions</h2>
+            <p className="text-gray-600">Quickly set up your club preferences</p>
           </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {clubs.map(c => {
-              const checked = (profile.followedClubs || []).includes(c.id);
-              return (
-                <label 
-                  key={c.id} 
-                  className={`border-2 rounded-2xl p-4 cursor-pointer transition-all duration-200 hover:shadow-md ${
-                    checked 
-                      ? 'border-blue-500 bg-blue-50 shadow-lg' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleFollow(c.id)}
-                      className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <span className="block text-sm font-medium text-gray-900 truncate">{c.name}</span>
-                      {c.isTop6 && (
-                        <span className="inline-block text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full font-medium mt-1">
-                          Top 6
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </label>
-              );
-            })}
+          
+          <div className="flex flex-wrap justify-center gap-4">
+            <button 
+              className="px-6 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl font-medium transition-all duration-200"
+              onClick={() => setFollowed(allSlugs)}
+            >
+              Select All Clubs
+            </button>
+            <button 
+              className="px-6 py-3 bg-green-100 hover:bg-green-200 text-green-700 rounded-xl font-medium transition-all duration-200"
+              onClick={() => setFollowed(top6Slugs)}
+            >
+              Follow Top 6
+            </button>
+            <button 
+              className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-200"
+              onClick={() => setFollowed([])}
+            >
+              Clear All
+            </button>
+            <button 
+              className="px-6 py-3 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-xl font-medium transition-all duration-200"
+              onClick={resetDefaults}
+            >
+              Reset to Defaults
+            </button>
           </div>
         </div>
 
