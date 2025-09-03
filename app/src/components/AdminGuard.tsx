@@ -44,20 +44,40 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
     // The LoginModal will auto-close and AdminGuard will re-check auth state
   };
 
-  if (state === 'loading') return <div className="p-6">Loading…</div>;
+  if (state === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-lg font-medium text-gray-700 dark:text-gray-300">Loading admin panel...</p>
+        </div>
+      </div>
+    );
+  }
   
   if (state === 'noauth') {
     return (
       <>
-        <div className="p-6 text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Admin Access Required</h2>
-          <p className="text-gray-600 mb-6">Please sign in to access the admin area.</p>
-          <button
-            onClick={() => setShowLogin(true)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-          >
-            Sign In
-          </button>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+          <div className="max-w-md w-full mx-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
+              <div className="text-center mb-8">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Admin Access Required</h2>
+                <p className="text-gray-600 dark:text-gray-400">Please sign in to access the admin area</p>
+              </div>
+              <button
+                onClick={() => setShowLogin(true)}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
         </div>
         <LoginModal 
           open={showLogin} 
@@ -70,61 +90,82 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
   
   if (state === 'noadmin') {
     return (
-      <div className="p-6 text-center">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Access Denied</h2>
-        <p className="text-gray-600 mb-4">You don&apos;t have admin access to this area.</p>
-        <div className="mb-4 text-sm text-gray-500">
-          <div>Signed in as: {auth?.currentUser?.email ?? 'unknown'}</div>
-        </div>
-        <div className="flex items-center justify-center gap-3">
-          <button
-            onClick={async () => {
-              try {
-                const synced = await ensureAdminClaim();
-                await auth?.currentUser?.getIdToken(true);
-                const token = auth?.currentUser ? await getIdTokenResult(auth.currentUser, true) : null;
-                const isAdmin = token?.claims?.isAdmin === true;
-                setDebug({ synced, isAdminClaim: isAdmin, claims: token?.claims as Record<string, unknown> | undefined });
-                setState(isAdmin || synced ? 'ok' : 'noadmin');
-              } catch {
-                // ignore
-              }
-            }}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-          >
-            Retry admin sync
-          </button>
-          <button
-            onClick={() => auth?.signOut()}
-            className="px-4 py-2 rounded-lg border hover:bg-gray-50"
-          >
-            Sign out
-          </button>
-          <button
-            onClick={async () => {
-              try {
-                const token = auth?.currentUser ? await getIdTokenResult(auth.currentUser, true) : null;
-                const isAdmin = token?.claims?.isAdmin === true;
-                setDebug({ ...debug, isAdminClaim: isAdmin, claims: token?.claims as Record<string, unknown> | undefined });
-                setDebugOpen(true);
-              } catch {
-                // ignore
-              }
-            }}
-            className="px-4 py-2 rounded-lg border hover:bg-gray-50"
-          >
-            Show debug
-          </button>
-        </div>
-        {debugOpen && (
-          <div className="mx-auto mt-4 max-w-2xl text-left">
-            <div className="rounded-lg border bg-gray-50 p-3 text-left">
-              <div className="text-sm text-gray-700 mb-2">Debug</div>
-              <pre className="whitespace-pre-wrap break-words text-xs text-gray-700">{JSON.stringify(debug, null, 2)}</pre>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="max-w-2xl w-full mx-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
+            <div className="text-center mb-8">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">You don't have admin access to this area</p>
+              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {auth?.currentUser?.email ?? 'unknown'}
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+              <button
+                onClick={async () => {
+                  try {
+                    const synced = await ensureAdminClaim();
+                    await auth?.currentUser?.getIdToken(true);
+                    const token = auth?.currentUser ? await getIdTokenResult(auth.currentUser, true) : null;
+                    const isAdmin = token?.claims?.isAdmin === true;
+                    setDebug({ synced, isAdminClaim: isAdmin, claims: token?.claims as Record<string, unknown> | undefined });
+                    setState(isAdmin || synced ? 'ok' : 'noadmin');
+                  } catch {
+                    // ignore
+                  }
+                }}
+                className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md"
+              >
+                Retry Admin Sync
+              </button>
+              <button
+                onClick={() => auth?.signOut()}
+                className="w-full sm:w-auto bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600"
+              >
+                Sign Out
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    const token = auth?.currentUser ? await getIdTokenResult(auth.currentUser, true) : null;
+                    const isAdmin = token?.claims?.isAdmin === true;
+                    setDebug({ ...debug, isAdminClaim: isAdmin, claims: token?.claims as Record<string, unknown> | undefined });
+                    setDebugOpen(true);
+                  } catch {
+                    // ignore
+                  }
+                }}
+                className="w-full sm:w-auto bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600"
+              >
+                Show Debug
+              </button>
+            </div>
+            
+            {debugOpen && (
+              <div className="mb-6">
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Debug Information</div>
+                  <pre className="whitespace-pre-wrap break-words text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 p-3 rounded border">{JSON.stringify(debug, null, 2)}</pre>
+                </div>
+              </div>
+            )}
+            
+            <div className="text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                If this persists, ensure an allowlist doc exists at <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">admins/your-email</code> with <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">isActive: true</code>.
+              </p>
             </div>
           </div>
-        )}
-        <p className="mt-4 text-sm text-gray-500">If this persists, ensure an allowlist doc exists at admins/your-email with isActive: true.</p>
+        </div>
       </div>
     );
   }
