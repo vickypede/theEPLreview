@@ -31,17 +31,13 @@
   --input: var(--border);
   --ring: 0 0% 65%;     /* light-grey focus ring */
 
-  /* New deep blue primary */
-  --blue-primary: 210 100% 18%;  /* #003f5c */
-  --blue-secondary: 210 100% 25%; /* Slightly lighter variant */
-  
-  --primary: var(--blue-primary);
+  --primary: var(--bg-4);
   --primary-foreground: var(--foreground);
   --secondary: var(--bg-3);
   --secondary-foreground: var(--foreground);
   --muted: var(--bg-2);
   --muted-foreground: var(--foreground-muted);
-  --accent: var(--blue-secondary);
+  --accent: var(--bg-2);
   --accent-foreground: var(--foreground);
 
   /* Subtle status greys (kept neutral) */
