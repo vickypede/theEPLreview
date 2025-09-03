@@ -1,285 +1,302 @@
 'use client';
+
 import AdminGuard from '@/components/AdminGuard';
-import { db, auth } from '@/lib/firebase';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useState } from 'react';
-import { signOut } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage } from 'firebase/storage';
+import { useRouter } from 'next/navigation';
 
 export default function AdminPage() {
   return (
     <AdminGuard>
-      <Editor />
+      <AdminEditor />
     </AdminGuard>
   );
 }
 
-function Editor() {
+function AdminEditor() {
+  const router = useRouter();
   const [title, setTitle] = useState('');
-  const [type, setType] = useState<'final-whistle'|'matchday-radar'|'full-time-verdict'|'pretender-list'|'high-press'|'mailbox'>('final-whistle');
   const [content, setContent] = useState('');
+  const [type, setType] = useState<'final-whistle' | 'matchday-radar' | 'big-match-review' | 'match-report' | 'editorial' | 'analysis'>('editorial');
+  const [status, setStatus] = useState<'draft' | 'review'>('draft');
   const [excerpt, setExcerpt] = useState('');
-  const [featuredImage, setFeaturedImage] = useState('');
-  const [clubs, setClubs] = useState<string>('arsenal, chelsea');
-  const [tags, setTags] = useState<string>('opinion, week-4');
-  const [status, setStatus] = useState<'draft'|'review'>('draft');
+  const [featuredImage, setFeaturedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-  // Auto-generate excerpt from content
-  const generateExcerpt = (text: string) => {
-    return text.substring(0, 160).trim() + (text.length > 160 ? '...' : '');
+  const storage = getStorage();
+
+  const generateExcerpt = () => {
+    const stripped = content.replace(/[#*`]/g, '').trim();
+    const words = stripped.split(' ').slice(0, 25);
+    setExcerpt(words.join(' ') + (words.length === 25 ? '...' : ''));
   };
 
-  // Compute word count and reading time
-  const computeStats = (text: string) => {
-    const words = text.trim().split(/\s+/).length;
-    const readingTime = Math.ceil(words / 200); // Average reading speed
+  const computeStats = () => {
+    const words = content.trim().split(/\s+/).length;
+    const readingTime = Math.ceil(words / 200);
     return { wordCount: words, readingTime };
   };
 
-  // Auto-generate slug from title
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
+  const generateSlug = () => {
+    return title.toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim();
   };
 
-  async function create() {
-    if (!db || !auth?.currentUser) {
-      alert('Database or user not available');
-      return;
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFeaturedImage(file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
+  };
 
-    // Validation
-    if (!excerpt) {
-      setExcerpt(generateExcerpt(content));
-    }
-
-    setSaving(true);
+  const uploadImage = async (file: File): Promise<string> => {
+    const timestamp = Date.now();
+    const fileName = `publications/${timestamp}_${file.name}`;
+    const storageRef = ref(storage, fileName);
     
+    await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
+  };
+
+  const create = async () => {
+    if (!auth?.currentUser || !db) return;
+    
+    setSaving(true);
+    setUploading(true);
+
     try {
-      const { wordCount, readingTime } = computeStats(content);
-      const slug = generateSlug(title);
+      let imageURL = '';
       
-      const publicationData = {
-        type,
+      // Upload image if selected
+      if (featuredImage) {
+        imageURL = await uploadImage(featuredImage);
+      }
+
+      const { wordCount, readingTime } = computeStats();
+      const slug = generateSlug();
+
+      await addDoc(collection(db!, 'publications'), {
         title,
-        slug,
         content,
-        excerpt: excerpt || generateExcerpt(content),
-        featuredImage: featuredImage || null,
-        clubs: clubs.split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
-        tags: tags.split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
-        authorId: auth!.currentUser!.uid,
-        authorByline: auth!.currentUser!.displayName || auth!.currentUser!.email || 'Anonymous',
+        type,
         status,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        excerpt,
+        featuredImage: imageURL,
+        seoTitle: seoTitle || title,
+        seoDescription: seoDescription || excerpt,
+        slug,
+        authorId: auth.currentUser.uid,
+        authorByline: auth.currentUser.displayName || auth.currentUser.email,
         wordCount,
         readingTime,
-        seoTitle: seoTitle || title,
-        seoDescription: seoDescription || (excerpt || generateExcerpt(content)),
-        // Publishing and scheduling are controlled by editors on the backend
-      };
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
 
-      const docRef = await addDoc(collection(db, 'publications'), publicationData);
-      setSaving(false);
-      alert(`Publication created successfully! ID: ${docRef.id}`);
-      
-      // Reset form for next publication
+      // Reset form
       setTitle('');
       setContent('');
-      setExcerpt('');
-      setFeaturedImage('');
-      setClubs('arsenal, chelsea');
-      setTags('opinion, week-4');
+      setType('editorial');
       setStatus('draft');
+      setExcerpt('');
+      setFeaturedImage(null);
+      setImagePreview('');
       setSeoTitle('');
       setSeoDescription('');
       
+      alert('Publication created successfully!');
     } catch (error) {
+      console.error('Error creating publication:', error);
+      alert('Error creating publication. Please try again.');
+    } finally {
       setSaving(false);
-      alert(`Error creating publication: ${error}`);
+      setUploading(false);
     }
-  }
+  };
+
+  const isFormValid = title.trim() && content.trim() && excerpt.trim();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
-          {/* Header with Logout Button */}
-          <div className="flex justify-between items-center mb-8">
-            <div className="text-center flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">New Publication</h1>
-              <p className="text-gray-600 dark:text-gray-400">Create your next editorial piece</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-3xl shadow-lg p-8 mb-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">Create Publication</h1>
+              <p className="text-gray-600">Write and publish your Premier League content</p>
             </div>
-            <button
-              onClick={() => signOut(auth!)}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+            <button 
+              onClick={() => router.push('/')}
+              className="px-6 py-3 border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 rounded-2xl font-medium transition-all duration-200 hover:bg-gray-50"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Sign Out
+              Back to Home
             </button>
           </div>
-          
-          <div className="space-y-6">
+
+          <form onSubmit={(e) => { e.preventDefault(); create(); }} className="space-y-6">
             {/* Title */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Title *</label>
-              <input 
-                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
-                placeholder="🔥 Enter your publication title here..." 
-                value={title} 
-                onChange={e => setTitle(e.target.value)} 
+              <label className="block text-sm font-semibold text-gray-700 mb-2">📝 Title *</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-lg"
+                placeholder="Enter your publication title..."
+                required
               />
             </div>
 
-            {/* Publication Type */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Publication Type *</label>
-              <select 
-                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
-                value={type} 
-                onChange={e => setType(e.target.value as 'final-whistle'|'matchday-radar'|'full-time-verdict'|'pretender-list'|'high-press'|'mailbox')}
-              >
-                <option value="final-whistle">Final Whistle - Weekend conclusions</option>
-                <option value="matchday-radar">Matchday Radar - Pre-match analysis</option>
-                <option value="full-time-verdict">Full-Time Verdict - Big match review</option>
-                <option value="pretender-list">Pretender List - Fraud Watch</option>
-                <option value="high-press">High Press - House opinion</option>
-                <option value="mailbox">Mailbox - Fan letters</option>
-              </select>
-            </div>
+            {/* Type and Status */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">🏷️ Content Type *</label>
+                <select
+                  value={type}
+                  onChange={(e) => setType(e.target.value as 'final-whistle' | 'matchday-radar' | 'big-match-review' | 'match-report' | 'editorial' | 'analysis')}
+                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                >
+                  <option value="editorial">Editorial</option>
+                  <option value="analysis">Analysis</option>
+                  <option value="match-report">Match Report</option>
+                  <option value="big-match-review">Big Match Review</option>
+                  <option value="matchday-radar">Matchday Radar</option>
+                  <option value="final-whistle">Final Whistle</option>
+                </select>
+              </div>
 
-            {/* Content */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Content (Markdown) *</label>
-              <textarea 
-                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 min-h-[300px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-y" 
-                placeholder="📝 Write your content in markdown format here... Start with a compelling introduction..." 
-                value={content} 
-                onChange={e => setContent(e.target.value)} 
-              />
-              {content && (
-                <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg">
-                  📊 {computeStats(content).wordCount} words • ⏱️ ~{computeStats(content).readingTime} min read
-                </div>
-              )}
-            </div>
-
-            {/* Excerpt */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Excerpt</label>
-              <textarea 
-                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-y" 
-                placeholder="💬 Brief summary of your article (auto-generated if empty)..." 
-                value={excerpt} 
-                onChange={e => setExcerpt(e.target.value)} 
-                maxLength={160}
-              />
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {excerpt.length}/160 characters. Leave empty to auto-generate from content.
-              </p>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">📊 Status *</label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as 'draft' | 'review')}
+                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="review">Review</option>
+                </select>
+              </div>
             </div>
 
             {/* Featured Image */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Featured Image URL</label>
-              <input 
-                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
-                placeholder="🖼️ https://example.com/image.jpg (optional)" 
-                value={featuredImage} 
-                onChange={e => setFeaturedImage(e.target.value)} 
+              <label className="block text-sm font-semibold text-gray-700 mb-2">🖼️ Featured Image</label>
+              <div className="space-y-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+                
+                {imagePreview && (
+                  <div className="border-2 border-gray-200 rounded-2xl p-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Image Preview:</p>
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="max-w-full h-48 object-cover rounded-xl"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">📝 Content *</label>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={12}
+                className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 font-mono text-sm"
+                placeholder="Write your publication content here... (Markdown supported)"
+                required
               />
             </div>
 
-            {/* Clubs */}
+            {/* Excerpt */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Clubs (comma separated)</label>
-              <input 
-                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
-                placeholder="⚽ arsenal, chelsea, liverpool (use club slugs)" 
-                value={clubs} 
-                onChange={e => setClubs(e.target.value)} 
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-semibold text-gray-700">📖 Excerpt *</label>
+                <button
+                  type="button"
+                  onClick={generateExcerpt}
+                  className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-all duration-200"
+                >
+                  Auto-generate
+                </button>
+              </div>
+              <textarea
+                value={excerpt}
+                onChange={(e) => setExcerpt(e.target.value)}
+                rows={3}
+                className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                placeholder="Brief summary of your publication..."
+                required
               />
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Use club slugs: arsenal, chelsea, liverpool, etc.</p>
             </div>
 
-            {/* Tags */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tags (comma separated)</label>
-              <input 
-                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
-                placeholder="🏷️ opinion, week-4, transfers, analysis" 
-                value={tags} 
-                onChange={e => setTags(e.target.value)} 
-              />
+            {/* SEO Fields */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">🔍 SEO Title</label>
+                <input
+                  type="text"
+                  value={seoTitle}
+                  onChange={(e) => setSeoTitle(e.target.value)}
+                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                  placeholder="SEO-optimized title (optional)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">📝 SEO Description</label>
+                <textarea
+                  value={seoDescription}
+                  onChange={(e) => setSeoDescription(e.target.value)}
+                  rows={2}
+                  className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                  placeholder="SEO description (optional)"
+                />
+              </div>
             </div>
 
-            {/* Status (editor-facing only) */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Status *</label>
-              <select 
-                className="border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
-                value={status} 
-                onChange={e => setStatus(e.target.value as 'draft'|'review')}
+            {/* Submit Button */}
+            <div className="text-center pt-6">
+              <button
+                type="submit"
+                disabled={!isFormValid || saving}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-12 rounded-2xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                <option value="draft">📝 Draft</option>
-                <option value="review">👀 Review</option>
-              </select>
-            </div>
-
-            {/* SEO Title */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">SEO Title</label>
-              <input 
-                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
-                placeholder="🔍 SEO optimized title (defaults to main title)" 
-                value={seoTitle} 
-                onChange={e => setSeoTitle(e.target.value)} 
-              />
-            </div>
-
-            {/* SEO Description */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">SEO Description</label>
-              <textarea 
-                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-y" 
-                placeholder="🔍 SEO description for search engines (defaults to excerpt)..." 
-                value={seoDescription} 
-                onChange={e => setSeoDescription(e.target.value)} 
-                maxLength={160}
-              />
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {seoDescription.length}/160 characters. Leave empty to use excerpt.
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-4 pt-6">
-              <button 
-                disabled={saving || !title || !content} 
-                onClick={create} 
-                className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-lg"
-              >
-                {saving ? '⏳ Creating...' : status === 'draft' ? '🚀 Create Draft' : '✅ Submit for Review'}
+                {saving ? (
+                  <div className="flex items-center gap-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    {uploading ? 'Uploading Image...' : 'Creating Publication...'}
+                  </div>
+                ) : (
+                  `Create ${status === 'draft' ? 'Draft' : 'Review'}`
+                )}
               </button>
             </div>
-
-            {/* Help Text */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mt-6 border border-blue-200 dark:border-blue-800">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>💡 Tip:</strong> The system will auto-generate slug, excerpt, word count, and reading time. 
-                When you publish, it automatically sets the publishedAt timestamp. Scheduled posts will be published automatically by the Cloud Function.
-              </p>
-            </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
