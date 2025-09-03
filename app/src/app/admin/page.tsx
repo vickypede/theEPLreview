@@ -138,7 +138,7 @@ function Editor() {
               <select 
                 className="border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                 value={status} 
-                onChange={e => setStatus(e.target.value as any)}
+                                 onChange={e => setStatus(e.target.value as 'draft'|'review'|'scheduled'|'published'|'archived')}
               >
                 <option value="draft">Draft</option>
                 <option value="review">Review</option>
