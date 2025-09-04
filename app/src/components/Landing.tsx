@@ -201,9 +201,9 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 [--club-h:260px] [--gap:1.5rem]">
             {/* Left: Latest headlines list (18 items; swipeable on mobile) */}
-            <aside className="lg:col-span-1 card border-0 flex flex-col md:h-96">
+            <aside className="lg:col-span-1 card border-0 flex flex-col md:h-auto xl:h-[calc(var(--club-h)*2+var(--gap))]">
               <div className="px-4 py-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold text-foreground">LATEST NEWS</h2>
@@ -341,7 +341,7 @@ export default function Landing() {
                 return (
                   <article
                     key={c?.id ?? i}
-                    className="card border-0 p-0 flex flex-col"
+                    className="card border-0 p-0 flex flex-col xl:h-[var(--club-h)]"
                     style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}
                   >
                     <div className="p-4 flex flex-col gap-3">
