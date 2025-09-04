@@ -96,6 +96,7 @@
   html, body { height: 100%; }
 
   body{
+    font-family: 'Bahnschrift SemiBold SemiCondensed','Bahnschrift SemiBold','Bahnschrift','Segoe UI',system-ui,-apple-system,sans-serif;
     @apply text-foreground;
     background:
       radial-gradient(1200px 800px at 10% -20%, hsl(var(--background) / 0.0) 0%, hsl(var(--background-secondary) / 0.35) 100%),
@@ -116,7 +117,7 @@
   *::-webkit-scrollbar-thumb { background: hsl(var(--bg-3)); border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
   *::-webkit-scrollbar-track { background: transparent; }
 
-  h1,h2,h3,h4 { letter-spacing: -0.01em; }
+  h1,h2,h3,h4,h5,h6 { letter-spacing: -0.01em; font-family: 'Microsoft YaHei Light','Microsoft YaHei','Segoe UI',system-ui,-apple-system,sans-serif; }
   code,kbd,pre { background: hsl(var(--muted) / 0.35); border-radius: 8px; padding: .125rem .375rem; }
 
   /* Accessible focus */
