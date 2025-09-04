@@ -203,7 +203,7 @@ export default function Landing() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left: Latest headlines list (18 items; swipeable on mobile) */}
-            <aside className="lg:col-span-1 card border-0 flex flex-col">
+            <aside className="lg:col-span-1 card border-0 flex flex-col min-h-[460px]">
               <div className="px-4 py-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold text-foreground">LATEST NEWS</h2>
