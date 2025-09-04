@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Article, Club } from '@/types';
@@ -51,7 +51,7 @@ export default function Landing2(){
         if (!db) return;
         // Latest site-wide news (left list)
         const newsRef = collection(db, 'articles');
-        const newsQ = query(newsRef, orderBy('publishedAt', 'desc'), limit(8));
+        const newsQ = query(newsRef, orderBy('publishedAt', 'desc'), limit(18));
         const newsSnap = await getDocs(newsQ);
         const newsList = newsSnap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<UiArticle, 'id'>) })) as UiArticle[];
 
@@ -93,8 +93,23 @@ export default function Landing2(){
   if (!db) return null;
 
   const latestForList: (UiArticle | null)[] = loading
-    ? Array.from({ length: 6 }, () => null)
-    : latestNews.slice(0, 6);
+    ? Array.from({ length: 18 }, () => null)
+    : latestNews.slice(0, 18);
+
+  // Mobile paging: 3 pages, 6 items each
+  const mobilePages: (UiArticle | null)[][] = [
+    latestForList.slice(0, 6),
+    latestForList.slice(6, 12),
+    latestForList.slice(12, 18),
+  ];
+  const [mobilePage, setMobilePage] = useState(0);
+  const pagerRef = useRef<HTMLDivElement | null>(null);
+  function onPagerScroll(e: React.UIEvent<HTMLDivElement>){
+    const el = e.currentTarget;
+    if (!el) return;
+    const idx = Math.round(el.scrollLeft / el.clientWidth);
+    if (idx !== mobilePage) setMobilePage(idx);
+  }
 
   const clubTiles: (ClubTile | null)[] = loading
     ? Array.from({ length: 6 }, () => null)
@@ -105,32 +120,89 @@ export default function Landing2(){
       <section className="py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: Latest News list */}
-          <aside className="lg:col-span-1 card border-0">
+          <aside className="lg:col-span-1 card border-0 flex flex-col">
             <div className="px-4 py-4">
-              <h2 className="text-lg font-bold text-foreground">LATEST NEWS</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-foreground">LATEST NEWS</h2>
+                <Link href="/news" className="md:hidden text-sm font-semibold text-primary hover:text-foreground">see all →</Link>
+              </div>
             </div>
-            <ul>
-              {latestForList.map((a, i) => (
-                <li key={a?.id ?? i} className="px-4 py-4 relative after:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-[#1c1c1c] last:after:hidden">
-                  {a ? (
-                    <Link href={a.url} target="_blank" rel="noopener noreferrer" className="block">
-                      <div className="text-xs text-muted-foreground mb-1">{/* timestamp */}
-                        {a.publishedAt?.toDate ? timeSince(a.publishedAt.toDate()) : ''}
-                      </div>
-                      <div className="text-sm text-foreground font-medium leading-snug">
-                        {a.title}
-                      </div>
-                    </Link>
-                  ) : (
-                    <div className="animate-pulse">
-                      <div className="h-3 w-24 surface-2 rounded mb-2" />
-                      <div className="h-4 w-5/6 surface-2 rounded" />
-                    </div>
-                  )}
-                </li>
+
+            {/* Mobile: swipeable pager (3 pages x 6 items) */}
+            <div ref={pagerRef} onScroll={onPagerScroll} className="md:hidden overflow-x-auto snap-x snap-mandatory scroll-smooth">
+              <div className="flex">
+                {mobilePages.map((page, pageIndex) => (
+                  <div key={pageIndex} className="min-w-full snap-start">
+                    <ul>
+                      {page.map((a, i) => (
+                        <li key={(a as UiArticle)?.id ?? `${pageIndex}-${i}`} className="px-4 py-4 relative after:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-[#1c1c1c] last:after:hidden">
+                          {a ? (
+                            <Link href={(a as UiArticle).url} target="_blank" rel="noopener noreferrer" className="block">
+                              <div className="text-xs text-muted-foreground mb-1">{/* timestamp */}
+                                {(a as UiArticle).publishedAt ? timeSince((a as UiArticle).publishedAt.toDate()) : ''}
+                              </div>
+                              <div className="text-sm text-foreground font-medium leading-snug">
+                                {(a as UiArticle).title}
+                              </div>
+                            </Link>
+                          ) : (
+                            <div className="animate-pulse">
+                              <div className="h-3 w-24 surface-2 rounded mb-2" />
+                              <div className="h-4 w-5/6 surface-2 rounded" />
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Mobile dots */}
+            <div className="md:hidden flex items-center justify-center gap-2 py-2">
+              {mobilePages.map((_, idx) => (
+                <button
+                  key={idx}
+                  aria-label={`Go to page ${idx + 1}`}
+                  onClick={() => {
+                    const el = pagerRef.current;
+                    if (!el) return;
+                    el.scrollTo({ left: idx * el.clientWidth, behavior: 'smooth' });
+                    setMobilePage(idx);
+                  }}
+                  className={`h-2 w-2 rounded-full ${mobilePage === idx ? 'bg-foreground' : 'bg-border'}`}
+                />
               ))}
-            </ul>
-            <div className="px-4 py-3">
+            </div>
+
+            {/* Desktop: scrollable list (keep card height feel) */}
+            <div className="hidden md:block">
+              <div className="max-h-96 overflow-y-auto">
+                <ul>
+                  {latestForList.map((a, i) => (
+                    <li key={a?.id ?? i} className="px-4 py-4 relative after:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-[#1c1c1c] last:after:hidden">
+                      {a ? (
+                        <Link href={a.url} target="_blank" rel="noopener noreferrer" className="block">
+                          <div className="text-xs text-muted-foreground mb-1">{/* timestamp */}
+                            {a.publishedAt ? timeSince(a.publishedAt.toDate()) : ''}
+                          </div>
+                          <div className="text-sm text-foreground font-medium leading-snug">
+                            {a.title}
+                          </div>
+                        </Link>
+                      ) : (
+                        <div className="animate-pulse">
+                          <div className="h-3 w-24 surface-2 rounded mb-2" />
+                          <div className="h-4 w-5/6 surface-2 rounded" />
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="px-4 py-3 hidden md:block">
               <Link href="/news" className="inline-flex items-center justify-between w-full text-left text-sm font-semibold text-primary hover:text-foreground">
                 <span>see all</span>
                 <span aria-hidden>→</span>
