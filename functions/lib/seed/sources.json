@@ -107,35 +107,35 @@
     "arsenal-arseblog": {
         "name": "Arseblog",
         "type": "html",
-        "url": "https://arseblog.com/",
+        "url": "https://arseblog.news/",
         "clubSlugs": ["arsenal"],
         "isActive": true
     },
     "arsenal-goonernews": {
         "name": "GoonerNews",
         "type": "html",
-        "url": "https://goonernews.com/",
+        "url": "https://goonernews.com/blog/",
         "clubSlugs": ["arsenal"],
         "isActive": true
     },
     "arsenal-footballlondon": {
         "name": "Football.London (Arsenal)",
         "type": "html",
-        "url": "https://www.football.london/arsenal-fc/",
+        "url": "https://www.football.london/arsenal-fc/news/",
         "clubSlugs": ["arsenal"],
         "isActive": true
     },
     "chelsea-talkchelsea": {
         "name": "TalkChelsea",
         "type": "html",
-        "url": "https://www.talkchelsea.net/",
+        "url": "https://www.talkchelsea.net/opinions/",
         "clubSlugs": ["chelsea"],
         "isActive": true
     },
     "chelsea-footballlondon": {
         "name": "Football.London (Chelsea)",
         "type": "html",
-        "url": "https://www.football.london/chelsea-fc/",
+        "url": "https://www.football.london/chelsea-fc/news/",
         "clubSlugs": ["chelsea"],
         "isActive": true
     },

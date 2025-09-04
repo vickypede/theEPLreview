@@ -1,6 +1,6 @@
 import { initializeApp, applicationDefault } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import sources from './sources.json';
+import sources from '../src/seed/sources.json';
 
 initializeApp({ credential: applicationDefault() });
 const db = getFirestore();

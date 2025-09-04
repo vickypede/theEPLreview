@@ -3,9 +3,11 @@
  *
  * Drop-in replacement for functions/src/index.ts
  * - Keeps existing logic
- * - Hardens HTML ingestion to avoid non-news pages
+ * - HARDENS HTML ingestion to avoid non-news pages
  * - Adds per-source badPathRegex + maxAgeHours (optional)
  * - Default HTML freshness window = 48h
+ * - NEW: Path-crumb lock + shallow BFS within crumb (no site-wide roaming)
+ * - NEW: Stronger denylist (tickets/shop/hospitality/membership)
  * - NEW: Publications system (editorial content management)
  */
 
@@ -229,12 +231,11 @@ function filterLinks(
   const includeRe = options.includePathRegex ? new RegExp(options.includePathRegex, "i") : null;
 
   // Robust default denylist for non-article/utility sections
-  const DEFAULT_BAD = /\/(about|contact|privacy|cookies|terms|advertis|marketing|promo|newsletter|subscribe|authors?|contributors?|editorial|policy|brand|company|careers|fixtures?|results?|table|standings|scores?|live(?:-blog)?|video|videos|photo|gallery|galleries|multimedia|podcasts?|shows?|tag|tags|category|categories|topic|topics|search|sitemap|index)(?:\/|$)|(\.xml|\.rss|\.jpg|\.jpeg|\.png|\.gif|\.webp|\.svg)$/i;
+  // NEW: extended with tickets/shop/hospitality/membership
+  const DEFAULT_BAD =
+    /\/(about|contact|privacy|cookies|terms|advertis|marketing|promo|newsletter|subscribe|authors?|contributors?|editorial|policy|brand|company|careers|fixtures?|results?|table|standings|scores?|live(?:-blog)?|video|videos|photo|gallery|galleries|multimedia|podcasts?|shows?|tag|tags|category|categories|topic|topics|search|sitemap|index|tickets?|ticket(?:-)?hub|hospitality|membership|shop|store|login|signin|sign-in|my-account|pricing)(?:\/|$)|(\.xml|\.rss|\.jpg|\.jpeg|\.png|\.gif|\.webp|\.svg)$/i;
 
-  const mergedBad = options.badPathRegex
-    ? new RegExp(options.badPathRegex, "i")
-    : DEFAULT_BAD;
-
+  const mergedBad = options.badPathRegex ? new RegExp(options.badPathRegex, "i") : DEFAULT_BAD;
   const sourceBad = options.sourceBadPathRegex ? new RegExp(options.sourceBadPathRegex, "i") : null;
 
   return links
@@ -400,6 +401,121 @@ function withinAgeWindow(date: Date, maxHours: number): boolean {
 }
 
 // -----------------------------------------------------------------------------
+// NEW: Path-crumb lock + shallow BFS for section pages
+// -----------------------------------------------------------------------------
+const DEFAULT_HTML_MAX_DEPTH = 2;
+const DEFAULT_HTML_MAX_SECTION_PAGES = 6;
+
+function pathPrefixFromUrl(u: string): string {
+  try {
+    const { pathname } = new URL(u);
+    // normalize: remove trailing slash except root
+    return pathname === "/" ? "/" : pathname.replace(/\/+$/, "");
+  } catch {
+    return "/";
+  }
+}
+
+// Build a regex to lock crawling to the crumb. E.g. "/news" => /^\/news(?:\/|$)/i
+function buildIncludeRegexFromPrefix(prefix: string): string | null {
+  if (!prefix || prefix === "/") return null;
+  return `^${escapeRegExp(prefix)}(?:\\/|$)`;
+}
+
+// Identify "section navigation" links (pagination/category/tag under the same crumb).
+function isSectionNavLink(candidateUrl: string, hostUrl: string, crumbPrefix: string): boolean {
+  try {
+    const base = new URL(hostUrl);
+    const u = new URL(candidateUrl, base);
+    if (u.hostname !== base.hostname) return false;
+    const p = u.pathname.replace(/\/+$/, "") || "/";
+    if (crumbPrefix !== "/" && !p.startsWith(crumbPrefix)) return false;
+
+    // Explicit pagination patterns
+    if (/\/page\/\d+\/?$/.test(p)) return true;
+    if (/[?&](page|p|pg|start|offset)=\d+/i.test(u.search)) return true;
+
+    // Common section/index tails
+    if (p === crumbPrefix) return true;
+    if (/\/(category|categories|tag|topic|section|all|archive|archives)\/?$/i.test(p)) return true;
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+async function gatherLinksWithinCrumb(
+  startUrl: string,
+  opts: {
+    allowHeadless: boolean;
+    headlessEnabled: boolean;
+    includePathRegex?: string | null;
+    badPathRegex?: string;
+    sourceBadPathRegex?: string;
+    maxDepth?: number;
+    maxPages?: number;
+  },
+): Promise<string[]> {
+  const includeStr = opts.includePathRegex || null;
+
+  const crumbPrefix = pathPrefixFromUrl(startUrl);
+  const visitedPages = new Set<string>();
+  const queue: Array<{ url: string; depth: number }> = [{ url: startUrl, depth: 0 }];
+  const candidateLinks = new Set<string>();
+
+  const maxDepth = Number.isFinite(opts.maxDepth) ? (opts.maxDepth as number) : DEFAULT_HTML_MAX_DEPTH;
+  const maxPages = Number.isFinite(opts.maxPages) ? (opts.maxPages as number) : DEFAULT_HTML_MAX_SECTION_PAGES;
+
+  while (queue.length && visitedPages.size < maxPages) {
+    const node = queue.shift()!;
+    const pageUrl = node.url;
+    if (visitedPages.has(pageUrl)) continue;
+    visitedPages.add(pageUrl);
+
+    const html = await getHtmlSmart(pageUrl, {
+      allowHeadless: opts.allowHeadless,
+      headlessEnabled: opts.headlessEnabled,
+    });
+    if (!html) continue;
+
+    let links = absolutizeLinks(pageUrl, html);
+    links = filterLinks(links, startUrl, {
+      includePathRegex: includeStr ?? buildIncludeRegexFromPrefix(crumbPrefix) ?? undefined,
+      badPathRegex: opts.badPathRegex,
+      sourceBadPathRegex: opts.sourceBadPathRegex,
+    });
+
+    for (const l of links) candidateLinks.add(l);
+
+    if (node.depth < maxDepth) {
+      for (const l of links) {
+        if (visitedPages.size >= maxPages) break;
+        if (isSectionNavLink(l, startUrl, crumbPrefix)) {
+          // Enqueue section pages only; article pages will be processed via candidateLinks anyway
+          queue.push({ url: l, depth: node.depth + 1 });
+        }
+      }
+    }
+  }
+
+  // If a crumb is defined, remove any candidates not under that crumb (defense-in-depth)
+  if (crumbPrefix !== "/") {
+    return Array.from(candidateLinks).filter((u) => {
+      try {
+        const p = new URL(u).pathname;
+        return p.startsWith(crumbPrefix);
+      } catch {
+        return false;
+      }
+    });
+  }
+
+  // Root crumb → return filtered candidates as-is
+  return Array.from(candidateLinks);
+}
+
+// -----------------------------------------------------------------------------
 // Main ingestion
 // -----------------------------------------------------------------------------
 export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => {
@@ -525,19 +641,19 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
         }
       } else if (source.type === "html") {
         try {
-          // 1) Fetch section page (allow headless only if source.needsJs + runtime says yes)
-          const sectionHtml = await getHtmlSmart(source.url, {
+          // NEW: enforce crumb lock include regex (auto-infer from source.url if not provided)
+          const crumbPrefix = pathPrefixFromUrl(source.url);
+          const enforcedIncludeReStr = source.includePathRegex || buildIncludeRegexFromPrefix(crumbPrefix) || undefined;
+
+          // NEW: shallow BFS within crumb to collect candidate links (includes pagination pages)
+          const links = await gatherLinksWithinCrumb(source.url, {
             allowHeadless: !!source.needsJs,
             headlessEnabled,
-          });
-          if (!sectionHtml) throw new Error("no html");
-
-          // 2) Extract links and skip obvious non-articles
-          let links: string[] = absolutizeLinks(source.url, sectionHtml);
-          links = filterLinks(links, source.url, {
-            includePathRegex: source.includePathRegex,
+            includePathRegex: enforcedIncludeReStr || null,
             badPathRegex: runtime.badPathRegex,
-            sourceBadPathRegex: source.badPathRegex, // NEW: per-source denylist
+            sourceBadPathRegex: source.badPathRegex,
+            maxDepth: DEFAULT_HTML_MAX_DEPTH,
+            maxPages: DEFAULT_HTML_MAX_SECTION_PAGES,
           });
 
           for (const url of links) {
@@ -546,7 +662,7 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
             let publishedAt: Date | null = null;
 
             try {
-              // 3) Fetch candidate page (same headless policy)
+              // Fetch candidate page (same headless policy)
               const pageHtml: string | null = await getHtmlSmart(normalizedUrl, {
                 allowHeadless: !!source.needsJs,
                 headlessEnabled,
@@ -557,7 +673,7 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
                 title = meta.title || "";
                 if (meta.publishedAt) publishedAt = meta.publishedAt;
 
-                // NEW: only accept likely news articles
+                // Only accept likely news articles
                 const looksLikeArticle = isLikelyArticle(
                   { title, publishedAt: publishedAt || undefined },
                   pageHtml,
@@ -567,7 +683,7 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
                   continue;
                 }
 
-                // NEW: freshness window (default 48h; per-source override allowed)
+                // Freshness window (default 48h; per-source override allowed)
                 const maxAge = typeof source.maxAgeHours === "number" ? source.maxAgeHours : 48;
                 if (!publishedAt || !withinAgeWindow(publishedAt, maxAge)) {
                   skippedCount += 1;
@@ -606,7 +722,7 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
             const sourceClubs: string[] = Array.isArray(source.clubSlugs) ? source.clubSlugs : [];
             const clubs = Array.from(new Set<string>([...sourceClubs, ...detectedClubs]));
 
-            // Publish time clamp (keeps your future-drift protection)
+            // Publish time clamp
             const { value: safePublishedAt, clamped } = clampPublishedAt(publishedAt);
 
             await ref.set(
