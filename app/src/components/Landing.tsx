@@ -151,7 +151,7 @@ export default function Landing() {
       {/* ======================= NEWS ======================= */}
       <section className="section-y">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 [--club-h:260px] [--gap:1.5rem]">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 [--club-h:260px] [--club-h-m:220px] [--gap:1.5rem]">
             {/* Left: Latest headlines list */}
             <aside className="lg:col-span-1 card border-0 flex flex-col md:h-auto xl:h-[calc(var(--club-h)*2+var(--gap))]">
               <div className="px-4 py-4">
@@ -242,7 +242,7 @@ export default function Landing() {
             </aside>
 
             {/* Right: Clubs */}
-            {/* Mobile: horizontal carousel with 3 headlines per card */}
+            {/* Mobile: horizontal carousel with fixed-size cards and 3 headlines per card */}
             <div className="lg:col-span-2 md:hidden -mx-4 px-4">
               <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory">
                 {clubTiles.map((c, i) => {
@@ -251,32 +251,54 @@ export default function Landing() {
                   return (
                     <article
                       key={c?.id ?? i}
-                      className="min-w-[86%] snap-start card border-0 p-0 flex-shrink-0"
+                      className="
+                        shrink-0 snap-start
+                        w-[78vw]
+                        h-[var(--club-h-m)]
+                        card border-0 p-0 overflow-hidden
+                      "
                       style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}
                     >
-                      <div className="p-4 flex flex-col gap-3">
+                      <div className="p-4 h-full flex flex-col gap-3">
+                        {/* Header row */}
                         <div className="flex items-center gap-3">
                           {c?.badgeUrl ? (
                             <img
                               src={c.badgeUrl}
                               alt={`${c.name} crest`}
                               className="w-9 h-9 object-contain rounded-full"
-                              style={{ outline: `2px solid ${hexToRgba(brand, 0.35)}`, outlineOffset: 0, backgroundColor: hexToRgba("#000000", 0.04) }}
+                              style={{
+                                outline: `2px solid ${hexToRgba(brand, 0.35)}`,
+                                outlineOffset: 0,
+                                backgroundColor: hexToRgba("#000000", 0.04),
+                              }}
                             />
                           ) : (
                             <div className="w-9 h-9 surface-2 rounded border border-border" />
                           )}
-                          <Link href={c ? `/clubs/${c.id}` : "#"} className="text-base font-bold hover:underline text-white">
+                          <Link
+                            href={c ? `/clubs/${c.id}` : "#"}
+                            className="text-base font-bold text-white hover:underline truncate max-w-[65%]"
+                            title={c?.name ?? "Club"}
+                          >
                             {c?.name ?? "Club"}
                           </Link>
                         </div>
 
-                        <div className="mt-1">
+                        {/* Headlines list area */}
+                        <div className="flex-1 overflow-hidden">
                           {c?.latest && c.latest.length > 0 ? (
                             <ul className="divide-y divide-border">
                               {c.latest.slice(0, 3).map((a) => (
-                                <li key={a.id} className="py-2">
-                                  <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2 font-body" style={{ color: "inherit" }}>
+                                <li key={a.id} className="py-1.5">
+                                  <Link
+                                    href={a.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-foreground leading-snug line-clamp-2 font-body"
+                                    style={{ color: "inherit" }}
+                                    title={a.title}
+                                  >
                                     {a.title}
                                   </Link>
                                 </li>
