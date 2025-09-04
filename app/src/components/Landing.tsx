@@ -320,7 +320,7 @@ export default function Landing() {
               </div>
 
               {/* See all (desktop) */}
-              <div className="px-4 py-3 hidden md:flex justify-center">
+              <div className="px-4 pt-3 pb-1 hidden md:flex justify-center">
                 <Link
                   href="/news"
                   className="inline-flex items-center gap-1 text-sm font-semibold"
