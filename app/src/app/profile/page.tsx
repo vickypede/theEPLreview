@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import {
   GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, User
@@ -11,6 +12,7 @@ import {
 import { Club, UserProfile } from '@/types';
 
 export default function ProfilePage(){
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [clubs, setClubs] = useState<Club[]>([]);
@@ -105,7 +107,16 @@ export default function ProfilePage(){
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[hsl(0_0%_0%_/_0.6)] backdrop-blur-sm p-4">
         <div className="w-full max-w-md transform overflow-hidden rounded-3xl bg-card border border-border shadow-2xl transition-all text-foreground">
           {/* Header (mirrors LoginModal) */}
-          <div className="relative surface-2 px-8 py-12">
+          <div className="relative surface-2 px-8 pt-8 pb-4">
+            <button
+              onClick={() => router.push('/')}
+              className="absolute right-4 top-4 rounded-full p-2 text-foreground/80 hover:opacity-80 transition-colors"
+              aria-label="Close"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
             <div className="text-center">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full surface-3 border border-border backdrop-blur-sm">
                 <svg className="h-8 w-8 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,12 +124,12 @@ export default function ProfilePage(){
                 </svg>
               </div>
               <h2 className="text-2xl font-bold">Welcome Back</h2>
-              <p className="mt-2 text-muted-foreground">Sign in to access your account</p>
+              <p className="mt-1 text-muted-foreground">Sign in to access your account</p>
             </div>
           </div>
 
           {/* Content */}
-          <div className="px-8 py-8">
+          <div className="px-8 pt-4 pb-6">
             <button
               onClick={signIn}
               className="group relative w-full rounded-xl border border-border surface px-6 py-4 font-semibold text-foreground hover:opacity-90 transition-all duration-200"
