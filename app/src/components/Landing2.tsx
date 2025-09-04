@@ -168,10 +168,10 @@ export default function Landing2(){
                   <div key={pageIndex} className="min-w-full snap-start">
                     <ul>
                       {page.map((a, i) => (
-                        <li key={(a as UiArticle)?.id ?? `${pageIndex}-${i}`} className="px-4 py-4 relative after:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-[#1c1c1c] last:after:hidden">
+                        <li key={(a as UiArticle)?.id ?? `${pageIndex}-${i}`} className="px-4 py-2 relative after:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-[#1c1c1c] last:after:hidden">
                           {a ? (
                             <Link href={(a as UiArticle).url} target="_blank" rel="noopener noreferrer" className="block">
-                              <div className="text-xs text-muted-foreground mb-1">{/* timestamp */}
+                              <div className="text-xs text-muted-foreground mb-0.5">{/* timestamp */}
                                 {(a as UiArticle).publishedAt ? timeSince((a as UiArticle).publishedAt.toDate()) : ''}
                               </div>
                               <div className="text-sm text-foreground font-medium leading-snug">
@@ -213,10 +213,10 @@ export default function Landing2(){
               <div className="max-h-96 overflow-y-auto no-scrollbar">
                 <ul>
                   {latestForList.map((a, i) => (
-                    <li key={a?.id ?? i} className="px-4 py-4 relative after:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-[#1c1c1c] last:after:hidden">
+                    <li key={a?.id ?? i} className="px-4 py-2 relative after:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-[#1c1c1c] last:after:hidden">
                       {a ? (
                         <Link href={a.url} target="_blank" rel="noopener noreferrer" className="block">
-                          <div className="text-xs text-muted-foreground mb-1">{/* timestamp */}
+                          <div className="text-xs text-muted-foreground mb-0.5">{/* timestamp */}
                             {a.publishedAt ? timeSince(a.publishedAt.toDate()) : ''}
                           </div>
                           <div className="text-sm text-foreground font-medium leading-snug">
@@ -235,8 +235,8 @@ export default function Landing2(){
               </div>
             </div>
 
-            <div className="px-4 py-3 hidden md:block">
-              <Link href="/news" className="inline-flex items-center justify-between w-full text-left text-sm font-semibold text-primary hover:text-foreground">
+            <div className="px-4 py-3 hidden md:flex justify-center">
+              <Link href="/news" className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-foreground">
                 <span>see all</span>
                 <span aria-hidden>→</span>
               </Link>
