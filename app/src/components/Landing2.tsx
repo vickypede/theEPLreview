@@ -106,7 +106,7 @@ export default function Landing2(){
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: Latest News list */}
           <aside className="lg:col-span-1 card border-0">
-            <div className="px-4 py-4 border-b border-[#1c1c1c]">
+            <div className="px-4 py-4">
               <h2 className="text-lg font-bold text-foreground">LATEST NEWS</h2>
             </div>
             <ul>
