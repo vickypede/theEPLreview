@@ -12,9 +12,10 @@ type ClubTile = {
   id: string;
   name: string;
   badgeUrl?: string;
-  latest: UiArticle[];
+  latest: UiArticle[]; // up to 3 latest articles
 };
 
+// --- Club brand colours (used to tint tiles) ---
 const CLUB_BRAND: Record<string, string> = {
   arsenal: "#EF0107",
   chelsea: "#034694",
@@ -40,6 +41,7 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 export default function Landing() {
+  // ---- NEWS state ----
   const [latestNews, setLatestNews] = useState<UiArticle[]>([]);
   const [clubs, setClubs] = useState<ClubTile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,25 +52,28 @@ export default function Landing() {
       try {
         if (!db) return;
 
-        // Latest site-wide news
+        // Latest site-wide news (left list)
         const newsRef = collection(db, "articles");
         const newsQ = query(newsRef, orderBy("publishedAt", "desc"), limit(18));
         const newsSnap = await getDocs(newsQ);
-        const newsList = newsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<UiArticle, "id">) })) as UiArticle[];
+        const newsList = newsSnap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as Omit<UiArticle, "id">),
+        })) as UiArticle[];
 
-        // Choose six clubs (prefer top6)
+        // Pick six clubs (top6 preferred → else first 6 alpha)
         const clubsRef = collection(db, "clubs");
         const clubsSnap = await getDocs(clubsRef);
         const allClubs = clubsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Club, "id">) })) as Club[];
         const top = allClubs.filter((c) => c.isTop6).slice(0, 6);
-        const six = (top.length === 6 ? top : allClubs.sort((a, b) => a.name.localeCompare(b.name)).slice(0, 6)).map((c: Club) => ({
+        const six = (top.length === 6 ? top : [...allClubs].sort((a, b) => a.name.localeCompare(b.name)).slice(0, 6)).map((c: Club) => ({
           id: c.id,
           name: c.name,
           badgeUrl: c.badgeUrl,
           latest: [],
         })) as ClubTile[];
 
-        // Fetch up to 3 latest per club
+        // For each club, fetch up to 3 latest articles with graceful fallbacks
         const tiles: ClubTile[] = await Promise.all(
           six.map(async (c) => {
             if (!db) return { ...c, latest: [] } as ClubTile;
@@ -78,16 +83,20 @@ export default function Landing() {
               const primaryQ = query(clubArticlesRef, where("clubs", "array-contains", c.id), orderBy("publishedAt", "desc"), limit(3));
               const primarySnap = await getDocs(primaryQ);
               results = primarySnap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<UiArticle, "id">) })) as UiArticle[];
-            } catch {}
+            } catch {
+              /* noop */
+            }
 
             if (results.length < 3) {
               try {
                 const fallbackQ = query(clubArticlesRef, where("clubs", "array-contains", c.id), orderBy("updatedAt", "desc"), limit(5));
                 const fbSnap = await getDocs(fallbackQ);
                 const fb = fbSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<UiArticle, "id">) })) as UiArticle[];
-                const seen = new Set(results.map((r) => r.id));
-                for (const a of fb) if (!seen.has(a.id) && results.length < 3) results.push(a);
-              } catch {}
+                const existing = new Set(results.map((r) => r.id));
+                for (const a of fb) if (!existing.has(a.id) && results.length < 3) results.push(a);
+              } catch {
+                /* noop */
+              }
             }
 
             if (results.length < 3) {
@@ -95,9 +104,11 @@ export default function Landing() {
                 const basicQ = query(clubArticlesRef, where("clubs", "array-contains", c.id), limit(3 - results.length));
                 const bSnap = await getDocs(basicQ);
                 const b = bSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<UiArticle, "id">) })) as UiArticle[];
-                const seen = new Set(results.map((r) => r.id));
-                for (const a of b) if (!seen.has(a.id) && results.length < 3) results.push(a);
-              } catch {}
+                const existing = new Set(results.map((r) => r.id));
+                for (const a of b) if (!existing.has(a.id) && results.length < 3) results.push(a);
+              } catch {
+                /* noop */
+              }
             }
 
             return { ...c, latest: results } as ClubTile;
@@ -113,18 +124,15 @@ export default function Landing() {
       }
     }
     load();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const latestForList: (UiArticle | null)[] = loading ? Array.from({ length: 18 }, () => null) : latestNews.slice(0, 18);
 
   // Mobile pager: 4 pages, 5 items each
-  const mobilePages: (UiArticle | null)[][] = [
-    latestForList.slice(0, 5),
-    latestForList.slice(5, 10),
-    latestForList.slice(10, 15),
-    latestForList.slice(15, 20),
-  ];
+  const mobilePages: (UiArticle | null)[][] = [latestForList.slice(0, 5), latestForList.slice(5, 10), latestForList.slice(10, 15), latestForList.slice(15, 20)];
   const [mobilePage, setMobilePage] = useState(0);
   const pagerRef = useRef<HTMLDivElement | null>(null);
   function onPagerScroll(e: React.UIEvent<HTMLDivElement>) {
@@ -155,22 +163,20 @@ export default function Landing() {
                 </div>
               </div>
 
-              {/* Mobile: swipeable pages */}
+              {/* Mobile pager */}
               <div ref={pagerRef} onScroll={onPagerScroll} className="md:hidden overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar">
                 <div className="flex">
                   {mobilePages.map((page, pageIndex) => (
                     <div key={pageIndex} className="min-w-full snap-start">
                       <ul>
                         {page.map((a, i) => (
-                          <li key={(a as UiArticle)?.id ?? `${pageIndex}-${i}`} className="px-4 py-3 relative after:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-[#1c1c1c] last:after:hidden">
+                          <li key={(a as UiArticle)?.id ?? `${pageIndex}-${i}`} className="px-4 py-2 relative after:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-[#1c1c1c] last:after:hidden">
                             {a ? (
                               <Link href={(a as UiArticle).url} target="_blank" rel="noopener noreferrer" className="block">
                                 <div className="text-xs text-muted-foreground mb-0.5">
                                   {(a as UiArticle).publishedAt ? timeSince((a as UiArticle).publishedAt.toDate()) : ""}
                                 </div>
-                                <div className="text-sm text-foreground font-medium leading-snug font-body">
-                                  {(a as UiArticle).title}
-                                </div>
+                                <div className="text-sm text-foreground font-medium leading-snug font-body">{(a as UiArticle).title}</div>
                               </Link>
                             ) : (
                               <div className="animate-pulse">
@@ -186,7 +192,7 @@ export default function Landing() {
                 </div>
               </div>
 
-              {/* Mobile pager dots */}
+              {/* Mobile dots */}
               <div className="md:hidden flex items-center justify-center gap-2 py-2">
                 {mobilePages.map((_, idx) => (
                   <button
@@ -203,7 +209,7 @@ export default function Landing() {
                 ))}
               </div>
 
-              {/* Desktop list */}
+              {/* Desktop list fills space */}
               <div className="hidden md:block md:flex-1 md:min-h-0">
                 <div className="h-full overflow-y-auto no-scrollbar w-full">
                   <ul>
@@ -236,64 +242,18 @@ export default function Landing() {
             </aside>
 
             {/* Right: Clubs */}
-            <div className="lg:col-span-2">
-              {/* Mobile: horizontal carousel */}
-              <div className="md:hidden -mx-4 px-4 overflow-x-auto no-scrollbar snap-x snap-mandatory">
-                <div className="flex gap-4">
-                  {clubTiles.map((c, i) => {
-                    const brand = c?.id ? CLUB_BRAND[c.id] ?? "#4f46e5" : "#4f46e5";
-                    const tint = hexToRgba(brand, 0.04);
-                    return (
-                      <article
-                        key={c?.id ?? i}
-                        className="card border-0 p-0 flex flex-col min-w-[280px] max-w-[280px] snap-start"
-                        style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}
-                      >
-                        <div className="p-4 flex flex-col gap-3">
-                          <div className="flex items-center gap-3">
-                            {c?.badgeUrl ? (
-                              <img
-                                src={c.badgeUrl}
-                                alt={`${c.name} crest`}
-                                className="w-9 h-9 object-contain rounded-full"
-                                style={{ outline: `2px solid ${hexToRgba(brand, 0.35)}`, outlineOffset: 0, backgroundColor: hexToRgba("#000000", 0.04) }}
-                              />
-                            ) : (
-                              <div className="w-9 h-9 surface-2 rounded border border-border" />
-                            )}
-                            <Link href={c ? `/clubs/${c.id}` : "#"} className="text-base font-bold hover:underline text-white">
-                              {c?.name ?? "Club"}
-                            </Link>
-                          </div>
-                          <div className="mt-1">
-                            {c?.latest && c.latest.length > 0 ? (
-                              <ul className="divide-y divide-border">
-                                {c.latest.slice(0, 1).map((a) => (
-                                  <li key={a.id} className="py-2">
-                                    <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2 font-body" style={{ color: "inherit" }}>
-                                      {a.title}
-                                    </Link>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <div className="text-sm text-muted-foreground">No recent article</div>
-                            )}
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Tablet/desktop: grid (unchanged) */}
-              <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {/* Mobile: horizontal carousel with 3 headlines per card */}
+            <div className="lg:col-span-2 md:hidden -mx-4 px-4">
+              <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory">
                 {clubTiles.map((c, i) => {
                   const brand = c?.id ? CLUB_BRAND[c.id] ?? "#4f46e5" : "#4f46e5";
                   const tint = hexToRgba(brand, 0.04);
                   return (
-                    <article key={c?.id ?? i} className="card border-0 p-0 flex flex-col xl:h-[var(--club-h)]" style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}>
+                    <article
+                      key={c?.id ?? i}
+                      className="min-w-[86%] snap-start card border-0 p-0 flex-shrink-0"
+                      style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}
+                    >
                       <div className="p-4 flex flex-col gap-3">
                         <div className="flex items-center gap-3">
                           {c?.badgeUrl ? (
@@ -310,18 +270,12 @@ export default function Landing() {
                             {c?.name ?? "Club"}
                           </Link>
                         </div>
+
                         <div className="mt-1">
                           {c?.latest && c.latest.length > 0 ? (
                             <ul className="divide-y divide-border">
-                              {c.latest.slice(0, 1).map((a) => (
+                              {c.latest.slice(0, 3).map((a) => (
                                 <li key={a.id} className="py-2">
-                                  <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2 font-body" style={{ color: "inherit" }}>
-                                    {a.title}
-                                  </Link>
-                                </li>
-                              ))}
-                              {c.latest.slice(1, 3).map((a) => (
-                                <li key={a.id} className="py-2 hidden md:block">
                                   <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2 font-body" style={{ color: "inherit" }}>
                                     {a.title}
                                   </Link>
@@ -338,6 +292,58 @@ export default function Landing() {
                 })}
               </div>
             </div>
+
+            {/* Desktop / tablet grid (unchanged layout, md+) */}
+            <div className="lg:col-span-2 hidden md:grid grid-cols-2 xl:grid-cols-3 gap-6">
+              {clubTiles.map((c, i) => {
+                const brand = c?.id ? CLUB_BRAND[c.id] ?? "#4f46e5" : "#4f46e5";
+                const tint = hexToRgba(brand, 0.04);
+                return (
+                  <article key={c?.id ?? i} className="card border-0 p-0 flex flex-col xl:h-[var(--club-h)]" style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}>
+                    <div className="p-4 flex flex-col gap-3">
+                      <div className="flex items-center gap-3">
+                        {c?.badgeUrl ? (
+                          <img
+                            src={c.badgeUrl}
+                            alt={`${c.name} crest`}
+                            className="w-9 h-9 object-contain rounded-full"
+                            style={{ outline: `2px solid ${hexToRgba(brand, 0.35)}`, outlineOffset: 0, backgroundColor: hexToRgba("#000000", 0.04) }}
+                          />
+                        ) : (
+                          <div className="w-9 h-9 surface-2 rounded border border-border" />
+                        )}
+                        <Link href={c ? `/clubs/${c.id}` : "#"} className="text-base font-bold hover:underline text-white">
+                          {c?.name ?? "Club"}
+                        </Link>
+                      </div>
+
+                      <div className="mt-1">
+                        {c?.latest && c.latest.length > 0 ? (
+                          <ul className="divide-y divide-border">
+                            {c.latest.slice(0, 1).map((a) => (
+                              <li key={a.id} className="py-2">
+                                <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2 font-body" style={{ color: "inherit" }}>
+                                  {a.title}
+                                </Link>
+                              </li>
+                            ))}
+                            {c.latest.slice(1, 3).map((a) => (
+                              <li key={a.id} className="py-2">
+                                <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2 font-body" style={{ color: "inherit" }}>
+                                  {a.title}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <div className="text-sm text-muted-foreground">No recent article</div>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
@@ -347,7 +353,9 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-lg font-bold text-foreground">EDITORIALS & ANALYSIS</h2>
-            <Link href="/editorials" className="text-primary hover:text-foreground font-semibold text-lg">see all →</Link>
+            <Link href="/editorials" className="text-primary hover:text-foreground font-semibold text-lg">
+              see all →
+            </Link>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -359,7 +367,7 @@ export default function Landing() {
               { type: "High Press", title: "House Opinion", desc: "Punchy takes and editorial voice" },
               { type: "Weekend Roundup", title: "Complete Coverage", desc: "All the weekend's biggest stories" },
             ].map((publication, i) => (
-              <div key={i} className="bg-card rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-border">
+              <div key={i} className="bg-card rounded-[var(--radius-card)] shadow-md p-6 hover:shadow-lg transition-shadow border border-border">
                 <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3 bg-muted text-muted-foreground border border-border">{publication.type}</div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">{publication.title}</h3>
                 <p className="text-muted-foreground text-sm mb-4">{publication.desc}</p>
@@ -378,7 +386,9 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-lg font-bold text-foreground">MAILBOX</h2>
-            <Link href="/mailbox" className="text-primary hover:text-foreground font-semibold text-lg">see all →</Link>
+            <Link href="/mailbox" className="text-primary hover:text-foreground font-semibold text-lg">
+              see all →
+            </Link>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -387,7 +397,7 @@ export default function Landing() {
               { title: "Transfer Talk", desc: "Fan perspective on latest rumors" },
               { title: "Match Reaction", desc: "Supporter thoughts on weekend games" },
             ].map((item, i) => (
-              <div key={i} className="bg-card rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+              <div key={i} className="bg-card rounded-[var(--radius-card)] shadow-md p-6 hover:shadow-lg transition-shadow">
                 <div className="text-center">
                   <div className="surface-2 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center border border-border">
                     <span className="text-2xl">✉️</span>

@@ -22,13 +22,13 @@ export default function Header() {
   // Auto-create profile on first login
   useEnsureProfile();
 
-  const [open, setOpen] = useState(false);            // mobile sheet
-  const [mobileClubsOpen, setMobileClubsOpen] = useState(false); // clubs accordion (mobile)
+  const [open, setOpen] = useState(false);
+  const [mobileClubsOpen, setMobileClubsOpen] = useState(false);
 
-  const [clubsOpen, setClubsOpen] = useState(false);  // desktop mega panel
+  const [clubsOpen, setClubsOpen] = useState(false);
   const [clubs, setClubs] = useState<Club[]>([]);
 
-  // Refs for desktop hover/close behavior
+  // Desktop dropdown helpers
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const closeTimer = useRef<number | null>(null);
@@ -42,8 +42,7 @@ export default function Header() {
   };
   const scheduleClose = () => {
     cancelClose();
-    // small hover-intent delay so tiny gaps don't cause flicker
-    closeTimer.current = window.setTimeout(() => setClubsOpen(false), 220);
+    closeTimer.current = window.setTimeout(() => setClubsOpen(false), 180);
   };
 
   // Close menus on route change
@@ -73,7 +72,7 @@ export default function Header() {
     };
   }, []);
 
-  // Desktop: compute tiny invisible “bridge” from button to panel (prevents hover gap)
+  // Hover “bridge” from button to centered fixed panel (desktop)
   useEffect(() => {
     function updateBridge() {
       const el = btnRef.current;
@@ -94,7 +93,7 @@ export default function Header() {
     }
   }, [clubsOpen]);
 
-  // Desktop: close on outside click / scroll / Escape
+  // Close desktop panel on outside click / esc / scroll
   useEffect(() => {
     if (!clubsOpen) return;
 
@@ -139,10 +138,18 @@ export default function Header() {
                 <div
                   key={item.href}
                   className="relative"
-                  onMouseEnter={() => { cancelClose(); setClubsOpen(true); }}
+                  onMouseEnter={() => {
+                    cancelClose();
+                    setClubsOpen(true);
+                  }}
                   onMouseLeave={scheduleClose}
-                  onFocus={() => { cancelClose(); setClubsOpen(true); }}
-                  onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setClubsOpen(false); }}
+                  onFocus={() => {
+                    cancelClose();
+                    setClubsOpen(true);
+                  }}
+                  onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget as Node)) setClubsOpen(false);
+                  }}
                 >
                   <button
                     type="button"
@@ -154,13 +161,22 @@ export default function Header() {
                   >
                     <span className="inline-flex items-center gap-1">
                       {item.label}
-                      <svg className={`w-4 h-4 transition-transform ${clubsOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <svg
+                        className={`w-4 h-4 transition-transform duration-150 ${clubsOpen ? "rotate-180" : ""}`}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
                         <polyline points="6 9 12 15 18 9" />
                       </svg>
                     </span>
                   </button>
 
-                  {/* Centered mega-panel (desktop) */}
+                  {/* Centered mega-panel (uses .card radius/shadow for consistency) */}
                   {clubsOpen && (
                     <div
                       ref={panelRef}
@@ -168,11 +184,14 @@ export default function Header() {
                       onMouseLeave={scheduleClose}
                       className="
                         fixed left-1/2 -translate-x-1/2 top-[66px]
-                        w-[min(92vw,60rem)]
-                        bg-card border border-border rounded-2xl shadow-2xl z-[60]
-                        p-4 sm:p-5
+                        card z-[60] p-4 sm:p-5
+                        transform-gpu transition-all duration-150 ease-out
+                        opacity-100 translate-y-0
                       "
                       role="menu"
+                      style={{
+                        width: "min(92vw, 60rem)",
+                      }}
                     >
                       <div className="max-h-[70vh] overflow-auto no-scrollbar">
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-3">
@@ -180,12 +199,16 @@ export default function Header() {
                             <Link
                               key={c.id}
                               href={`/clubs/${c.id}`}
-                              className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-[hsl(var(--background-tertiary))] transition-colors"
+                              className="flex items-center gap-3 px-2 py-2 rounded-[var(--radius-card)] hover:bg-[hsl(var(--background-tertiary))] transition-colors"
                               role="menuitem"
                               onClick={() => setClubsOpen(false)}
                             >
                               {c.badgeUrl ? (
-                                <img src={c.badgeUrl} alt={`${c.name} crest`} className="w-6 h-6 object-contain rounded-full border border-border shrink-0" />
+                                <img
+                                  src={c.badgeUrl}
+                                  alt={`${c.name} crest`}
+                                  className="w-6 h-6 object-contain rounded-full border border-border shrink-0"
+                                />
                               ) : (
                                 <span className="w-6 h-6 surface-2 rounded-full border border-border shrink-0" />
                               )}
@@ -199,11 +222,17 @@ export default function Header() {
                     </div>
                   )}
 
-                  {/* Invisible hover bridge (desktop) */}
+                  {/* Invisible hover bridge (prevents gap flicker) */}
                   {clubsOpen && bridgeRect && (
                     <div
                       className="fixed z-[59]"
-                      style={{ top: "64px", left: bridgeRect.left, width: bridgeRect.width, height: "18px", background: "transparent" }}
+                      style={{
+                        top: "64px",
+                        left: bridgeRect.left,
+                        width: bridgeRect.width,
+                        height: "18px",
+                        background: "transparent",
+                      }}
                       onMouseEnter={cancelClose}
                       onMouseLeave={scheduleClose}
                     />
@@ -220,7 +249,16 @@ export default function Header() {
               >
                 {item.href === "/profile" ? (
                   <span className="inline-flex items-center gap-2">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <svg
+                      className="w-5 h-5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
                       <circle cx="12" cy="8" r="4" />
                       <path d="M6 20c0-3.314 2.686-6 6-6s6 2.686 6 6" />
                     </svg>
@@ -234,29 +272,35 @@ export default function Header() {
           })}
         </nav>
 
-        {/* Mobile hamburger */}
+        {/* Mobile hamburger (no border, animated to X) */}
         <button
           type="button"
-          className="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg border border-border text-foreground"
+          className="md:hidden relative inline-flex items-center justify-center w-10 h-10 rounded-md text-foreground hover:bg-white/5 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[hsl(var(--ring))] focus-visible:outline-offset-2"
           aria-label="Toggle menu"
           aria-expanded={open ? "true" : "false"}
           onClick={() => setOpen((v) => !v)}
         >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
+          <span className="relative block w-6 h-5">
+            <span
+              className={`absolute left-0 top-0 h-[2px] w-full bg-foreground transition-transform duration-200 transform-gpu ${open ? "translate-y-[10px] rotate-45" : ""}`}
+            />
+            <span
+              className={`absolute left-0 top-1/2 -translate-y-1/2 h-[2px] w-full bg-foreground transition-opacity duration-200 ${open ? "opacity-0" : "opacity-100"}`}
+            />
+            <span
+              className={`absolute left-0 bottom-0 h-[2px] w-full bg-foreground transition-transform duration-200 transform-gpu ${open ? "-translate-y-[10px] -rotate-45" : ""}`}
+            />
+          </span>
         </button>
 
-        {/* Mobile sheet + Clubs accordion */}
+        {/* Mobile dropdown (card radius, quick animate) */}
         {open && (
           <nav
             className="
-              md:hidden fixed inset-x-0 top-16
-              bg-card border-t border-border shadow-2xl z-50
-              max-h-[calc(100vh-4rem)] overflow-y-auto
-              p-4
+              md:hidden absolute right-4 top-16
+              card z-50 min-w-[14rem] p-2
+              origin-top-right transform-gpu transition-all duration-200 ease-out
+              scale-100 opacity-100
             "
           >
             {nav.map((item) => {
@@ -264,39 +308,61 @@ export default function Header() {
 
               if (item.href === "/clubs") {
                 return (
-                  <div key="mobile-clubs" className="mb-2">
+                  <div key="mobile-clubs" className="px-1">
                     <button
                       type="button"
-                      aria-expanded={mobileClubsOpen ? "true" : "false"}
+                      className="w-full flex items-center justify-between px-2 py-2 rounded-[var(--radius-card)] text-sm font-medium text-foreground hover:bg-[hsl(var(--background-tertiary))] transition-colors"
                       onClick={() => setMobileClubsOpen((v) => !v)}
-                      className="w-full flex items-center justify-between px-2 py-2 rounded-md text-sm font-medium
-                                 text-foreground bg-[hsl(var(--background-secondary))] border border-border"
+                      aria-expanded={mobileClubsOpen ? "true" : "false"}
                     >
                       <span>Clubs</span>
-                      <svg className={`w-4 h-4 transition-transform ${mobileClubsOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <svg
+                        className={`w-4 h-4 transition-transform duration-150 ${mobileClubsOpen ? "rotate-180" : ""}`}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
                         <polyline points="6 9 12 15 18 9" />
                       </svg>
                     </button>
 
-                    {mobileClubsOpen && (
-                      <div className="mt-2 grid grid-cols-2 gap-2 max-h-80 overflow-auto no-scrollbar">
-                        {clubs.map((c) => (
-                          <Link
-                            key={c.id}
-                            href={`/clubs/${c.id}`}
-                            onClick={() => { setOpen(false); setMobileClubsOpen(false); }}
-                            className="flex items-center gap-2 p-2 rounded-md border border-border hover:bg-[hsl(var(--background-tertiary))]"
-                          >
-                            {c.badgeUrl ? (
-                              <img src={c.badgeUrl} alt={`${c.name} crest`} className="w-6 h-6 object-contain rounded-full border border-border" />
-                            ) : (
-                              <span className="w-6 h-6 surface-2 rounded-full border border-border" />
-                            )}
-                            <span className="text-sm truncate">{c.name}</span>
-                          </Link>
-                        ))}
+                    <div
+                      className={`
+                        overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out
+                        ${mobileClubsOpen ? "max-h-[60vh] opacity-100" : "max-h-0 opacity-0"}
+                      `}
+                    >
+                      <div className="pt-2 pb-1 px-1">
+                        <div className="grid grid-cols-2 gap-2 max-h-[50vh] overflow-auto no-scrollbar">
+                          {clubs.map((c) => (
+                            <Link
+                              key={c.id}
+                              href={`/clubs/${c.id}`}
+                              className="flex items-center gap-2 px-2 py-2 rounded-[var(--radius-card)] hover:bg-[hsl(var(--background-tertiary))] transition-colors"
+                              onClick={() => {
+                                setOpen(false);
+                                setMobileClubsOpen(false);
+                              }}
+                            >
+                              {c.badgeUrl ? (
+                                <img
+                                  src={c.badgeUrl}
+                                  alt={`${c.name} crest`}
+                                  className="w-6 h-6 object-contain rounded-full border border-border shrink-0"
+                                />
+                              ) : (
+                                <span className="w-6 h-6 surface-2 rounded-full border border-border shrink-0" />
+                              )}
+                              <span className="text-sm text-foreground truncate">{c.name}</span>
+                            </Link>
+                          ))}
+                        </div>
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               }
@@ -306,8 +372,8 @@ export default function Header() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`block px-2 py-2 rounded-md text-sm font-medium ${
-                    active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  className={`block px-3 py-2 rounded-[var(--radius-card)] text-sm font-medium ${
+                    active ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-[hsl(var(--background-tertiary))]"
                   }`}
                 >
                   {item.href === "/profile" ? (
