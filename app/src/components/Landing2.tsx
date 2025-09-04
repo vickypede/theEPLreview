@@ -129,7 +129,7 @@ export default function Landing2(){
             </div>
 
             {/* Mobile: swipeable pager (3 pages x 6 items) */}
-            <div ref={pagerRef} onScroll={onPagerScroll} className="md:hidden overflow-x-auto snap-x snap-mandatory scroll-smooth">
+            <div ref={pagerRef} onScroll={onPagerScroll} className="md:hidden overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar">
               <div className="flex">
                 {mobilePages.map((page, pageIndex) => (
                   <div key={pageIndex} className="min-w-full snap-start">
@@ -177,7 +177,7 @@ export default function Landing2(){
 
             {/* Desktop: scrollable list (keep card height feel) */}
             <div className="hidden md:block">
-              <div className="max-h-96 overflow-y-auto">
+              <div className="max-h-96 overflow-y-auto no-scrollbar">
                 <ul>
                   {latestForList.map((a, i) => (
                     <li key={a?.id ?? i} className="px-4 py-4 relative after:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-[#1c1c1c] last:after:hidden">

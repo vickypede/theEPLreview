@@ -200,4 +200,8 @@
 
   /* Ensure any bg-card block gets the global card radius */
   .bg-card { border-radius: var(--radius-card); }
+
+  /* Hide scrollbars while keeping scroll behavior */
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
 }
