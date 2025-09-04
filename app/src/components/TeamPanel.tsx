@@ -97,16 +97,11 @@ export default function TeamPanel({ slug }: { slug: string }) {
     scoreAxisMapping: SCOREAXIS_IDS
   });
 
-  // Generate ScoreAxis URL with conditional parameters
-  // Liverpool (ID 8) only supports basic parameters, others support enhanced features
+  // Generate ScoreAxis URL with unified dark theme and tabs for all clubs
   const generateScoreAxisUrl = (teamId: number, instanceId: string) => {
-    if (teamId === 8) {
-      // Liverpool ID 8 - basic parameters only
-      return `https://www.scoreaxis.com/widget/team-info/${teamId}?autoHeight=1&inst=${instanceId}`;
-    } else {
-      // Other teams - enhanced parameters
-      return `https://www.scoreaxis.com/widget/team-info/${teamId}?autoHeight=1&teamLogo=1&statsTab=1&playersTab=1&inst=${instanceId}`;
-    }
+    const bodyBackground = encodeURIComponent('#333333');
+    const textColor = encodeURIComponent('#cccccc');
+    return `https://www.scoreaxis.com/widget/team-info/${teamId}?autoHeight=1&bodyBackground=${bodyBackground}&textColor=${textColor}&teamLogo=1&matchesTab=1&playersTab=1&statsTab=1&inst=${instanceId}`;
   };
 
   if (loading) {
@@ -175,7 +170,7 @@ export default function TeamPanel({ slug }: { slug: string }) {
           <div className="px-4 py-3 border-b surface-2 text-foreground">
             <h3 className="font-semibold">Team Info & Stats</h3>
           </div>
-          <div className="p-3">
+          <div className="p-3" style={{ backgroundColor: '#333333' }}>
             <iframe
               key={`info-${scoreAxisId}`}
               data-inst={instInfo}
