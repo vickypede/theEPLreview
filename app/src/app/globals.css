@@ -214,4 +214,7 @@
   .section-pt { padding-top: 2rem; }
   .section-pb { padding-bottom: 2rem; }
   .section-y-lg { padding-block: 3rem; }
+
+  /* Heading font utility to match h1–h6 */
+  .font-heading { font-family: 'Microsoft YaHei Light','Microsoft YaHei','Segoe UI',system-ui,-apple-system,sans-serif; }
 }

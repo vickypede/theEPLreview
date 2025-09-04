@@ -18,7 +18,7 @@ const nav = [
 
 export default function Header() {
   const pathname = usePathname();
-
+  
   // Auto-create profile on first login
   useEnsureProfile();
 
@@ -124,12 +124,12 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 surface border-b border-header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
-        <Link href="/" className="text-xl font-bold tracking-tight text-foreground">
+        <Link href="/" className="text-xl font-bold tracking-tight text-foreground font-heading">
           The EPL Review
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-6 font-heading">
           {nav.map((item) => {
             const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
 
