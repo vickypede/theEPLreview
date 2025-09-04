@@ -156,7 +156,7 @@ export default function Landing2(){
           <aside className="lg:col-span-1 card border-0 flex flex-col">
             <div className="px-4 py-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-foreground" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>LATEST NEWS</h2>
+                <h2 className="text-lg font-bold text-foreground">LATEST NEWS</h2>
                 <Link href="/news" className="md:hidden text-sm font-semibold text-primary hover:text-foreground">see all →</Link>
               </div>
             </div>
