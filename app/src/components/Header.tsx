@@ -88,11 +88,15 @@ export default function Header() {
                   </button>
                   {clubsOpen && (
                     <div
+                      onMouseEnter={() => setClubsOpen(true)}
+                      onMouseLeave={() => setClubsOpen(false)}
                       className="
-                        absolute left-0 top-full mt-3
+                        fixed left-1/2 -translate-x-1/2 top-[4.25rem]
                         w-[min(92vw,60rem)]
-                        bg-card border border-border rounded-2xl shadow-2xl z-50
+                        bg-card border border-border rounded-2xl shadow-2xl z-[60]
                         p-4 sm:p-5
+                        before:content-[''] before:absolute before:-top-2 before:left-1/2 before:-translate-x-1/2
+                        before:w-4 before:h-4 before:bg-card before:border-t before:border-l before:border-border before:rotate-45
                       "
                       role="menu"
                     >
