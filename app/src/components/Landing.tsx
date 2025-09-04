@@ -75,20 +75,17 @@ export default function Landing() {
           id: d.id,
           ...(d.data() as Omit<Club, "id">),
         })) as Club[];
-        const top = allClubs.filter((c: any) => (c as any).isTop6).slice(0, 6);
+        const top = allClubs.filter((c) => c.isTop6).slice(0, 6);
         const six = (
           top.length === 6
             ? top
             : allClubs.sort((a, b) => a.name.localeCompare(b.name)).slice(0, 6)
-        ).map(
-          (c) =>
-            ({
-              id: (c as any).id,
-              name: (c as any).name,
-              badgeUrl: (c as any).badgeUrl,
-              latest: [],
-            } as ClubTile)
-        );
+        ).map((c: Club) => ({
+          id: c.id,
+          name: c.name,
+          badgeUrl: c.badgeUrl,
+          latest: [],
+        })) as ClubTile[];
 
         // For each club, fetch up to 3 latest articles with graceful fallbacks
         const tiles: ClubTile[] = await Promise.all(
