@@ -246,7 +246,7 @@ export default function Landing() {
                                       )
                                     : ""}
                                 </div>
-                                <div className="text-sm text-foreground font-medium leading-snug">
+                                <div className="text-sm text-foreground font-medium leading-snug font-body">
                                   {(a as UiArticle).title}
                                 </div>
                               </Link>
@@ -304,7 +304,7 @@ export default function Landing() {
                             <div className="text-xs text-muted-foreground mb-0.5">
                               {a.publishedAt ? timeSince(a.publishedAt.toDate()) : ""}
                             </div>
-                            <div className="text-sm text-foreground font-medium leading-snug">
+                            <div className="text-sm text-foreground font-medium leading-snug font-body">
                               {a.title}
                             </div>
                           </Link>
@@ -378,7 +378,7 @@ export default function Landing() {
                                   href={a.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-sm text-foreground line-clamp-2"
+                                  className="text-sm text-foreground line-clamp-2 font-body"
                                   style={{ color: "inherit" }}
                                 >
                                   {a.title}
@@ -391,7 +391,7 @@ export default function Landing() {
                                   href={a.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-sm text-foreground line-clamp-2"
+                                  className="text-sm text-foreground line-clamp-2 font-body"
                                   style={{ color: "inherit" }}
                                 >
                                   {a.title}

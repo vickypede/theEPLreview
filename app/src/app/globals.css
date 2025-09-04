@@ -217,4 +217,6 @@
 
   /* Heading font utility to match h1–h6 */
   .font-heading { font-family: 'Microsoft YaHei Light','Microsoft YaHei','Segoe UI',system-ui,-apple-system,sans-serif; }
+  /* Body font utility to force body type where needed */
+  .font-body { font-family: 'Bahnschrift SemiBold SemiCondensed','Bahnschrift SemiBold','Bahnschrift','Segoe UI',system-ui,-apple-system,sans-serif; }
 }
