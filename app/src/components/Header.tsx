@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEnsureProfile } from "@/lib/useEnsureProfile";
+import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged, type User } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import type { Club } from "@/types";
 
 const nav = [
@@ -22,13 +23,32 @@ export default function Header() {
   // Auto-create profile on first login
   useEnsureProfile();
 
+  // Auth state (for avatar + "My profile")
+  const [user, setUser] = useState<User | null>(null);
+  useEffect(() => {
+    if (!auth) return;
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    return () => unsub();
+  }, []);
+
+  const userInitial = useMemo(() => {
+    if (!user) return "";
+    const name = user.displayName?.trim() || user.email || "";
+    return name.charAt(0).toUpperCase();
+  }, [user]);
+
+  // Mobile menu + mobile clubs accordion
   const [open, setOpen] = useState(false);
+  const [menuMounted, setMenuMounted] = useState(false);
+  const [menuAnim, setMenuAnim] = useState<"in" | "out">("in");
   const [mobileClubsOpen, setMobileClubsOpen] = useState(false);
 
+  // Desktop clubs dropdown
   const [clubsOpen, setClubsOpen] = useState(false);
-  const [clubs, setClubs] = useState<Club[]>([]);
+  const [panelMounted, setPanelMounted] = useState(false);
+  const [panelAnim, setPanelAnim] = useState<"in" | "out">("in");
 
-  // Desktop dropdown helpers
+  const [clubs, setClubs] = useState<Club[]>([]);
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const closeTimer = useRef<number | null>(null);
@@ -93,6 +113,18 @@ export default function Header() {
     }
   }, [clubsOpen]);
 
+  // Desktop panel mount/unmount animation
+  useEffect(() => {
+    if (clubsOpen) {
+      setPanelMounted(true);
+      requestAnimationFrame(() => setPanelAnim("in"));
+    } else {
+      setPanelAnim("out");
+      const t = window.setTimeout(() => setPanelMounted(false), 180);
+      return () => window.clearTimeout(t);
+    }
+  }, [clubsOpen]);
+
   // Close desktop panel on outside click / esc / scroll
   useEffect(() => {
     if (!clubsOpen) return;
@@ -121,6 +153,18 @@ export default function Header() {
     };
   }, [clubsOpen]);
 
+  // Mobile menu mount/unmount animation
+  useEffect(() => {
+    if (open) {
+      setMenuMounted(true);
+      requestAnimationFrame(() => setMenuAnim("in"));
+    } else {
+      setMenuAnim("out");
+      const t = window.setTimeout(() => setMenuMounted(false), 180);
+      return () => window.clearTimeout(t);
+    }
+  }, [open]);
+
   return (
     <header className="sticky top-0 z-50 surface border-b border-header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
@@ -131,7 +175,8 @@ export default function Header() {
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-6 font-heading">
           {nav.map((item) => {
-            const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+            const active =
+              pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
 
             if (item.href === "/clubs") {
               return (
@@ -154,7 +199,9 @@ export default function Header() {
                   <button
                     type="button"
                     ref={btnRef}
-                    className={`inline-flex items-center text-sm font-medium ${active ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                    className={`inline-flex items-center text-sm font-medium ${
+                      active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                    }`}
                     aria-haspopup="menu"
                     aria-expanded={clubsOpen ? "true" : "false"}
                     onClick={() => setClubsOpen((v) => !v)}
@@ -162,7 +209,9 @@ export default function Header() {
                     <span className="inline-flex items-center gap-1">
                       {item.label}
                       <svg
-                        className={`w-4 h-4 transition-transform duration-150 ${clubsOpen ? "rotate-180" : ""}`}
+                        className={`w-4 h-4 transition-transform duration-150 ${
+                          clubsOpen ? "rotate-180" : ""
+                        }`}
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -176,22 +225,20 @@ export default function Header() {
                     </span>
                   </button>
 
-                  {/* Centered mega-panel (uses .card radius/shadow for consistency) */}
-                  {clubsOpen && (
+                  {/* Centered mega-panel (card radius/shadow for consistency) */}
+                  {panelMounted && (
                     <div
                       ref={panelRef}
                       onMouseEnter={cancelClose}
                       onMouseLeave={scheduleClose}
-                      className="
+                      className={`
                         fixed left-1/2 -translate-x-1/2 top-[66px]
-                        card z-[60] p-4 sm:p-5
-                        transform-gpu transition-all duration-150 ease-out
-                        opacity-100 translate-y-0
-                      "
+                        card z-[60] p-4 sm:p-5 transform-gpu
+                        transition-all duration-180 ease-out
+                        ${panelAnim === "in" ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-2 scale-[0.98]"}
+                      `}
                       role="menu"
-                      style={{
-                        width: "min(92vw, 60rem)",
-                      }}
+                      style={{ width: "min(92vw, 60rem)" }}
                     >
                       <div className="max-h-[70vh] overflow-auto no-scrollbar">
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-3">
@@ -212,7 +259,11 @@ export default function Header() {
                               ) : (
                                 <span className="w-6 h-6 surface-2 rounded-full border border-border shrink-0" />
                               )}
-                              <span className="text-sm text-foreground truncate" title={c.name} style={{ maxWidth: "14rem" }}>
+                              <span
+                                className="text-sm text-foreground truncate"
+                                title={c.name}
+                                style={{ maxWidth: "14rem" }}
+                              >
                                 {c.name}
                               </span>
                             </Link>
@@ -241,32 +292,63 @@ export default function Header() {
               );
             }
 
+            // Profile link: show avatar + "My profile" when authed
+            if (item.href === "/profile") {
+              return (
+                <Link
+                  key={item.href}
+                  href="/profile"
+                  className={`inline-flex items-center gap-2 text-sm font-medium ${
+                    active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {user ? (
+                    <>
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[hsl(var(--background-tertiary))] border border-border text-[0.8rem] font-semibold">
+                        {user.photoURL ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={user.photoURL}
+                            alt="avatar"
+                            className="w-6 h-6 rounded-full object-cover"
+                          />
+                        ) : (
+                          userInitial || "•"
+                        )}
+                      </span>
+                      <span>My profile</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="w-5 h-5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M6 20c0-3.314 2.686-6 6-6s6 2.686 6 6" />
+                      </svg>
+                      <span>Log in</span>
+                    </>
+                  )}
+                </Link>
+              );
+            }
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`inline-flex items-center text-sm font-medium ${active ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                className={`inline-flex items-center text-sm font-medium ${
+                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                }`}
               >
-                {item.href === "/profile" ? (
-                  <span className="inline-flex items-center gap-2">
-                    <svg
-                      className="w-5 h-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <circle cx="12" cy="8" r="4" />
-                      <path d="M6 20c0-3.314 2.686-6 6-6s6 2.686 6 6" />
-                    </svg>
-                    <span>Log in</span>
-                  </span>
-                ) : (
-                  item.label
-                )}
+                {item.label}
               </Link>
             );
           })}
@@ -282,29 +364,36 @@ export default function Header() {
         >
           <span className="relative block w-6 h-5">
             <span
-              className={`absolute left-0 top-0 h-[2px] w-full bg-foreground transition-transform duration-200 transform-gpu ${open ? "translate-y-[10px] rotate-45" : ""}`}
+              className={`absolute left-0 top-0 h-[2px] w-full bg-foreground transition-transform duration-200 transform-gpu ${
+                open ? "translate-y-[10px] rotate-45" : ""
+              }`}
             />
             <span
-              className={`absolute left-0 top-1/2 -translate-y-1/2 h-[2px] w-full bg-foreground transition-opacity duration-200 ${open ? "opacity-0" : "opacity-100"}`}
+              className={`absolute left-0 top-1/2 -translate-y-1/2 h-[2px] w-full bg-foreground transition-opacity duration-200 ${
+                open ? "opacity-0" : "opacity-100"
+              }`}
             />
             <span
-              className={`absolute left-0 bottom-0 h-[2px] w-full bg-foreground transition-transform duration-200 transform-gpu ${open ? "-translate-y-[10px] -rotate-45" : ""}`}
+              className={`absolute left-0 bottom-0 h-[2px] w-full bg-foreground transition-transform duration-200 transform-gpu ${
+                open ? "-translate-y-[10px] -rotate-45" : ""
+              }`}
             />
           </span>
         </button>
 
         {/* Mobile dropdown (card radius, quick animate) */}
-        {open && (
+        {menuMounted && (
           <nav
-            className="
+            className={`
               md:hidden absolute right-4 top-16
-              card z-50 min-w-[14rem] p-2
-              origin-top-right transform-gpu transition-all duration-200 ease-out
-              scale-100 opacity-100
-            "
+              card z-50 min-w-[14rem] p-2 origin-top-right transform-gpu
+              transition-all duration-180 ease-out
+              ${menuAnim === "in" ? "opacity-100 scale-100" : "opacity-0 scale-95"}
+            `}
           >
             {nav.map((item) => {
-              const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+              const active =
+                pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
 
               if (item.href === "/clubs") {
                 return (
@@ -317,7 +406,9 @@ export default function Header() {
                     >
                       <span>Clubs</span>
                       <svg
-                        className={`w-4 h-4 transition-transform duration-150 ${mobileClubsOpen ? "rotate-180" : ""}`}
+                        className={`w-4 h-4 transition-transform duration-150 ${
+                          mobileClubsOpen ? "rotate-180" : ""
+                        }`}
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -367,26 +458,69 @@ export default function Header() {
                 );
               }
 
+              // Mobile profile link shows initials/avatar + proper label when logged-in
+              if (item.href === "/profile") {
+                return (
+                  <Link
+                    key={item.href}
+                    href="/profile"
+                    onClick={() => setOpen(false)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-[var(--radius-card)] text-sm font-medium ${
+                      active
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-foreground hover:bg-[hsl(var(--background-tertiary))]"
+                    }`}
+                  >
+                    {user ? (
+                      <>
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[hsl(var(--background-tertiary))] border border-border text-[0.8rem] font-semibold">
+                          {user.photoURL ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={user.photoURL}
+                              alt="avatar"
+                              className="w-6 h-6 rounded-full object-cover"
+                            />
+                          ) : (
+                            userInitial || "•"
+                          )}
+                        </span>
+                        <span>My profile</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="w-5 h-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <circle cx="12" cy="8" r="4" />
+                          <path d="M6 20c0-3.314 2.686-6 6-6s6 2.686 6 6" />
+                        </svg>
+                        <span>Log in</span>
+                      </>
+                    )}
+                  </Link>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={`block px-3 py-2 rounded-[var(--radius-card)] text-sm font-medium ${
-                    active ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-[hsl(var(--background-tertiary))]"
+                    active
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-[hsl(var(--background-tertiary))]"
                   }`}
                 >
-                  {item.href === "/profile" ? (
-                    <span className="inline-flex items-center gap-2">
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="8" r="4" />
-                        <path d="M6 20c0-3.314 2.686-6 6-6s6 2.686 6 6" />
-                      </svg>
-                      <span>Log in</span>
-                    </span>
-                  ) : (
-                    item.label
-                  )}
+                  {item.label}
                 </Link>
               );
             })}
