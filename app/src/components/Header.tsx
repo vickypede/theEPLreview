@@ -89,7 +89,7 @@ export default function Header() {
                   {clubsOpen && (
                     <div
                       className="
-                        absolute left-1/2 -translate-x-1/2 top-full mt-3
+                        absolute left-0 top-full mt-3
                         w-[min(92vw,60rem)]
                         bg-card border border-border rounded-2xl shadow-2xl z-50
                         p-4 sm:p-5
