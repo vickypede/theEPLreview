@@ -144,9 +144,8 @@ export default function Landing2(){
               const brand = c?.id ? (CLUB_BRAND[c.id] ?? '#4f46e5') : '#4f46e5';
               const tint = hexToRgba(brand, 0.04);
               return (
-              <article key={c?.id ?? i} className="card border-0 p-0 flex flex-col" style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}>
-                <div className="h-1.5 rounded-t-md" style={{ backgroundColor: brand }} />
-                <div className="p-4 flex flex-col gap-3">
+                             <article key={c?.id ?? i} className="card border-0 p-0 flex flex-col" style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}>
+                 <div className="p-4 flex flex-col gap-3">
                   <div className="flex items-center gap-3">
                     {c?.badgeUrl ? (
                     <img src={c.badgeUrl} alt={`${c.name} crest`} className="w-9 h-9 object-contain rounded-full" style={{ outline: `2px solid ${hexToRgba(brand, 0.35)}`, outlineOffset: 0, backgroundColor: hexToRgba('#000000', 0.04) }} />
