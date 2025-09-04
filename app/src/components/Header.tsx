@@ -39,7 +39,17 @@ export default function Header() {
                   `text-sm font-medium ${active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`
                 }
               >
-                {item.label}
+                {item.href === '/profile' ? (
+                  <span className="inline-flex items-center gap-2">
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="8" r="4" />
+                      <path d="M6 20c0-3.314 2.686-6 6-6s6 2.686 6 6" />
+                    </svg>
+                    <span>Log in</span>
+                  </span>
+                ) : (
+                  item.label
+                )}
               </Link>
             );
           })}
@@ -70,7 +80,17 @@ export default function Header() {
                   onClick={() => setOpen(false)}
                   className={`px-2 py-1.5 rounded-md text-sm font-medium ${active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                 >
-                  {item.label}
+                  {item.href === '/profile' ? (
+                    <span className="inline-flex items-center gap-2">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M6 20c0-3.314 2.686-6 6-6s6 2.686 6 6" />
+                      </svg>
+                      <span>Log in</span>
+                    </span>
+                  ) : (
+                    item.label
+                  )}
                 </Link>
               );
             })}
