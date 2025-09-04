@@ -1,11 +1,10 @@
 'use client';
 
 import AdminGuard from '@/components/AdminGuard';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getStorage } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, getStorage } from 'firebase/storage';
 import { useRouter } from 'next/navigation';
 
 export default function AdminPage() {
@@ -16,12 +15,23 @@ export default function AdminPage() {
   );
 }
 
+type PubType =
+  | 'final-whistle'
+  | 'matchday-radar'
+  | 'big-match-review'
+  | 'match-report'
+  | 'editorial'
+  | 'analysis';
+
+type PubStatus = 'draft' | 'review';
+
 function AdminEditor() {
   const router = useRouter();
+
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [type, setType] = useState<'final-whistle' | 'matchday-radar' | 'big-match-review' | 'match-report' | 'editorial' | 'analysis'>('editorial');
-  const [status, setStatus] = useState<'draft' | 'review'>('draft');
+  const [type, setType] = useState<PubType>('editorial');
+  const [status, setStatus] = useState<PubStatus>('draft');
   const [excerpt, setExcerpt] = useState('');
   const [featuredImage, setFeaturedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
@@ -29,68 +39,63 @@ function AdminEditor() {
   const [seoDescription, setSeoDescription] = useState('');
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const storage = getStorage();
 
+  // ---------- helpers ----------
   const generateExcerpt = () => {
-    const stripped = content.replace(/[#*`]/g, '').trim();
-    const words = stripped.split(' ').slice(0, 25);
-    setExcerpt(words.join(' ') + (words.length === 25 ? '...' : ''));
+    const stripped = content.replace(/[#*_`>~\-]|!\[.*?\]\(.*?\)|\[(.*?)\]\(.*?\)/g, '').trim();
+    const words = stripped.split(/\s+/).filter(Boolean).slice(0, 30);
+    setExcerpt(words.join(' ') + (words.length === 30 ? '…' : ''));
   };
 
   const computeStats = () => {
-    const words = content.trim().split(/\s+/).length;
-    const readingTime = Math.ceil(words / 200);
+    const words = content.trim() ? content.trim().split(/\s+/).length : 0;
+    const readingTime = Math.max(1, Math.ceil(words / 200));
     return { wordCount: words, readingTime };
   };
 
-  const generateSlug = () => {
-    return title.toLowerCase()
+  const slug = useMemo(() => {
+    return title
+      .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim();
-  };
+  }, [title]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFeaturedImage(file);
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleImageChange = (file?: File) => {
+    const f = file || null;
+    if (!f) return;
+    setFeaturedImage(f);
+    const reader = new FileReader();
+    reader.onload = (e) => setImagePreview(String(e.target?.result || ''));
+    reader.readAsDataURL(f);
   };
 
   const uploadImage = async (file: File): Promise<string> => {
     const timestamp = Date.now();
     const fileName = `publications/${timestamp}_${file.name}`;
     const storageRef = ref(storage, fileName);
-    
     await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(storageRef);
-    return downloadURL;
+    return await getDownloadURL(storageRef);
   };
 
   const create = async () => {
     if (!auth?.currentUser || !db) return;
-    
+
     setSaving(true);
-    setUploading(true);
+    setUploading(!!featuredImage);
 
     try {
       let imageURL = '';
-      
-      // Upload image if selected
+
       if (featuredImage) {
         imageURL = await uploadImage(featuredImage);
       }
 
       const { wordCount, readingTime } = computeStats();
-      const slug = generateSlug();
 
       await addDoc(collection(db!, 'publications'), {
         title,
@@ -120,7 +125,7 @@ function AdminEditor() {
       setImagePreview('');
       setSeoTitle('');
       setSeoDescription('');
-      
+
       alert('Publication created successfully!');
     } catch (error) {
       console.error('Error creating publication:', error);
@@ -131,115 +136,91 @@ function AdminEditor() {
     }
   };
 
-  const isFormValid = title.trim() && content.trim() && excerpt.trim();
+  const isFormValid = Boolean(title.trim() && content.trim() && excerpt.trim());
+  const { wordCount, readingTime } = computeStats();
 
+  // Cmd/Ctrl+S to submit
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const isSave = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's';
+      if (isSave) {
+        e.preventDefault();
+        if (isFormValid && !saving) create();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isFormValid, saving, title, content, excerpt, type, status, seoTitle, seoDescription, slug]);
+
+  // ---------- UI ----------
   return (
-    <div className="min-h-screen surface p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-card rounded-3xl shadow-lg p-8 mb-8 border border-border">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">Create Publication</h1>
-              <p className="text-muted-foreground">Write and publish your Premier League content</p>
-            </div>
-            <button 
-              onClick={() => router.push('/')}
-              className="px-6 py-3 border border-border text-foreground rounded-2xl font-medium transition-all duration-200 hover:opacity-90"
-            >
-              Back to Home
-            </button>
+    <div className="min-h-screen surface section-y">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Page header */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+          <div>
+            <h1 className="text-lg font-bold font-heading">Create publication</h1>
+            <p className="text-muted-foreground text-sm">Write and publish your Premier League content</p>
           </div>
+          <div className="flex items-center gap-2">
+            <span className="badge" title="Approximate reading time">
+              ⏱ {readingTime} min
+            </span>
+            <span className="badge" title="Word count">
+              {wordCount.toLocaleString()} words
+            </span>
+          </div>
+        </div>
 
-          <form onSubmit={(e) => { e.preventDefault(); create(); }} className="space-y-6">
-            {/* Title */}
-            <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">📝 Title *</label>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            create();
+          }}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6"
+        >
+          {/* Left column: main editor */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Title / Slug */}
+            <section className="card p-5">
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Title *</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full border border-border rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] transition-all duration-200 placeholder:text-muted-foreground surface"
-                placeholder="🔥 Enter your publication title here..."
+                className="input"
+                placeholder="🔥 Enter your publication title…"
                 required
               />
-            </div>
-
-            {/* Type and Status */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">🏷️ Content Type *</label>
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value as 'final-whistle' | 'matchday-radar' | 'big-match-review' | 'match-report' | 'editorial' | 'analysis')}
-                  className="w-full border border-border rounded-2xl p-4 surface"
-                >
-                  <option value="editorial">Editorial</option>
-                  <option value="analysis">Analysis</option>
-                  <option value="match-report">Match Report</option>
-                  <option value="big-match-review">Big Match Review</option>
-                  <option value="matchday-radar">Matchday Radar</option>
-                  <option value="final-whistle">Final Whistle</option>
-                </select>
+              <div className="mt-2 text-xs text-muted-foreground">
+                Slug: <span className="text-foreground">{slug || '—'}</span>
               </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">📊 Status *</label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as 'draft' | 'review')}
-                  className="w-full border border-border rounded-2xl p-4 surface"
-                >
-                  <option value="draft">Draft</option>
-                  <option value="review">Review</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Featured Image */}
-            <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">🖼️ Featured Image</label>
-              <div className="space-y-4">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="w-full border border-border rounded-2xl p-4 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold surface"
-                />
-                
-                {imagePreview && (
-                  <div className="border border-border rounded-2xl p-4 surface-2">
-                    <p className="text-sm font-medium text-foreground mb-2">Image Preview:</p>
-                    <img 
-                      src={imagePreview} 
-                      alt="Preview" 
-                      className="max-w-full h-48 object-cover rounded-xl"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
+            </section>
 
             {/* Content */}
-            <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">📝 Content *</label>
+            <section className="card p-5">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-semibold text-foreground">Content *</label>
+                <span className="text-xs text-muted-foreground">Markdown supported</span>
+              </div>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                rows={12}
-                className="w-full border border-border rounded-2xl p-4 font-mono text-sm placeholder:text-muted-foreground surface"
-                placeholder="📝 Write your content in markdown format here... Start with a compelling introduction..."
+                rows={16}
+                className="textarea font-mono text-sm"
+                placeholder="Write your content in Markdown…"
                 required
               />
-            </div>
+            </section>
 
             {/* Excerpt */}
-            <div>
+            <section className="card p-5">
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-semibold text-foreground">📖 Excerpt *</label>
+                <label className="block text-sm font-semibold text-foreground">Excerpt *</label>
                 <button
                   type="button"
                   onClick={generateExcerpt}
-                  className="px-3 py-1 surface-2 hover:opacity-90 text-foreground rounded-lg text-sm font-medium border border-border"
+                  className="btn btn-ghost text-sm"
                 >
                   Auto-generate
                 </button>
@@ -248,56 +229,164 @@ function AdminEditor() {
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
                 rows={3}
-                className="w-full border border-border rounded-2xl p-4 placeholder:text-muted-foreground surface"
-                placeholder="💬 Brief summary of your article (auto-generated if empty)..."
+                className="textarea"
+                placeholder="Brief summary (used on cards & SEO if blank)…"
                 required
               />
-            </div>
+            </section>
 
-            {/* SEO Fields */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">🔍 SEO Title</label>
+            {/* SEO */}
+            <section className="card p-5">
+              <h2 className="text-sm font-semibold text-foreground mb-3">SEO</h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">SEO Title</label>
+                  <input
+                    type="text"
+                    value={seoTitle}
+                    onChange={(e) => setSeoTitle(e.target.value)}
+                    className="input"
+                    placeholder="Defaults to Title"
+                  />
+                  <div className="mt-1 text-[11px] text-muted-foreground">{seoTitle.length}/60</div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">SEO Description</label>
+                  <textarea
+                    value={seoDescription}
+                    onChange={(e) => setSeoDescription(e.target.value)}
+                    rows={3}
+                    className="textarea"
+                    placeholder="Defaults to Excerpt"
+                  />
+                  <div className="mt-1 text-[11px] text-muted-foreground">{seoDescription.length}/160</div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Right column: meta & image */}
+          <aside className="lg:col-span-4 space-y-6">
+            {/* Meta */}
+            <section className="card p-5">
+              <h2 className="text-sm font-semibold text-foreground mb-3">Meta</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">Content type *</label>
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value as PubType)}
+                    className="select"
+                  >
+                    <option value="editorial">Editorial</option>
+                    <option value="analysis">Analysis</option>
+                    <option value="match-report">Match Report</option>
+                    <option value="big-match-review">Big Match Review</option>
+                    <option value="matchday-radar">Matchday Radar</option>
+                    <option value="final-whistle">Final Whistle</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">Status *</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setStatus('draft')}
+                      className={`btn ${status === 'draft' ? 'btn-primary' : 'btn-ghost'}`}
+                    >
+                      Draft
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStatus('review')}
+                      className={`btn ${status === 'review' ? 'btn-primary' : 'btn-ghost'}`}
+                    >
+                      Review
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Image uploader */}
+            <section className="card p-5">
+              <h2 className="text-sm font-semibold text-foreground mb-3">Featured image</h2>
+
+              <div
+                className={`
+                  border-2 border-dashed rounded-[var(--radius-card)]
+                  ${isDragging ? 'border-[hsl(var(--ring))] surface-2' : 'border-border surface-2'}
+                  p-4 text-center transition
+                `}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                  const f = e.dataTransfer.files?.[0];
+                  if (f) handleImageChange(f);
+                }}
+              >
                 <input
-                  type="text"
-                  value={seoTitle}
-                  onChange={(e) => setSeoTitle(e.target.value)}
-                  className="w-full border border-border rounded-2xl p-4 placeholder:text-muted-foreground surface"
-                  placeholder="🔍 SEO optimized title (defaults to main title)"
+                  id="file"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageChange(e.target.files?.[0])}
+                  className="hidden"
                 />
+                <label htmlFor="file" className="cursor-pointer inline-flex flex-col items-center">
+                  <svg className="w-8 h-8 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span className="text-sm">Click to upload or drag & drop</span>
+                  <span className="text-xs text-muted-foreground">PNG, JPG up to ~5MB</span>
+                </label>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">📝 SEO Description</label>
-                <textarea
-                  value={seoDescription}
-                  onChange={(e) => setSeoDescription(e.target.value)}
-                  rows={2}
-                  className="w-full border border-border rounded-2xl p-4 placeholder:text-muted-foreground surface"
-                  placeholder="🔍 SEO description for search engines (defaults to excerpt)..."
-                />
-              </div>
-            </div>
+              {imagePreview && (
+                <div className="mt-3 surface-2 border border-border rounded-[var(--radius-card)] p-3">
+                  <p className="text-xs text-muted-foreground mb-2">Preview</p>
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-40 object-cover rounded-[var(--radius-card)]"
+                  />
+                </div>
+              )}
+            </section>
 
-            {/* Submit Button */}
-            <div className="text-center pt-6">
+            {/* Primary actions (sticky on desktop) */}
+            <section className="card p-4 sticky top-[88px] space-y-3">
               <button
                 type="submit"
                 disabled={!isFormValid || saving}
-                className="bg-primary hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-semibold py-4 px-12 rounded-2xl transition-all duration-200 transform hover:scale-105 shadow-lg"
+                className="btn btn-primary w-full disabled:opacity-60"
               >
                 {saving ? (
-                  <div className="flex items-center gap-3">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground"></div>
-                    {uploading ? 'Uploading Image...' : 'Creating Publication...'}
-                  </div>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></span>
+                    {uploading ? 'Uploading image…' : 'Creating…'}
+                  </span>
                 ) : (
-                  `Create ${status === 'draft' ? 'Draft' : 'Review'}`
+                  `Create ${status === 'draft' ? 'draft' : 'review'}`
                 )}
               </button>
-            </div>
-          </form>
-        </div>
+              <button
+                type="button"
+                onClick={() => router.push('/')}
+                className="btn w-full"
+              >
+                Back to home
+              </button>
+            </section>
+          </aside>
+        </form>
       </div>
     </div>
   );
