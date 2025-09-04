@@ -208,4 +208,10 @@
 
   /* Header divider color */
   .border-header { border-color: #3e5e5b; }
+
+  /* Section spacing utilities (standardize vertical rhythm) */
+  .section-y { padding-block: 2rem; }
+  .section-pt { padding-top: 2rem; }
+  .section-pb { padding-bottom: 2rem; }
+  .section-y-lg { padding-block: 3rem; }
 }

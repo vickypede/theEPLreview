@@ -197,7 +197,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen surface">
       {/* ======================= NEWS (merged from Landing2) ======================= */}
-      <section className="pt-8 pb-8">
+      <section className="section-y">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
 
@@ -416,7 +416,7 @@ export default function Landing() {
       {/* ===================== /NEWS ===================== */}
 
       {/* ================== EDITORIALS & ANALYSIS ================== */}
-      <section className="py-16 surface-2">
+      <section className="section-y surface-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-lg font-bold text-foreground">
@@ -491,7 +491,7 @@ export default function Landing() {
       </section>
 
       {/* ================== MAILBOX ================== */}
-      <section className="py-16">
+      <section className="section-y">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-lg font-bold text-foreground">MAILBOX</h2>
