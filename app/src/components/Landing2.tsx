@@ -63,20 +63,53 @@ export default function Landing2(){
         const six = (top.length === 6 ? top : allClubs.sort((a,b)=>a.name.localeCompare(b.name)).slice(0,6))
           .map(c => ({ id: c.id, name: c.name, badgeUrl: c.badgeUrl, latest: [] })) as ClubTile[];
 
-        // For each club fetch its latest article
-        const tiles: ClubTile[] = [];
-        for (const c of six){
+        // For each club fetch up to 3 latest articles with graceful fallbacks
+        const tiles: ClubTile[] = await Promise.all(six.map(async (c) => {
+          if (!db) return { ...c, latest: [] } as ClubTile;
           const clubArticlesRef = collection(db, 'articles');
-          const clubQ = query(
-            clubArticlesRef,
-            where('clubs', 'array-contains', c.id),
-            orderBy('publishedAt', 'desc'),
-            limit(3)
-          );
-          const aSnap = await getDocs(clubQ);
-          const list = aSnap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<UiArticle,'id'>) })) as UiArticle[];
-          tiles.push({ ...c, latest: list });
-        }
+          let results: UiArticle[] = [];
+          try {
+            const primaryQ = query(
+              clubArticlesRef,
+              where('clubs', 'array-contains', c.id),
+              orderBy('publishedAt', 'desc'),
+              limit(3)
+            );
+            const primarySnap = await getDocs(primaryQ);
+            results = primarySnap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<UiArticle,'id'>) })) as UiArticle[];
+          } catch {}
+
+          if (results.length < 3) {
+            try {
+              const fallbackQ = query(
+                clubArticlesRef,
+                where('clubs', 'array-contains', c.id),
+                orderBy('updatedAt', 'desc'),
+                limit(5)
+              );
+              const fbSnap = await getDocs(fallbackQ);
+              const fb = fbSnap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<UiArticle,'id'>) })) as UiArticle[];
+              const existing = new Set(results.map(r => r.id));
+              for (const a of fb) if (!existing.has(a.id) && results.length < 3) results.push(a);
+            } catch {}
+          }
+
+          if (results.length < 3) {
+            try {
+              const basicQ = query(
+                clubArticlesRef,
+                where('clubs', 'array-contains', c.id),
+                limit(3 - results.length)
+              );
+              const bSnap = await getDocs(basicQ);
+              const b = bSnap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<UiArticle,'id'>) })) as UiArticle[];
+              const existing = new Set(results.map(r => r.id));
+              for (const a of b) if (!existing.has(a.id) && results.length < 3) results.push(a);
+            } catch {}
+          }
+
+          return { ...c, latest: results } as ClubTile;
+        }));
 
         if (mounted){
           setLatestNews(newsList);
@@ -123,7 +156,7 @@ export default function Landing2(){
           <aside className="lg:col-span-1 card border-0 flex flex-col">
             <div className="px-4 py-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-foreground">LATEST NEWS</h2>
+                <h2 className="text-lg font-bold text-foreground" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>LATEST NEWS</h2>
                 <Link href="/news" className="md:hidden text-sm font-semibold text-primary hover:text-foreground">see all →</Link>
               </div>
             </div>
