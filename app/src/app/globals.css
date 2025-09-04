@@ -96,7 +96,7 @@
   html, body { height: 100%; }
 
   body{
-    font-family: 'Bahnschrift SemiBold SemiCondensed','Bahnschrift SemiBold','Bahnschrift','Segoe UI',system-ui,-apple-system,sans-serif;
+    font-family: 'Calibri','Segoe UI',system-ui,-apple-system,sans-serif;
     @apply text-foreground;
     background:
       radial-gradient(1200px 800px at 10% -20%, hsl(var(--background) / 0.0) 0%, hsl(var(--background-secondary) / 0.35) 100%),
@@ -218,5 +218,5 @@
   /* Heading font utility to match h1–h6 */
   .font-heading { font-family: 'Microsoft YaHei Light','Microsoft YaHei','Segoe UI',system-ui,-apple-system,sans-serif; }
   /* Body font utility to force body type where needed */
-  .font-body { font-family: 'Bahnschrift SemiBold SemiCondensed','Bahnschrift SemiBold','Bahnschrift','Segoe UI',system-ui,-apple-system,sans-serif; }
+  .font-body { font-family: 'Calibri','Segoe UI',system-ui,-apple-system,sans-serif; }
 }
