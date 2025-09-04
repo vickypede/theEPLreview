@@ -154,7 +154,7 @@ export default function Header() {
                   <button
                     type="button"
                     ref={btnRef}
-                    className={`text-sm font-medium ${active ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                    className={`inline-flex items-center text-sm font-medium ${active ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
                     aria-haspopup="menu"
                     aria-expanded={clubsOpen ? "true" : "false"}
                     onClick={() => setClubsOpen((v) => !v)}
@@ -242,7 +242,7 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-sm font-medium ${active ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                className={`inline-flex items-center text-sm font-medium ${active ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
               >
                 {item.href === "/profile" ? (
                   <span className="inline-flex items-center gap-2">
