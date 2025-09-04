@@ -172,11 +172,12 @@ export default function Landing() {
     ? Array.from({ length: 18 }, () => null)
     : latestNews.slice(0, 18);
 
-  // Mobile pager: 3 pages, 6 items each
+  // Mobile pager: 4 pages, 5 items each
   const mobilePages: (UiArticle | null)[][] = [
-    latestForList.slice(0, 6),
-    latestForList.slice(6, 12),
-    latestForList.slice(12, 18),
+    latestForList.slice(0, 5),
+    latestForList.slice(5, 10),
+    latestForList.slice(10, 15),
+    latestForList.slice(15, 20),
   ];
   const [mobilePage, setMobilePage] = useState(0);
   const pagerRef = useRef<HTMLDivElement | null>(null);
@@ -285,8 +286,8 @@ export default function Landing() {
               </div>
 
               {/* Desktop list */}
-              <div className="hidden md:block">
-                <div className="max-h-96 overflow-y-auto no-scrollbar">
+              <div className="hidden md:flex flex-1 min-h-0">
+                <div className="h-full max-h-96 overflow-y-auto no-scrollbar w-full">
                   <ul>
                     {latestForList.map((a, i) => (
                       <li
@@ -320,7 +321,7 @@ export default function Landing() {
               </div>
 
               {/* See all (desktop) */}
-              <div className="px-4 pt-3 pb-1 hidden md:flex justify-center">
+              <div className="mt-[3px] px-4 pb-[3px] hidden md:flex justify-center">
                 <Link
                   href="/news"
                   className="inline-flex items-center gap-1 text-sm font-semibold"
