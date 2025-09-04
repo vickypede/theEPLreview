@@ -90,8 +90,6 @@ export default function Landing2(){
     return () => { mounted = false; };
   }, []);
 
-  if (!db) return null;
-
   const latestForList: (UiArticle | null)[] = loading
     ? Array.from({ length: 18 }, () => null)
     : latestNews.slice(0, 18);
@@ -114,6 +112,8 @@ export default function Landing2(){
   const clubTiles: (ClubTile | null)[] = loading
     ? Array.from({ length: 6 }, () => null)
     : clubs;
+
+  if (!db) return null;
 
   return (
     <div className="min-h-screen surface">
@@ -232,7 +232,7 @@ export default function Landing2(){
                 <div className="mt-1">
                   {c?.latest && c.latest.length > 0 ? (
                     <ul className="divide-y divide-border">
-                      {c.latest.slice(0,1).map((a, idx) => (
+                      {c.latest.slice(0,1).map((a) => (
                         <li key={a.id} className="py-2">
                           <Link href={a.url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground line-clamp-2" style={{ color: 'inherit' }}>
                             {a.title}
