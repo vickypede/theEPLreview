@@ -24,7 +24,7 @@ export default function Header() {
   useEffect(() => { setOpen(false); }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-50 surface border-b border-border">
+    <header className="sticky top-0 z-50 surface border-b border-header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
         <Link href="/" className="text-xl font-bold tracking-tight text-foreground">The EPL Review</Link>
         {/* Desktop nav */}

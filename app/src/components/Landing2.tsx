@@ -157,7 +157,7 @@ export default function Landing2(){
             <div className="px-4 py-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold text-foreground">LATEST NEWS</h2>
-                <Link href="/news" className="md:hidden text-sm font-semibold text-primary hover:text-foreground">see all →</Link>
+                <Link href="/news" className="md:hidden text-sm font-semibold" style={{ color: '#3e5e5b' }}>see all →</Link>
               </div>
             </div>
 
@@ -236,7 +236,7 @@ export default function Landing2(){
             </div>
 
             <div className="px-4 py-3 hidden md:flex justify-center">
-              <Link href="/news" className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-foreground">
+              <Link href="/news" className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: '#3e5e5b' }}>
                 <span>see all</span>
                 <span aria-hidden>→</span>
               </Link>
