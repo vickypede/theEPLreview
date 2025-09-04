@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEnsureProfile } from '@/lib/useEnsureProfile';
@@ -25,6 +25,17 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [clubsOpen, setClubsOpen] = useState(false);
   const [clubs, setClubs] = useState<Club[]>([]);
+  const btnRef = useRef<HTMLButtonElement | null>(null);           // "Clubs" button
+  const closeTimer = useRef<number | null>(null);                   // hover-intent timer
+  const [bridgeRect, setBridgeRect] = useState<{left: number; width: number} | null>(null); // invisible hover bridge
+
+  const cancelClose = () => {
+    if (closeTimer.current) { window.clearTimeout(closeTimer.current); closeTimer.current = null; }
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer.current = window.setTimeout(() => setClubsOpen(false), 140);
+  };
   useEffect(() => { setOpen(false); }, [pathname]);
 
   useEffect(() => {
@@ -44,6 +55,27 @@ export default function Header() {
     return () => { mounted = false; };
   }, []);
 
+  // Position the invisible bridge under the "Clubs" button
+  useEffect(() => {
+    function update() {
+      const el = btnRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const width = Math.max(48, r.width * 0.6);
+      const left = r.left + r.width / 2 - width / 2;
+      setBridgeRect({ left, width });
+    }
+    if (clubsOpen) {
+      update();
+      window.addEventListener('resize', update);
+      window.addEventListener('scroll', update, true);
+      return () => {
+        window.removeEventListener('resize', update);
+        window.removeEventListener('scroll', update, true);
+      };
+    }
+  }, [clubsOpen]);
+
   return (
     <header className="sticky top-0 z-50 surface border-b border-header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
@@ -57,15 +89,16 @@ export default function Header() {
                 <div
                   key={item.href}
                   className="relative"
-                  onMouseEnter={() => setClubsOpen(true)}
-                  onMouseLeave={() => setClubsOpen(false)}
-                  onFocus={() => setClubsOpen(true)}
+                  onMouseEnter={() => { cancelClose(); setClubsOpen(true); }}
+                  onMouseLeave={scheduleClose}
+                  onFocus={() => { cancelClose(); setClubsOpen(true); }}
                   onBlur={(e) => {
                     if (!e.currentTarget.contains(e.relatedTarget as Node)) setClubsOpen(false);
                   }}
                 >
                   <button
                     type="button"
+                    ref={btnRef}
                     className={`text-sm font-medium ${active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                     aria-haspopup="menu"
                     aria-expanded={clubsOpen ? 'true' : 'false'}
@@ -88,15 +121,13 @@ export default function Header() {
                   </button>
                   {clubsOpen && (
                     <div
-                      onMouseEnter={() => setClubsOpen(true)}
-                      onMouseLeave={() => setClubsOpen(false)}
+                      onMouseEnter={cancelClose}
+                      onMouseLeave={scheduleClose}
                       className="
                         fixed left-1/2 -translate-x-1/2 top-[4.25rem]
                         w-[min(92vw,60rem)]
                         bg-card border border-border rounded-2xl shadow-2xl z-[60]
                         p-4 sm:p-5
-                        before:content-[''] before:absolute before:-top-2 before:left-1/2 before:-translate-x-1/2
-                        before:w-4 before:h-4 before:bg-card before:border-t before:border-l before:border-border before:rotate-45
                       "
                       role="menu"
                     >
@@ -128,6 +159,20 @@ export default function Header() {
                         ))}
                       </div>
                     </div>
+                  )}
+                  {clubsOpen && bridgeRect && (
+                    <div
+                      className="fixed z-[59]"
+                      style={{
+                        top: '64px',
+                        left: bridgeRect.left,
+                        width: bridgeRect.width,
+                        height: '16px',
+                        background: 'transparent',
+                      }}
+                      onMouseEnter={cancelClose}
+                      onMouseLeave={scheduleClose}
+                    />
                   )}
                 </div>
               );
