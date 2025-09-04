@@ -203,7 +203,7 @@ export default function Landing() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left: Latest headlines list (18 items; swipeable on mobile) */}
-            <aside className="lg:col-span-1 card border-0 flex flex-col min-h-[460px]">
+            <aside className="lg:col-span-1 card border-0 flex flex-col relative">
               <div className="px-4 py-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold text-foreground">LATEST NEWS</h2>
@@ -286,8 +286,8 @@ export default function Landing() {
               </div>
 
               {/* Desktop list */}
-              <div className="hidden md:flex flex-1 min-h-0">
-                <div className="h-full max-h-96 overflow-y-auto no-scrollbar w-full">
+              <div className="hidden md:block">
+                <div className="max-h-96 overflow-y-auto no-scrollbar w-full pb-[3px]">
                   <ul>
                     {latestForList.map((a, i) => (
                       <li
@@ -321,7 +321,7 @@ export default function Landing() {
               </div>
 
               {/* See all (desktop) */}
-              <div className="mt-[3px] px-4 pb-[3px] hidden md:flex justify-center">
+              <div className="px-4 hidden md:flex justify-center absolute bottom-[3px] left-0 right-0">
                 <Link
                   href="/news"
                   className="inline-flex items-center gap-1 text-sm font-semibold"
