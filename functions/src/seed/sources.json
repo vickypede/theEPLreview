@@ -538,6 +538,13 @@
     "url": "https://www.msn.com/en-ca/sports/soccer/",
     "clubSlugs": [],
     "isActive": true
+  },
+  "tbr-football": {
+    "name": "TBR Football",
+    "type": "html",
+    "url": "https://tbrfootball.com/",
+    "clubSlugs": [],
+    "isActive": true
   }
 }
 

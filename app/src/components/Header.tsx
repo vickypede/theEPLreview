@@ -59,6 +59,10 @@ export default function Header() {
                   className="relative"
                   onMouseEnter={() => setClubsOpen(true)}
                   onMouseLeave={() => setClubsOpen(false)}
+                  onFocus={() => setClubsOpen(true)}
+                  onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget as Node)) setClubsOpen(false);
+                  }}
                 >
                   <button
                     type="button"
@@ -66,27 +70,56 @@ export default function Header() {
                     aria-haspopup="menu"
                     aria-expanded={clubsOpen ? 'true' : 'false'}
                   >
-                    {item.label}
+                    <span className="inline-flex items-center gap-1">
+                      {item.label}
+                      <svg
+                        className={`w-4 h-4 transition-transform ${clubsOpen ? 'rotate-180' : ''}`}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </span>
                   </button>
                   {clubsOpen && (
-                    <div className="absolute left-1/2 -translate-x-1/2 top-8 bg-card border border-border rounded-xl shadow p-4 z-50">
-                      <div className="grid grid-cols-5 gap-3">
+                    <div
+                      className="
+                        absolute left-1/2 -translate-x-1/2 top-full mt-3
+                        w-[min(92vw,60rem)]
+                        bg-card border border-border rounded-2xl shadow-2xl z-50
+                        p-4 sm:p-5
+                      "
+                      role="menu"
+                    >
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-3">
                         {clubs.map((c) => (
                           <Link
                             key={c.id}
                             href={`/clubs/${c.id}`}
-                            className="flex items-center gap-2 px-2 py-2 rounded hover:bg-[hsl(var(--background-tertiary))]"
+                            className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-[hsl(var(--background-tertiary))] transition-colors"
+                            role="menuitem"
                           >
                             {c.badgeUrl ? (
                               <img
                                 src={c.badgeUrl}
                                 alt={`${c.name} crest`}
-                                className="w-6 h-6 object-contain rounded-full border border-border"
+                                className="w-6 h-6 object-contain rounded-full border border-border shrink-0"
                               />
                             ) : (
-                              <span className="w-6 h-6 surface-2 rounded-full border border-border" />
+                              <span className="w-6 h-6 surface-2 rounded-full border border-border shrink-0" />
                             )}
-                            <span className="text-sm text-foreground">{c.name}</span>
+                            <span
+                              className="text-sm text-foreground truncate"
+                              title={c.name}
+                              style={{ maxWidth: '14rem' }}
+                            >
+                              {c.name}
+                            </span>
                           </Link>
                         ))}
                       </div>
