@@ -32,7 +32,7 @@ export default function PublicationCard({
   rightSlot?: ReactNode;
 }) {
   return (
-    <article className="rounded-2xl overflow-hidden bg-white shadow hover:shadow-md transition-transform hover:-translate-y-0.5">
+    <article className="h-full flex flex-col rounded-2xl overflow-hidden bg-white shadow hover:shadow-md transition-transform hover:-translate-y-0.5">
       <div className="relative aspect-[16/10]">
         {featuredImage ? (
           <Image
@@ -48,8 +48,10 @@ export default function PublicationCard({
         )}
       </div>
 
-      <div className="p-3 md:p-4">
-        <div className="flex items-center justify-between gap-2 mb-2">
+      {/* 3-row layout: [badges] [title+excerpt] [meta] */}
+      <div className="p-3 md:p-4 grid grid-rows-[auto_1fr_auto] gap-2 min-h-[170px]">
+        {/* Top badges / right slot */}
+        <div className="flex items-center justify-between gap-2">
           <div className="inline-flex items-center gap-2">
             {type ? (
               <span
@@ -66,26 +68,40 @@ export default function PublicationCard({
           {rightSlot}
         </div>
 
-        <h3 className="text-base md:text-lg font-semibold text-slate-900 leading-snug">
-          {title}
-        </h3>
-
-        {excerpt ? (
-          <p
-            className="mt-1 text-sm text-slate-700"
+        {/* Middle content: title + excerpt (both clamped) */}
+        <div className="min-h-0">
+          <h3
+            className="text-base md:text-lg font-semibold text-slate-900 leading-snug"
             style={{
               display: "-webkit-box",
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
             }}
+            title={title}
           >
-            {excerpt}
-          </p>
-        ) : null}
+            {title}
+          </h3>
 
-        <div className="mt-3 flex items-center justify-between text-xs text-slate-600">
-          <span>{authorByline}</span>
+          {excerpt ? (
+            <p
+              className="mt-1 text-sm text-slate-700"
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+              title={excerpt}
+            >
+              {excerpt}
+            </p>
+          ) : null}
+        </div>
+
+        {/* Bottom meta row pinned */}
+        <div className="flex items-center justify-between text-xs text-slate-600">
+          <span className="truncate">{authorByline}</span>
           <span>{prettyDate(date)}</span>
         </div>
       </div>
