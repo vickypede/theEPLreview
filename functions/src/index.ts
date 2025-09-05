@@ -15,7 +15,7 @@ import { setGlobalOptions } from "firebase-functions";
 import { onRequest } from "firebase-functions/https";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
-import { https } from "firebase-functions/v2";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 import Parser from "rss-parser";
 import * as cheerio from "cheerio";
@@ -883,7 +883,7 @@ export const seedClubsHttp = onRequest({ timeoutSeconds: 300 }, async (_req, res
 });
 
 // -----------------------------------------------------------------------------
-// NEW: Publications system (editorial content management)
+// NEW: Publications system (editorial content management) — loop-safe version
 // -----------------------------------------------------------------------------
 
 function makeSlug(input: string) {
@@ -911,60 +911,108 @@ function calcReading(data: { content?: string }) {
   return { wordCount: words, readingTime: mins, excerpt: text.slice(0, 160) };
 }
 
-// 1) Tidy / enrich on create/update
+// Build a stable hash of only the *editor-controlled* inputs to decide if tidy is needed
+function tidyInputHash(after: any) {
+  const scheduledAtMs =
+    typeof after?.scheduledAt?.toMillis === 'function'
+      ? after.scheduledAt.toMillis()
+      : typeof after?.scheduledAt === 'number'
+        ? after.scheduledAt
+        : 0;
+
+  // We purposely DO NOT include publishedAt/updatedAt/createdAt/slug in the hash
+  // to avoid re-trigger cascades from server-side timestamps or slug reservation.
+  const base = {
+    title: String(after?.title || ''),
+    content: String(after?.content || ''),
+    status: String(after?.status || ''),
+    scheduledAt: scheduledAtMs,
+    // If editor explicitly wrote an excerpt, we keep it and don't auto-generate
+    hasManualExcerpt: Boolean(after?.excerpt && String(after.excerpt).trim()),
+  };
+  return crypto.createHash('sha1').update(JSON.stringify(base)).digest('hex');
+}
+
+// 1) Tidy / enrich on create/update — loop-safe & idempotent
 export const publicationsTidy = onDocumentWritten(
   {
     document: 'publications/{id}',
-    region: 'us-central1'
+    region: 'us-central1',
+    // Avoid automatic retries from transient errors causing extra invocations
+    // (We handle idempotency anyway.)
+    retry: false,
   },
   async (event) => {
     const before = event.data?.before?.data() as any | undefined;
     const after = event.data?.after?.data() as any | undefined;
     if (!after) return; // deleted
 
-    const ref = event.data!.after!.ref; // current doc ref
+    const ref = event.data!.after!.ref;
+
+    // ----- Idempotency gate: if inputs haven't changed, do nothing -----
+    const incomingHash = tidyInputHash(after);
+    if (after._tidyHash === incomingHash) {
+      // No editor-facing changes since last tidy → exit with no write
+      return;
+    }
+
     const updates: Record<string, any> = {};
+    const now = admin.firestore.FieldValue.serverTimestamp();
 
     // timestamps
-    const now = admin.firestore.FieldValue.serverTimestamp();
     if (!before) updates.createdAt = now;
-    updates.updatedAt = now;
+    // NOTE: updatedAt will be set only when we actually have something to update,
+    // which we do (the hash differs), preventing infinite loops.
 
-    // slug (generate once, reserve)
-    if (!after.slug || (before && before.title !== after.title && !before.slug)) {
-      // If slug missing (new doc) or legacy doc changed title without slug, generate
+    // ----- Slug: generate once (with reservation), or freeze previous if someone tried to change it -----
+    if (!after.slug) {
       let slug = makeSlug(after.title || 'post');
       let tries = 0;
       while (tries < 5) {
         const reserve = db.doc(`slugs/${slug}`);
         const snap = await reserve.get();
         if (!snap.exists) {
-          await reserve.set({ publicationId: ref.id, createdAt: admin.firestore.FieldValue.serverTimestamp() });
+          await reserve.set({
+            publicationId: ref.id,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          updates.slug = slug;
           break;
         }
         slug = makeSlug(after.title || 'post');
         tries++;
       }
-      updates.slug = slug;
+      if (!updates.slug) {
+        // fallback if reservation collisions are crazy
+        updates.slug = makeSlug(`post-${ref.id.slice(0, 6)}`);
+      }
     } else if (before && before.slug && before.slug !== after.slug) {
-      // Prevent manual slug changes
+      // Prevent manual slug edits; restore previous
       updates.slug = before.slug;
     }
 
-    // content niceties
+    // ----- Reading stats & excerpt (only populate excerpt if editor didn't set one) -----
     const { wordCount, readingTime, excerpt } = calcReading(after);
-    if (!after.excerpt && excerpt) updates.excerpt = excerpt;
-    updates.wordCount = wordCount;
-    updates.readingTime = readingTime;
 
-    // status sanity: published must have publishedAt
+    if (after.wordCount !== wordCount) updates.wordCount = wordCount;
+    if (after.readingTime !== readingTime) updates.readingTime = readingTime;
+
+    if ((!after.excerpt || !String(after.excerpt).trim()) && excerpt) {
+      updates.excerpt = excerpt;
+    }
+    // If editor provided excerpt, we keep it as-is.
+
+    // ----- Status sanity: published must have publishedAt (one-time) -----
     if (after.status === 'published' && !after.publishedAt) {
-      updates.publishedAt = admin.firestore.FieldValue.serverTimestamp();
+      updates.publishedAt = now;
     }
 
-    if (Object.keys(updates).length) {
-      await ref.set(updates, { merge: true });
-    }
+    // ----- Commit the tidy marker & timestamps (single write) -----
+    updates._tidyHash = incomingHash; // idempotency marker
+    updates.tidiedAt = now;
+    updates.updatedAt = now;
+
+    await ref.set(updates, { merge: true });
   }
 );
 
@@ -973,43 +1021,45 @@ export const publishDue = onSchedule(
   {
     schedule: 'every 1 minutes',
     timeZone: 'America/Toronto',
-    region: 'us-central1'
+    region: 'us-central1',
   },
   async () => {
-    const now = admin.firestore.Timestamp.now();
+    const nowTs = admin.firestore.Timestamp.now();
     const snap = await db
       .collection('publications')
       .where('status', '==', 'scheduled')
-      .where('scheduledAt', '<=', now)
+      .where('scheduledAt', '<=', nowTs)
       .orderBy('scheduledAt', 'asc')
       .limit(50)
       .get();
 
+    if (snap.empty) return;
     const batch = db.batch();
     snap.docs.forEach((doc) => {
       batch.update(doc.ref, {
         status: 'published',
-        publishedAt: admin.firestore.FieldValue.serverTimestamp()
+        publishedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     });
-    if (!snap.empty) await batch.commit();
+    await batch.commit();
   }
 );
 
 // 3) Callable to sync admin custom claim based on allowlist
-export const syncAdminClaim = https.onCall({ region: 'us-central1' }, async (req) => {
+export const syncAdminClaim = onCall({ region: "us-central1" }, async (req) => {
   const uid = req.auth?.uid;
   const email = (req.auth?.token?.email as string | undefined)?.toLowerCase();
-  if (!uid || !email) throw new https.HttpsError('unauthenticated', 'Sign in first');
+  if (!uid || !email) throw new HttpsError("unauthenticated", "Sign in first");
 
   // Accept either: admins/{email} doc OR a doc in admins collection with field email == email
   const directDoc = await db.doc(`admins/${email}`).get();
-  let shouldBeAdmin = directDoc.exists && directDoc.get('isActive') === true;
+  let shouldBeAdmin = directDoc.exists && directDoc.get("isActive") === true;
   if (!shouldBeAdmin) {
     const q = await db
-      .collection('admins')
-      .where('email', '==', email)
-      .where('isActive', '==', true)
+      .collection("admins")
+      .where("email", "==", email)
+      .where("isActive", "==", true)
       .limit(1)
       .get();
     shouldBeAdmin = !q.empty;

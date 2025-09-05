@@ -530,5 +530,19 @@
         "url": "https://www.football365.com/wolves/",
         "clubSlugs": ["wolves"],
         "isActive": true
+    },
+    "msn-soccer": {
+        "name": "MSN Sports Soccer",
+        "type": "html",
+        "url": "https://www.msn.com/en-ca/sports/soccer/",
+        "clubSlugs": [],
+        "isActive": true
+    },
+    "tbr-football": {
+        "name": "TBR Football",
+        "type": "html",
+        "url": "https://tbrfootball.com/",
+        "clubSlugs": [],
+        "isActive": true
     }
 }
