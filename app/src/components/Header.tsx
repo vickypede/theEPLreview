@@ -20,7 +20,7 @@ const nav = [
 
 export default function Header() {
   const pathname = usePathname();
-
+  
   // Auto-create profile on first login
   useEnsureProfile();
 
@@ -171,7 +171,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
         <Link href="/" className="inline-flex items-center" aria-label="theEPLreview home">
           <Image
-            src="/assets/logo/logo_header/logo_header_inline.webp"
+            src="/assets/logo/logo_header/logo_header_inline.png"
             alt="theEPLreview"
             width={240}
             height={40}
