@@ -207,7 +207,7 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
 
   /* Header divider color */
-  .border-header { border-color: #3e5e5b; }
+  .border-header { border-color: #f25a87; }
 
   /* Section spacing utilities (standardize vertical rhythm) */
   .section-y { padding-block: 2rem; }

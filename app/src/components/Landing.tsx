@@ -234,7 +234,7 @@ export default function Landing() {
 
               {/* See all (desktop) */}
               <div className="px-4 py-3 hidden md:flex justify-center">
-                <Link href="/news" className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: "#3e5e5b" }}>
+                <Link href="/news" className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: "#f25a87" }}>
                   <span>see all</span>
                   <span aria-hidden>→</span>
                 </Link>
