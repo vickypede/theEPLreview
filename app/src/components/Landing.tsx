@@ -278,7 +278,7 @@ export default function Landing() {
                           )}
                           <Link
                             href={c ? `/clubs/${c.id}` : "#"}
-                            className="text-base font-bold text-white hover:underline truncate max-w-[65%]"
+                            className="text-base font-bold text-white hover:underline truncate max-w-[65%] font-heading"
                             title={c?.name ?? "Club"}
                           >
                             {c?.name ?? "Club"}
@@ -334,7 +334,7 @@ export default function Landing() {
                         ) : (
                           <div className="w-9 h-9 surface-2 rounded border border-border" />
                         )}
-                        <Link href={c ? `/clubs/${c.id}` : "#"} className="text-base font-bold hover:underline text-white">
+                        <Link href={c ? `/clubs/${c.id}` : "#"} className="text-base font-bold hover:underline text-white font-heading">
                           {c?.name ?? "Club"}
                         </Link>
                       </div>
