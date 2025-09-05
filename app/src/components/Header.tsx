@@ -14,6 +14,7 @@ const nav = [
   { href: "/", label: "Home" },
   { href: "/clubs", label: "Clubs" },
   { href: "/news", label: "News" },
+  { href: "/publications", label: "Publications" },
   { href: "/table", label: "Table" },
   { href: "/profile", label: "log in" },
 ];
