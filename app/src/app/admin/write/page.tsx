@@ -40,6 +40,7 @@ function AdminEditor() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   const storage = getStorage();
 
@@ -83,21 +84,49 @@ function AdminEditor() {
   };
 
   const create = useCallback(async () => {
-    if (!auth?.currentUser || !db) return;
+    if (!auth?.currentUser || !db) {
+      setDebugInfo('Missing auth or db connection');
+      alert('Not authenticated or database not available');
+      return;
+    }
+
+    // Validate required fields
+    if (!title.trim()) {
+      setDebugInfo('Title is required');
+      alert('Title is required');
+      return;
+    }
+    if (!content.trim()) {
+      setDebugInfo('Content is required');
+      alert('Content is required');
+      return;
+    }
+    if (!excerpt.trim()) {
+      setDebugInfo('Excerpt is required');
+      alert('Excerpt is required');
+      return;
+    }
 
     setSaving(true);
     setUploading(!!featuredImage);
+    setDebugInfo('Starting publication creation...');
 
     try {
       let imageURL = '';
 
       if (featuredImage) {
+        setDebugInfo('Uploading image...');
         imageURL = await uploadImage(featuredImage);
+        setDebugInfo('Image uploaded successfully');
       }
 
+      setDebugInfo('Computing stats and preparing data...');
       const { wordCount, readingTime } = computeStats();
 
-      await addDoc(collection(db!, 'publications'), {
+      setDebugInfo('Saving to Firestore...');
+      
+      // Debug: Log the data we're about to save
+      const publicationData = {
         title,
         content,
         type,
@@ -113,7 +142,12 @@ function AdminEditor() {
         readingTime,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+      
+      console.log('Publication data:', publicationData);
+      setDebugInfo(`Saving to Firestore with authorId: ${auth.currentUser.uid}`);
+      
+      await addDoc(collection(db!, 'publications'), publicationData);
 
       // Reset form
       setTitle('');
@@ -126,10 +160,28 @@ function AdminEditor() {
       setSeoTitle('');
       setSeoDescription('');
 
+      setDebugInfo('Publication created successfully!');
       alert('Publication created successfully!');
     } catch (error) {
       console.error('Error creating publication:', error);
-      alert('Error creating publication. Please try again.');
+      
+      // More detailed error message
+      let errorMessage = 'Error creating publication. Please try again.';
+      
+      if (error instanceof Error) {
+        errorMessage = `Error: ${error.message}`;
+      } else if (typeof error === 'object' && error !== null) {
+        // Firebase errors often have a code property
+        const firebaseError = error as any;
+        if (firebaseError.code) {
+          errorMessage = `Firebase Error (${firebaseError.code}): ${firebaseError.message || 'Unknown error'}`;
+        } else if (firebaseError.message) {
+          errorMessage = `Error: ${firebaseError.message}`;
+        }
+      }
+      
+      setDebugInfo(`Error: ${errorMessage}`);
+      alert(errorMessage);
     } finally {
       setSaving(false);
       setUploading(false);
@@ -373,6 +425,16 @@ function AdminEditor() {
                 </div>
               )}
             </section>
+
+            {/* Debug info */}
+            {debugInfo && (
+              <section className="card p-4">
+                <h3 className="text-sm font-semibold text-foreground mb-2">Debug Info</h3>
+                <p className="text-xs text-muted-foreground font-mono bg-surface-2 p-2 rounded border">
+                  {debugInfo}
+                </p>
+              </section>
+            )}
 
             {/* Primary actions (sticky on desktop) */}
             <section className="card p-4 sticky top-[88px] space-y-3">
