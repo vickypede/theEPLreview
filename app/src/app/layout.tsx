@@ -10,7 +10,15 @@ export const metadata: Metadata = {
   title: "The EPL Review",
   description: "Premier League news and analysis",
   icons: {
-    icon: "/pink_stacked.png",
+    icon: [
+      { url: "/pink_stacked.png", type: "image/png" },
+    ],
+    shortcut: [
+      { url: "/pink_stacked.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/pink_stacked.png", type: "image/png" },
+    ],
   },
 };
 
