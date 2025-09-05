@@ -403,39 +403,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ================== MAILBOX ================== */}
-      <section className="section-y">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-lg font-bold text-foreground">MAILBOX</h2>
-            <Link href="/mailbox" className="text-primary hover:text-foreground font-semibold text-lg">
-              see all →
-            </Link>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              { title: "Fan Question", desc: "Reader asks about tactical changes" },
-              { title: "Transfer Talk", desc: "Fan perspective on latest rumors" },
-              { title: "Match Reaction", desc: "Supporter thoughts on weekend games" },
-            ].map((item, i) => (
-              <div key={i} className="bg-card rounded-[var(--radius-card)] shadow-md p-6 hover:shadow-lg transition-shadow">
-                <div className="text-center">
-                  <div className="surface-2 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center border border-border">
-                    <span className="text-2xl">✉️</span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">{item.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-4">{item.desc}</p>
-                  <div className="surface-3 rounded-lg p-3 mb-4 border border-border">
-                    <p className="text-muted-foreground text-xs">Fan letter content will appear here</p>
-                  </div>
-                  <button className="text-primary hover:text-foreground text-sm font-medium">Coming Soon →</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
