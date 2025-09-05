@@ -170,11 +170,11 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
         <Link
           href="/"
-          className="text-xl tracking-tight text-foreground"
+          className="text-3xl tracking-tight text-foreground"
           aria-label="theEPLreview home"
           style={{ fontFamily: "Candara, 'Segoe UI', system-ui, -apple-system, sans-serif", fontWeight: 700 }}
         >
-          theEPLreview
+          the<span style={{ color: '#3e5e5b' }}>EPL</span>review
         </Link>
 
         {/* Desktop nav */}
