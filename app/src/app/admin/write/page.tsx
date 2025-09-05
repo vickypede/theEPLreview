@@ -172,7 +172,7 @@ function AdminEditor() {
         errorMessage = `Error: ${error.message}`;
       } else if (typeof error === 'object' && error !== null) {
         // Firebase errors often have a code property
-        const firebaseError = error as any;
+        const firebaseError = error as { code?: string; message?: string };
         if (firebaseError.code) {
           errorMessage = `Firebase Error (${firebaseError.code}): ${firebaseError.message || 'Unknown error'}`;
         } else if (firebaseError.message) {
@@ -196,6 +196,7 @@ function AdminEditor() {
     status,
     excerpt,
     seoTitle,
+    seoDescription,
     slug,
     computeStats,
     uploadImage
