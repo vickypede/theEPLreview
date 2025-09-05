@@ -385,9 +385,6 @@ export default function Landing() {
               { type: "Final Whistle", title: "Victors & Vanquished", desc: "Weekend conclusions and key takeaways" },
               { type: "Matchday Radar", title: "Pre-Match Analysis", desc: "Storylines and tactics ahead of fixtures" },
               { type: "Full-Time Verdict", title: "Post-Match Review", desc: "Big-match analysis ~2 hours after FT" },
-              { type: "Pretender List", title: "Fraud Watch", desc: "Call-outs of overrated players/managers" },
-              { type: "High Press", title: "House Opinion", desc: "Punchy takes and editorial voice" },
-              { type: "Weekend Roundup", title: "Complete Coverage", desc: "All the weekend's biggest stories" },
             ].map((publication, i) => (
               <div key={i} className="bg-card rounded-[var(--radius-card)] shadow-md p-6 hover:shadow-lg transition-shadow border border-border">
                 <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3 bg-muted text-muted-foreground border border-border">{publication.type}</div>
