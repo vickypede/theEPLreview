@@ -4,33 +4,29 @@ import Image from "next/image";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
-type Publication = {
-  id: string;
-  title: string;
-  slug?: string;
-  content?: string;
-  featuredImage?: string | null;
-  authorByline?: string;
-  type?: string;
-  publishedAt?: any;
-  createdAt?: any;
-};
+import type { Publication } from "@/types/publication";
+import type { Timestamp } from "firebase/firestore";
 
 function friendlyType(type?: string): string {
   if (!type) return "";
   return type
     .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 }
 
-function toDate(ts?: any): Date | null {
+/** Strict, no-`any` type guard for Firestore Timestamp */
+function hasToDate(x: unknown): x is { toDate: () => Date } {
+  return !!x && typeof x === "object" && "toDate" in x &&
+         typeof (x as { toDate?: unknown }).toDate === "function";
+}
+function toDate(ts?: unknown): Date | null {
   try {
     if (!ts) return null;
-    if (ts.toDate) return ts.toDate();
+    if (hasToDate(ts)) return ts.toDate();
     if (ts instanceof Date) return ts;
-    return new Date(ts);
+    const n = typeof ts === "number" ? ts : Date.parse(String(ts));
+    return Number.isNaN(n) ? null : new Date(n);
   } catch {
     return null;
   }
@@ -38,11 +34,7 @@ function toDate(ts?: any): Date | null {
 
 function prettyDate(d?: Date | null): string {
   if (!d) return "";
-  return d.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 }
 
 export default function PublicationDetail({ pub }: { pub: Publication }) {
@@ -54,30 +46,19 @@ export default function PublicationDetail({ pub }: { pub: Publication }) {
     "@type": "Article",
     headline: pub.title,
     description: pub.content?.slice(0, 160) || "",
-    author: {
-      "@type": "Person",
-      name: pub.authorByline || "The EPL Review",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "The EPL Review",
-    },
+    author: { "@type": "Person", name: pub.authorByline || "The EPL Review" },
+    publisher: { "@type": "Organization", name: "The EPL Review" },
     datePublished: pubDate?.toISOString(),
     image: pub.featuredImage || undefined,
   };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
         {/* Breadcrumb */}
         <nav className="mb-6 text-sm">
-          <Link href="/publications" className="text-[#6F9283] hover:underline">
-            Publications
-          </Link>
+          <Link href="/publications" className="text-[#6F9283] hover:underline">Publications</Link>
           <span className="mx-2 text-gray-400">/</span>
           <span className="text-gray-600">{typeLabel}</span>
         </nav>
@@ -125,27 +106,14 @@ export default function PublicationDetail({ pub }: { pub: Publication }) {
               ol: ({ children }) => <ol className="mb-4 pl-6 list-decimal text-slate-700">{children}</ol>,
               li: ({ children }) => <li className="mb-1">{children}</li>,
               blockquote: ({ children }) => (
-                <blockquote className="border-l-4 border-[#8D9F87] pl-4 my-4 italic text-slate-600">
-                  {children}
-                </blockquote>
+                <blockquote className="border-l-4 border-[#8D9F87] pl-4 my-4 italic text-slate-600">{children}</blockquote>
               ),
               code: ({ children }) => (
-                <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-slate-800">
-                  {children}
-                </code>
+                <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-slate-800">{children}</code>
               ),
-              pre: ({ children }) => (
-                <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4">
-                  {children}
-                </pre>
-              ),
+              pre: ({ children }) => <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4">{children}</pre>,
               a: ({ href, children }) => (
-                <a
-                  href={href}
-                  className="text-[#6F9283] hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={href} className="text-[#6F9283] hover:underline" target="_blank" rel="noopener noreferrer">
                   {children}
                 </a>
               ),

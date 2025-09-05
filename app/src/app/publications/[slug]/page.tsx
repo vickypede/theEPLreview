@@ -1,10 +1,39 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { getDocs, getDoc, query, where, limit } from "firebase/firestore";
+import { publicationsRef, publicationDoc } from "@/lib/firestoreConverters";
+import type { Publication } from "@/types/publication";
 import PublicationDetail from "@/components/PublicationDetail";
 
+// Ensure it's not prerendered (we read Firestore)
+export const dynamic = "force-dynamic";
+
 type Props = { params: { slug: string } };
+
+async function getPublication(slug: string): Promise<Publication | null> {
+  try {
+    // Try by slug first
+    const col = publicationsRef();
+    const q = query(
+      col,
+      where("slug", "==", slug),
+      where("status", "==", "published"),
+      limit(1)
+    );
+    const snap = await getDocs(q);
+    if (!snap.empty) return snap.docs[0].data();
+
+    // Fallback: treat slug as document ID
+    const docSnap = await getDoc(publicationDoc(slug));
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.status === "published") return data;
+    }
+  } catch {
+    // swallow and return null
+  }
+  return null;
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const pub = await getPublication(params.slug);
@@ -15,28 +44,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-async function getPublication(slug: string) {
-  try {
-    // Try by slug first
-    const col = db.collection("publications");
-    const q = col.where("slug", "==", slug).where("status", "==", "published").limit(1);
-    const snap = await q.get();
-    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
-
-    // Fallback: treat slug as document ID
-    const docSnap = await getDoc(doc(db, "publications", slug));
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      if (data.status === "published") return { id: docSnap.id, ...data };
-    }
-  } catch {
-    /* noop */
-  }
-  return null;
-}
-
 export default async function PublicationPage({ params }: Props) {
   const pub = await getPublication(params.slug);
   if (!pub) notFound();
-  return <PublicationDetail pub={pub} />;
+  return <PublicationDetail pub={pub!} />;
 }

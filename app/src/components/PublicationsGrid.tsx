@@ -1,73 +1,57 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { db } from "@/lib/firebase";
 import {
-  Timestamp,
-  collection,
   getDocs,
-  limit,
-  orderBy,
   query,
-  startAfter,
   where,
-  QueryDocumentSnapshot,
-  DocumentData,
+  orderBy,
+  limit,
+  startAfter,
+  type QueryDocumentSnapshot,
+  type Timestamp,
 } from "firebase/firestore";
+import { publicationsRef } from "@/lib/firestoreConverters";
+import type { Publication } from "@/types/publication";
 import PublicationCard from "./PublicationCard";
-
-type Publication = {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt?: string;
-  content?: string;
-  featuredImage?: string | null;
-  authorByline?: string;
-  type?: string;
-  status: "draft" | "published";
-  readingTime?: number;
-  publishedAt?: Timestamp | null;
-  createdAt?: Timestamp | null;
-  updatedAt?: Timestamp | null;
-};
 
 const PAGE_SIZE = 12;
 
-function toDate(ts?: Timestamp | null): Date | null {
-  try { return ts ? ts.toDate() : null; } catch { return null; }
+function hasToDate(x: unknown): x is { toDate: () => Date } {
+  return !!x && typeof x === "object" && "toDate" in x &&
+         typeof (x as { toDate?: unknown }).toDate === "function";
+}
+function toDate(ts?: unknown): Date | null {
+  try {
+    if (!ts) return null;
+    if (hasToDate(ts)) return ts.toDate();
+    if (ts instanceof Date) return ts;
+    const n = typeof ts === "number" ? ts : Date.parse(String(ts));
+    return Number.isNaN(n) ? null : new Date(n);
+  } catch {
+    return null;
+  }
 }
 
 export default function PublicationsGrid() {
   const [items, setItems] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [moreLoading, setMoreLoading] = useState(false);
-  const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<Publication> | null>(null);
   const [hasMore, setHasMore] = useState(true);
 
-  const baseQuery = (cursor?: QueryDocumentSnapshot<DocumentData>) => {
-    const col = collection(db, "publications");
+  const load = async () => {
+    setLoading(true);
+    const col = publicationsRef();
     const q = query(
       col,
       where("status", "==", "published"),
       orderBy("publishedAt", "desc"),
       limit(PAGE_SIZE)
     );
-    if (!cursor) return q;
-    return query(
-      col,
-      where("status", "==", "published"),
-      orderBy("publishedAt", "desc"),
-      startAfter(cursor),
-      limit(PAGE_SIZE)
-    );
-  };
-
-  const load = async () => {
-    setLoading(true);
-    const snap = await getDocs(baseQuery());
-    const docs = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Publication[];
+    const snap = await getDocs(q);
+    const docs = snap.docs.map((d) => d.data());
     setItems(docs);
     setLastDoc(snap.docs.length ? snap.docs[snap.docs.length - 1] : null);
     setHasMore(snap.docs.length === PAGE_SIZE);
@@ -77,8 +61,16 @@ export default function PublicationsGrid() {
   const loadMore = async () => {
     if (!lastDoc || !hasMore) return;
     setMoreLoading(true);
-    const snap = await getDocs(baseQuery(lastDoc));
-    const docs = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Publication[];
+    const col = publicationsRef();
+    const q = query(
+      col,
+      where("status", "==", "published"),
+      orderBy("publishedAt", "desc"),
+      startAfter(lastDoc),
+      limit(PAGE_SIZE)
+    );
+    const snap = await getDocs(q);
+    const docs = snap.docs.map((d) => d.data());
     setItems((prev) => [...prev, ...docs]);
     setLastDoc(snap.docs.length ? snap.docs[snap.docs.length - 1] : null);
     setHasMore(snap.docs.length === PAGE_SIZE);
@@ -87,7 +79,6 @@ export default function PublicationsGrid() {
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {
