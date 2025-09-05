@@ -171,7 +171,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
         <Link
           href="/"
-          className="inline-flex items-center gap-3 text-3xl tracking-tight text-foreground"
+          className="inline-flex items-center gap-3 text-3xl tracking-tight text-foreground leading-none"
           aria-label="theEPLreview home"
           style={{ fontFamily: "Candara, 'Segoe UI', system-ui, -apple-system, sans-serif", fontWeight: 700 }}
         >
@@ -183,8 +183,8 @@ export default function Header() {
             priority
             className="h-10 w-auto"
           />
-          <span>
-            the<span style={{ color: '#3e5e5b' }}>EPL</span>review
+          <span className="leading-none align-middle">
+            the<span className="align-middle" style={{ color: '#3e5e5b' }}>EPL</span>review
           </span>
         </Link>
 
