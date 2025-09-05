@@ -120,11 +120,11 @@ export default function ProfilePage(){
               </svg>
             </button>
             <div className="text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full surface-3 border border-border">
-                <svg className="h-7 w-7 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
+                                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full surface-3 border border-border">
+                     <svg className="h-7 w-7" fill="none" stroke="#f25a87" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                     </svg>
+                   </div>
               <h2 className="text-xl font-bold font-heading">Welcome back</h2>
               <p className="mt-1 text-muted-foreground text-sm">Sign in to access your account</p>
             </div>
