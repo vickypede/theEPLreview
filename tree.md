@@ -15,7 +15,8 @@ theeplreview/
 │   │   │   │   └── 📄 page.tsx     # /profile (user settings)
 │   │   │   ├── 📁 admin/           # Admin panel
 │   │   │   │   └── 📄 page.tsx     # /admin (admin dashboard)
-│   │   │   ├── 📄 layout.tsx       # Root layout (Header + Footer + favicon)
+│   │   │   ├── 📄 layout.tsx       # Root layout (Header + Footer)
+│   │   │   ├── 📄 icon.png         # App Router favicon
 │   │   │   └── 📄 globals.css      # Global styles & theme
 │   │   ├── 📁 components/          # React Components
 │   │   │   ├── 📄 Landing.tsx          # Main homepage component
