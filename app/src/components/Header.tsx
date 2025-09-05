@@ -171,21 +171,17 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
         <Link
           href="/"
-          className="inline-flex items-center gap-3 text-3xl tracking-tight text-foreground leading-none"
+          className="inline-flex items-center leading-none"
           aria-label="theEPLreview home"
-          style={{ fontFamily: "Candara, 'Segoe UI', system-ui, -apple-system, sans-serif", fontWeight: 700 }}
         >
           <Image
-            src="/assets/logo_stacked/logo-stacked-transparent-1024.webp"
-            alt="theEPLreview crest"
-            width={44}
-            height={44}
+            src="/assets/logo_header/pink_header.png"
+            alt="theEPLreview logo"
+            width={512}
+            height={128}
             priority
-            className="h-10 w-auto"
+            className="h-10 md:h-11 lg:h-12 w-auto"
           />
-          <span className="leading-none align-middle">
-            the<span className="align-middle" style={{ color: '#3e5e5b' }}>EPL</span>review
-          </span>
         </Link>
 
         {/* Desktop nav */}
