@@ -4,6 +4,12 @@ import { auth, ensureAdminClaim } from '@/lib/firebase';
 import { onAuthStateChanged, getIdTokenResult } from 'firebase/auth';
 import LoginModal from './LoginModal';
 
+type CustomClaims = {
+  isAdmin?: boolean;
+  admin?: boolean; // back-compat
+  [key: string]: unknown;
+};
+
 export default function AdminGuard({ children }: { children: ReactNode }) {
   const [state, setState] = useState<'loading'|'noauth'|'noadmin'|'ok'>('loading');
   const [showLogin, setShowLogin] = useState(false);
@@ -26,7 +32,8 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
         
         // If sync failed, check existing token
         const token = await getIdTokenResult(user, true);
-        const isAdmin = token.claims.isAdmin === true || (token.claims as any).admin === true;
+        const claims = token.claims as CustomClaims;
+        const isAdmin = claims.isAdmin === true || claims.admin === true;
         if (isAdmin) {
           setState('ok');
         } else {
@@ -116,7 +123,8 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
                     const synced = await ensureAdminClaim();
                     await auth?.currentUser?.getIdToken(true);
                     const token = auth?.currentUser ? await getIdTokenResult(auth.currentUser, true) : null;
-                    const isAdmin = token?.claims?.isAdmin === true || (token?.claims as any)?.admin === true;
+                    const claims = (token?.claims ?? {}) as CustomClaims;
+                    const isAdmin = claims.isAdmin === true || claims.admin === true;
                     setDebug({ synced, isAdminClaim: isAdmin, claims: token?.claims as Record<string, unknown> | undefined });
                     setState(isAdmin || synced ? 'ok' : 'noadmin');
                   } catch {
@@ -137,7 +145,8 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
                 onClick={async () => {
                   try {
                     const token = auth?.currentUser ? await getIdTokenResult(auth.currentUser, true) : null;
-                    const isAdmin = token?.claims?.isAdmin === true || (token?.claims as any)?.admin === true;
+                    const claims = (token?.claims ?? {}) as CustomClaims;
+                    const isAdmin = claims.isAdmin === true || claims.admin === true;
                     setDebug({ ...debug, isAdminClaim: isAdmin, claims: token?.claims as Record<string, unknown> | undefined });
                     setDebugOpen(true);
                   } catch {

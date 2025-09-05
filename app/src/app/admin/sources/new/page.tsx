@@ -18,6 +18,11 @@ type Club = {
   isTop6?: boolean;
 };
 
+type ClubDoc = {
+  name: string;
+  isTop6?: boolean;
+};
+
 type SourceType = 'rss' | 'html';
 
 function toKey(input: string) {
@@ -53,7 +58,10 @@ export default function AddSourcePage() {
       if (!db) return;
       try {
         const snap = await getDocs(collection(db, 'clubs'));
-        const list = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Club[];
+        const list = snap.docs.map((d) => {
+          const data = d.data() as ClubDoc; // ✅ no 'any'
+          return { id: d.id, ...data };
+        });
         // Top 6 first, then name
         list.sort((a, b) => {
           if ((a.isTop6 ? 1 : 0) !== (b.isTop6 ? 1 : 0)) return a.isTop6 ? -1 : 1;

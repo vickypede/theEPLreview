@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Article, Club } from '@/types';
+import type { Article } from '@/types';
 
 type UiArticle = Article & { sourceName?: string; source?: string };
 

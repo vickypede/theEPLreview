@@ -1,7 +1,7 @@
 'use client';
 
 import AdminGuard from '@/components/AdminGuard';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, getStorage } from 'firebase/storage';
@@ -82,7 +82,7 @@ function AdminEditor() {
     return await getDownloadURL(storageRef);
   };
 
-  const create = async () => {
+  const create = useCallback(async () => {
     if (!auth?.currentUser || !db) return;
 
     setSaving(true);
@@ -134,7 +134,20 @@ function AdminEditor() {
       setSaving(false);
       setUploading(false);
     }
-  };
+  }, [
+    auth?.currentUser,
+    db,
+    featuredImage,
+    content,
+    title,
+    type,
+    status,
+    excerpt,
+    seoTitle,
+    slug,
+    computeStats,
+    uploadImage
+  ]);
 
   const isFormValid = Boolean(title.trim() && content.trim() && excerpt.trim());
   const { wordCount, readingTime } = computeStats();
@@ -150,7 +163,7 @@ function AdminEditor() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isFormValid, saving, title, content, excerpt, type, status, seoTitle, seoDescription, slug]);
+  }, [isFormValid, saving, create]); // ✅ include create
 
   // ---------- UI ----------
   return (
