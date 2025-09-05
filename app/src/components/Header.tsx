@@ -171,9 +171,17 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
         <Link
           href="/"
-          className="inline-flex items-center leading-none"
+          className="inline-flex items-center gap-2 leading-none"
           aria-label="theEPLreview home"
         >
+          <Image
+            src="/assets/logo_header/pink_stacked.png"
+            alt="theEPLreview mark"
+            width={96}
+            height={96}
+            priority
+            className="h-10 md:h-11 lg:h-12 w-auto"
+          />
           <Image
             src="/assets/logo_header/pink_header.png"
             alt="theEPLreview logo"
