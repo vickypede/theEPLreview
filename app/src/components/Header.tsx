@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEnsureProfile } from "@/lib/useEnsureProfile";
 import { auth, db } from "@/lib/firebase";
@@ -168,8 +169,15 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 surface border-b border-header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
-        <Link href="/" className="text-xl font-bold tracking-tight text-foreground font-heading">
-          The EPL Review
+        <Link href="/" className="inline-flex items-center" aria-label="theEPLreview home">
+          <Image
+            src="/assets/logo/logo_header/logo_header_inline.webp"
+            alt="theEPLreview"
+            width={240}
+            height={40}
+            priority
+            className="h-6 w-auto"
+          />
         </Link>
 
         {/* Desktop nav */}

@@ -1,0 +1,37 @@
+{
+  "name": "theEPLreview",
+  "short_name": "EPLreview",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "logo-stacked-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo-stacked-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "logo-stacked-256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "logo-stacked-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
