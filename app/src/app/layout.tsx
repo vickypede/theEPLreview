@@ -9,6 +9,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "The EPL Review",
   description: "Premier League news and analysis",
+  icons: {
+    icon: "/pink_stacked.png",
+  },
 };
 
 export default function RootLayout({
