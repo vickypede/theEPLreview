@@ -10,7 +10,6 @@ import {
   limit,
   startAfter,
   type QueryDocumentSnapshot,
-  type Timestamp,
 } from "firebase/firestore";
 import { publicationsRef } from "@/lib/firestoreConverters";
 import type { Publication } from "@/types/publication";
@@ -34,47 +33,80 @@ function toDate(ts?: unknown): Date | null {
   }
 }
 
+type FirestoreErr = { code?: string };
+const isIndexMissing = (e: unknown): e is FirestoreErr =>
+  !!e && typeof e === "object" && "code" in (e as FirestoreErr) && (e as FirestoreErr).code === "failed-precondition";
+
 export default function PublicationsGrid() {
   const [items, setItems] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [moreLoading, setMoreLoading] = useState(false);
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<Publication> | null>(null);
   const [hasMore, setHasMore] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const col = publicationsRef();
-    const q = query(
-      col,
-      where("status", "==", "published"),
-      orderBy("publishedAt", "desc"),
-      limit(PAGE_SIZE)
-    );
-    const snap = await getDocs(q);
-    const docs = snap.docs.map((d) => d.data());
-    setItems(docs);
-    setLastDoc(snap.docs.length ? snap.docs[snap.docs.length - 1] : null);
-    setHasMore(snap.docs.length === PAGE_SIZE);
-    setLoading(false);
+    try {
+      const col = publicationsRef();
+      const q1 = query(
+        col,
+        where("status", "==", "published"),
+        orderBy("publishedAt", "desc"),
+        limit(PAGE_SIZE)
+      );
+      const snap = await getDocs(q1);
+      const docs = snap.docs.map((d) => d.data());
+      setItems(docs);
+      setLastDoc(snap.docs.length ? snap.docs[snap.docs.length - 1] : null);
+      setHasMore(snap.docs.length === PAGE_SIZE);
+      setUsingFallback(false);
+    } catch (e) {
+      // No composite index yet -> fallback to simple orderBy and filter client-side
+      if (isIndexMissing(e)) {
+        const col = publicationsRef();
+        const q2 = query(col, orderBy("publishedAt", "desc"), limit(PAGE_SIZE));
+        const snap = await getDocs(q2);
+        const docs = snap.docs.map((d) => d.data()).filter((p) => p.status === "published");
+        setItems(docs);
+        setLastDoc(snap.docs.length ? snap.docs[snap.docs.length - 1] : null);
+        setHasMore(snap.docs.length === PAGE_SIZE);
+        setUsingFallback(true);
+      } else {
+        console.error(e);
+        setItems([]);
+        setLastDoc(null);
+        setHasMore(false);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loadMore = async () => {
     if (!lastDoc || !hasMore) return;
     setMoreLoading(true);
-    const col = publicationsRef();
-    const q = query(
-      col,
-      where("status", "==", "published"),
-      orderBy("publishedAt", "desc"),
-      startAfter(lastDoc),
-      limit(PAGE_SIZE)
-    );
-    const snap = await getDocs(q);
-    const docs = snap.docs.map((d) => d.data());
-    setItems((prev) => [...prev, ...docs]);
-    setLastDoc(snap.docs.length ? snap.docs[snap.docs.length - 1] : null);
-    setHasMore(snap.docs.length === PAGE_SIZE);
-    setMoreLoading(false);
+    try {
+      const col = publicationsRef();
+      const q = usingFallback
+        ? query(col, orderBy("publishedAt", "desc"), startAfter(lastDoc), limit(PAGE_SIZE))
+        : query(
+            col,
+            where("status", "==", "published"),
+            orderBy("publishedAt", "desc"),
+            startAfter(lastDoc),
+            limit(PAGE_SIZE)
+          );
+      const snap = await getDocs(q);
+      const docs = snap.docs
+        .map((d) => d.data())
+        .filter((p) => (usingFallback ? p.status === "published" : true));
+      setItems((prev) => [...prev, ...docs]);
+      setLastDoc(snap.docs.length ? snap.docs[snap.docs.length - 1] : null);
+      setHasMore(snap.docs.length === PAGE_SIZE);
+    } finally {
+      setMoreLoading(false);
+    }
   };
 
   useEffect(() => {

@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { Article, Club } from "@/types";
+import Image from "next/image";
+import type { Publication } from "@/types/publication";
 
 type UiArticle = Article & { sourceName?: string; source?: string };
 
@@ -45,6 +47,7 @@ export default function Landing() {
   const [latestNews, setLatestNews] = useState<UiArticle[]>([]);
   const [clubs, setClubs] = useState<ClubTile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [latestPubs, setLatestPubs] = useState<Publication[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -114,6 +117,33 @@ export default function Landing() {
             return { ...c, latest: results } as ClubTile;
           })
         );
+
+        let pubs: Publication[] = [];
+        try {
+          const pubsRef = collection(db, "publications");
+          const q1 = query(
+            pubsRef,
+            where("status", "==", "published"),
+            orderBy("publishedAt", "desc"),
+            limit(3)
+          );
+          const snap = await getDocs(q1);
+          pubs = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Publication, "id">) })) as Publication[];
+        } catch (e) {
+          // Fallback if composite index missing
+          const pubsRef = collection(db, "publications");
+          const q2 = query(pubsRef, orderBy("publishedAt", "desc"), limit(10));
+          const snap = await getDocs(q2);
+
+          // ⬇️ split the assertion from the chain (or wrap in parentheses)
+          const mapped = snap.docs.map((d) => ({
+            id: d.id,
+            ...(d.data() as Omit<Publication, "id">),
+          })) as Publication[];
+
+          pubs = mapped.filter((p) => p.status === "published").slice(0, 3);
+        }
+        if (mounted) setLatestPubs(pubs);
 
         if (mounted) {
           setLatestNews(newsList);
@@ -381,21 +411,57 @@ export default function Landing() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              { type: "Final Whistle", title: "Victors & Vanquished", desc: "Weekend conclusions and key takeaways" },
-              { type: "Matchday Radar", title: "Pre-Match Analysis", desc: "Storylines and tactics ahead of fixtures" },
-              { type: "Full-Time Verdict", title: "Post-Match Review", desc: "Big-match analysis ~2 hours after FT" },
-            ].map((publication, i) => (
-              <div key={i} className="bg-card rounded-[var(--radius-card)] shadow-md p-6 hover:shadow-lg transition-shadow border border-border">
-                <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3 bg-muted text-muted-foreground border border-border">{publication.type}</div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{publication.title}</h3>
-                <p className="text-muted-foreground text-sm mb-4">{publication.desc}</p>
-                <div className="surface-3 rounded-lg p-3 mb-4 border border-border">
-                  <p className="text-muted-foreground text-xs">Content will appear here once publications are created</p>
+            {(latestPubs.length ? latestPubs : Array.from({ length: 3 }, () => null)).map((p, i) =>
+              p ? (
+                <article
+                  key={p.id}
+                  className="bg-card rounded-[var(--radius-card)] shadow-md hover:shadow-lg transition-shadow border border-border overflow-hidden"
+                >
+                  {p.featuredImage && (
+                    <div className="relative aspect-[16/9]">
+                      <Image
+                        src={p.featuredImage}
+                        alt={p.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
+                      />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    {p.type ? (
+                      <span
+                        className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3 border border-border"
+                        style={{ background: "#8D9F87", color: "#0b0b0b" }}
+                      >
+                        {p.type.split("-").map(w => w[0]?.toUpperCase() + w.slice(1)).join(" ")}
+                      </span>
+                    ) : null}
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      <Link href={`/publications/${p.slug || p.id}`} className="hover:underline">
+                        {p.title}
+                      </Link>
+                    </h3>
+                    {p.excerpt ? (
+                      <p className="text-muted-foreground text-sm line-clamp-2">{p.excerpt}</p>
+                    ) : null}
+                    <div className="mt-4">
+                      <Link href={`/publications/${p.slug || p.id}`} className="text-primary hover:text-foreground text-sm font-medium">
+                        Read →
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ) : (
+                // skeleton
+                <div key={i} className="bg-card rounded-[var(--radius-card)] shadow-md p-6 border border-border animate-pulse">
+                  <div className="h-40 w-full bg-muted rounded mb-4" />
+                  <div className="h-4 w-24 bg-muted rounded mb-2" />
+                  <div className="h-5 w-3/4 bg-muted rounded mb-2" />
+                  <div className="h-4 w-2/3 bg-muted rounded" />
                 </div>
-                <button className="text-primary hover:text-foreground text-sm font-medium">Coming Soon →</button>
-              </div>
-            ))}
+              )
+            )}
           </div>
         </div>
       </section>
