@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEnsureProfile } from "@/lib/useEnsureProfile";
 import { auth, db } from "@/lib/firebase";
@@ -169,15 +168,13 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 surface border-b border-header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
-        <Link href="/" className="inline-flex items-center" aria-label="theEPLreview home">
-          <Image
-            src="/assets/logo/logo_header/logo_header_inline.png"
-            alt="theEPLreview"
-            width={240}
-            height={40}
-            priority
-            className="h-8 md:h-9 lg:h-10 w-auto"
-          />
+        <Link
+          href="/"
+          className="text-xl tracking-tight text-foreground"
+          aria-label="theEPLreview home"
+          style={{ fontFamily: "Candara, 'Segoe UI', system-ui, -apple-system, sans-serif", fontWeight: 700 }}
+        >
+          theEPLreview
         </Link>
 
         {/* Desktop nav */}
