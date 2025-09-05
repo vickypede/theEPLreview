@@ -183,7 +183,7 @@ export default function Header() {
             className="h-10 md:h-11 lg:h-12 w-auto"
           />
           <Image
-            src="/assets/logo_header/pink_header.png"
+            src="/assets/logo_header/pink_header_cut.png"
             alt="theEPLreview logo"
             width={512}
             height={128}
