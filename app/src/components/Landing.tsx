@@ -149,7 +149,7 @@ export default function Landing() {
   // Render even if `db` is unavailable so the rest of the layout/skeletons still show
 
   return (
-    <div className="min-h-screen surface">
+    <div className="surface">
       {/* ======================= NEWS ======================= */}
       <section className="section-y pb-6 md:pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
