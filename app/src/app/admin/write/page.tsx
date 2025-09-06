@@ -3,7 +3,7 @@
 import AdminGuard from '@/components/AdminGuard';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, getStorage } from 'firebase/storage';
 import { useRouter } from 'next/navigation';
 
@@ -41,8 +41,26 @@ function AdminEditor() {
   const [uploading, setUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>('');
+  const [authorByline, setAuthorByline] = useState('');
 
   const storage = getStorage();
+
+  // Prefill authorByline from profile if available; fallback to auth name/email
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!auth?.currentUser || !db) return;
+        const prefRef = doc(db, 'user_profiles', auth.currentUser.uid);
+        const snap = await getDoc(prefRef);
+        const profile = snap.exists() ? (snap.data() as { displayName?: string }) : null;
+        const fallback = auth.currentUser.displayName || auth.currentUser.email || '';
+        setAuthorByline(profile?.displayName || fallback);
+      } catch {
+        const fallback = auth?.currentUser?.displayName || auth?.currentUser?.email || '';
+        setAuthorByline(fallback);
+      }
+    })();
+  }, [auth?.currentUser, db]);
 
   // ---------- helpers ----------
   const generateExcerpt = () => {
@@ -137,7 +155,7 @@ function AdminEditor() {
         seoDescription: seoDescription || excerpt,
         slug,
         authorId: auth.currentUser.uid,
-        authorByline: auth.currentUser.displayName || auth.currentUser.email,
+        authorByline: authorByline || auth.currentUser.displayName || auth.currentUser.email,
         wordCount,
         readingTime,
         createdAt: serverTimestamp(),
@@ -199,7 +217,8 @@ function AdminEditor() {
     seoDescription,
     slug,
     computeStats,
-    uploadImage
+    uploadImage,
+    authorByline
   ]);
 
   const isFormValid = Boolean(title.trim() && content.trim() && excerpt.trim());
@@ -337,6 +356,16 @@ function AdminEditor() {
             <section className="card p-5">
               <h2 className="text-sm font-semibold text-foreground mb-3">Meta</h2>
               <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">Author byline</label>
+                  <input
+                    type="text"
+                    value={authorByline}
+                    onChange={(e) => setAuthorByline(e.target.value)}
+                    className="input"
+                    placeholder="Defaults to your profile name"
+                  />
+                </div>
                 <div>
                   <label className="block text-xs font-medium text-muted-foreground mb-1">Content type *</label>
                   <select
