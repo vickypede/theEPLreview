@@ -29,8 +29,14 @@ export default function PublicationCard({
   date?: Date;
   rightSlot?: ReactNode;
 }) {
+  const formattedType = (type || "")
+    .split("-")
+    .filter(Boolean)
+    .map((word) => word[0]?.toUpperCase() + word.slice(1))
+    .join(" ");
+
   return (
-    <article className="h-full flex flex-col rounded-2xl overflow-hidden bg-white shadow hover:shadow-md transition-transform hover:-translate-y-0.5">
+    <article className="h-full flex flex-col overflow-hidden card card-hover transition-transform hover:-translate-y-0.5">
       <div className="relative aspect-[16/10]">
         {featuredImage ? (
           <Image
@@ -42,7 +48,7 @@ export default function PublicationCard({
             priority={false}
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300" />
+          <div className="w-full h-full surface-2" />
         )}
       </div>
 
@@ -51,16 +57,16 @@ export default function PublicationCard({
         {/* Top badges / right slot */}
         <div className="flex items-center justify-between gap-2">
           <div className="inline-flex items-center gap-2">
-            {type ? (
+            {formattedType ? (
               <span
-                className="text-[11px] px-2 py-1 rounded-full"
+                className="text-[11px] px-2 py-1 rounded-full border border-border"
                 style={{ background: "#8D9F87", color: "#0b0b0b" }}
               >
-                {type.replace(/-/g, " ")}
+                {formattedType}
               </span>
             ) : null}
             {readingTime ? (
-              <span className="text-xs opacity-70">{readingTime} min read</span>
+              <span className="text-xs text-muted-foreground">{readingTime} min read</span>
             ) : null}
           </div>
           {rightSlot}
@@ -69,7 +75,7 @@ export default function PublicationCard({
         {/* Middle content: title + excerpt (both clamped) */}
         <div className="min-h-0">
           <h3
-            className="text-base md:text-lg font-semibold text-slate-900 leading-snug"
+            className="text-base md:text-lg font-semibold text-foreground leading-snug"
             style={{
               display: "-webkit-box",
               WebkitLineClamp: 2,
@@ -83,7 +89,7 @@ export default function PublicationCard({
 
           {excerpt ? (
             <p
-              className="mt-1 text-sm text-slate-700"
+              className="mt-1 text-sm text-muted-foreground"
               style={{
                 display: "-webkit-box",
                 WebkitLineClamp: 2,
@@ -98,7 +104,7 @@ export default function PublicationCard({
         </div>
 
         {/* Bottom meta row pinned */}
-        <div className="flex items-center justify-between text-xs text-slate-600">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span className="truncate">{authorByline}</span>
           <span>{prettyDate(date)}</span>
         </div>
