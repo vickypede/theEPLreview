@@ -35,6 +35,18 @@ function prettyDate(d?: Date | null): string {
   return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 }
 
+function formatRelativeOrDate(d?: Date | null): string {
+  if (!d) return "";
+  const now = Date.now();
+  const ms = now - d.getTime();
+  const minutes = Math.floor(ms / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  return d.toLocaleDateString(undefined, { day: "2-digit", month: "long", year: "numeric" });
+}
+
 export default function PublicationDetail({ pub }: { pub: Publication }) {
   const pubDate = toDate(pub.publishedAt) || toDate(pub.createdAt);
   const typeLabel = friendlyType(pub.type);
@@ -57,9 +69,26 @@ export default function PublicationDetail({ pub }: { pub: Publication }) {
         {/* Breadcrumb */}
         <nav className="mb-6 text-sm">
           <Link href="/publications" className="text-[#6F9283] hover:underline">Publications</Link>
-          <span className="mx-2 text-gray-400">/</span>
-          <span className="text-gray-600">{typeLabel}</span>
+          <span className="mx-2 text-muted-foreground">/</span>
+          <span className="text-muted-foreground">{typeLabel}</span>
         </nav>
+
+        {/* Title */}
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-3 leading-tight">
+          {pub.title}
+        </h1>
+
+        {/* Tag + time (same line) */}
+        <div className="flex items-center gap-3 mb-6 text-sm">
+          {typeLabel ? (
+            <span className="inline-block px-3 py-1 rounded-full border border-border" style={{ background: "#8D9F87", color: "#0b0b0b" }}>
+              {typeLabel}
+            </span>
+          ) : null}
+          {pubDate ? (
+            <span className="text-muted-foreground">{formatRelativeOrDate(pubDate)}</span>
+          ) : null}
+        </div>
 
         {/* Hero image */}
         {pub.featuredImage && (
@@ -75,41 +104,25 @@ export default function PublicationDetail({ pub }: { pub: Publication }) {
           </div>
         )}
 
-        {/* Meta */}
-        <div className="mb-6">
-          {typeLabel && (
-            <div className="inline-block px-3 py-1 rounded-full text-sm mb-3" style={{ background: "#8D9F87", color: "#0b0b0b" }}>
-              {typeLabel}
-            </div>
-          )}
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 mb-4 leading-tight">
-            {pub.title}
-          </h1>
-          <div className="flex items-center gap-4 text-sm text-slate-600">
-            <span>{pub.authorByline || "The EPL Review"}</span>
-            {pubDate && <span>{prettyDate(pubDate)}</span>}
-          </div>
-        </div>
-
         {/* Content */}
-        <div className="prose prose-lg max-w-none">
+        <div className="max-w-none">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
-              h1: ({ children }) => <h1 className="text-2xl font-bold mt-8 mb-4 text-slate-900">{children}</h1>,
-              h2: ({ children }) => <h2 className="text-xl font-bold mt-6 mb-3 text-slate-900">{children}</h2>,
-              h3: ({ children }) => <h3 className="text-lg font-bold mt-4 mb-2 text-slate-900">{children}</h3>,
-              p: ({ children }) => <p className="mb-4 text-slate-700 leading-relaxed">{children}</p>,
-              ul: ({ children }) => <ul className="mb-4 pl-6 list-disc text-slate-700">{children}</ul>,
-              ol: ({ children }) => <ol className="mb-4 pl-6 list-decimal text-slate-700">{children}</ol>,
+              h1: ({ children }) => <h1 className="text-2xl font-bold mt-8 mb-4 text-foreground">{children}</h1>,
+              h2: ({ children }) => <h2 className="text-xl font-bold mt-6 mb-3 text-foreground">{children}</h2>,
+              h3: ({ children }) => <h3 className="text-lg font-bold mt-4 mb-2 text-foreground">{children}</h3>,
+              p: ({ children }) => <p className="mb-4 text-foreground/90 leading-relaxed">{children}</p>,
+              ul: ({ children }) => <ul className="mb-4 pl-6 list-disc text-foreground/90">{children}</ul>,
+              ol: ({ children }) => <ol className="mb-4 pl-6 list-decimal text-foreground/90">{children}</ol>,
               li: ({ children }) => <li className="mb-1">{children}</li>,
               blockquote: ({ children }) => (
-                <blockquote className="border-l-4 border-[#8D9F87] pl-4 my-4 italic text-slate-600">{children}</blockquote>
+                <blockquote className="border-l-4 border-[#8D9F87] pl-4 my-4 italic text-muted-foreground">{children}</blockquote>
               ),
               code: ({ children }) => (
-                <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-slate-800">{children}</code>
+                <code className="bg-[hsl(var(--muted)_/_0.35)] px-1 py-0.5 rounded text-sm font-mono text-foreground">{children}</code>
               ),
-              pre: ({ children }) => <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4">{children}</pre>,
+              pre: ({ children }) => <pre className="bg-[hsl(var(--muted)_/_0.35)] p-4 rounded-lg overflow-x-auto my-4">{children}</pre>,
               a: ({ href, children }) => (
                 <a href={href} className="text-[#6F9283] hover:underline" target="_blank" rel="noopener noreferrer">
                   {children}
@@ -119,6 +132,11 @@ export default function PublicationDetail({ pub }: { pub: Publication }) {
           >
             {pub.content || ""}
           </ReactMarkdown>
+        </div>
+
+        {/* Author footer */}
+        <div className="mt-8 text-sm text-muted-foreground">
+          Written by <span className="text-foreground">{pub.authorByline || "The EPL Review"}</span>
         </div>
       </div>
     </>
