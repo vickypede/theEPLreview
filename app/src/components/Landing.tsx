@@ -6,7 +6,6 @@ import { collection, getDocs, limit, orderBy, query, where } from "firebase/fire
 import { db } from "@/lib/firebase";
 import type { Article, Club } from "@/types";
 import Image from "next/image";
-import type { Publication } from "@/types/publication";
 
 type UiArticle = Article & { sourceName?: string; source?: string };
 
@@ -47,7 +46,6 @@ export default function Landing() {
   const [latestNews, setLatestNews] = useState<UiArticle[]>([]);
   const [clubs, setClubs] = useState<ClubTile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [latestPubs, setLatestPubs] = useState<Publication[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -118,32 +116,6 @@ export default function Landing() {
           })
         );
 
-        let pubs: Publication[] = [];
-        try {
-          const pubsRef = collection(db, "publications");
-          const q1 = query(
-            pubsRef,
-            where("status", "==", "published"),
-            orderBy("publishedAt", "desc"),
-            limit(3)
-          );
-          const snap = await getDocs(q1);
-          pubs = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Publication, "id">) })) as Publication[];
-        } catch (e) {
-          // Fallback if composite index missing
-          const pubsRef = collection(db, "publications");
-          const q2 = query(pubsRef, orderBy("publishedAt", "desc"), limit(10));
-          const snap = await getDocs(q2);
-
-          // ⬇️ split the assertion from the chain (or wrap in parentheses)
-          const mapped = snap.docs.map((d) => ({
-            id: d.id,
-            ...(d.data() as Omit<Publication, "id">),
-          })) as Publication[];
-
-          pubs = mapped.filter((p) => p.status === "published").slice(0, 3);
-        }
-        if (mounted) setLatestPubs(pubs);
 
         if (mounted) {
           setLatestNews(newsList);
@@ -174,7 +146,7 @@ export default function Landing() {
 
   const clubTiles: (ClubTile | null)[] = loading ? Array.from({ length: 6 }, () => null) : clubs;
 
-  if (!db) return null;
+  // Render even if `db` is unavailable so the rest of the layout/skeletons still show
 
   return (
     <div className="min-h-screen surface">
@@ -400,71 +372,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ================== EDITORIALS & ANALYSIS ================== */}
-      <section className="section-y surface-2">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-lg font-bold text-foreground">EDITORIALS & ANALYSIS</h2>
-            <Link href="/editorials" className="text-primary hover:text-foreground font-semibold text-lg">
-              see all →
-            </Link>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {(latestPubs.length ? latestPubs : Array.from({ length: 3 }, () => null)).map((p, i) =>
-              p ? (
-                <article
-                  key={p.id}
-                  className="bg-card rounded-[var(--radius-card)] shadow-md hover:shadow-lg transition-shadow border border-border overflow-hidden"
-                >
-                  {p.featuredImage && (
-                    <div className="relative aspect-[16/9]">
-                      <Image
-                        src={p.featuredImage}
-                        alt={p.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
-                      />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    {p.type ? (
-                      <span
-                        className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3 border border-border"
-                        style={{ background: "#8D9F87", color: "#0b0b0b" }}
-                      >
-                        {p.type.split("-").map(w => w[0]?.toUpperCase() + w.slice(1)).join(" ")}
-                      </span>
-                    ) : null}
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
-                      <Link href={`/publications/${p.slug || p.id}`} className="hover:underline">
-                        {p.title}
-                      </Link>
-                    </h3>
-                    {p.excerpt ? (
-                      <p className="text-muted-foreground text-sm line-clamp-2">{p.excerpt}</p>
-                    ) : null}
-                    <div className="mt-4">
-                      <Link href={`/publications/${p.slug || p.id}`} className="text-primary hover:text-foreground text-sm font-medium">
-                        Read →
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              ) : (
-                // skeleton
-                <div key={i} className="bg-card rounded-[var(--radius-card)] shadow-md p-6 border border-border animate-pulse">
-                  <div className="h-40 w-full bg-muted rounded mb-4" />
-                  <div className="h-4 w-24 bg-muted rounded mb-2" />
-                  <div className="h-5 w-3/4 bg-muted rounded mb-2" />
-                  <div className="h-4 w-2/3 bg-muted rounded" />
-                </div>
-              )
-            )}
-          </div>
-        </div>
-      </section>
 
     </div>
   );
