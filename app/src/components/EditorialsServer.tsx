@@ -36,12 +36,14 @@ export default async function EditorialsServer() {
               )}
               <div className="p-6 flex flex-col min-h-[180px]">
                 {p.type ? (
-                  <span
-                    className="inline-flex w-auto shrink-0 px-3 py-1 rounded-full text-xs font-semibold mb-3 border border-border"
-                    style={{ background: "#8D9F87", color: "#0b0b0b" }}
-                  >
-                    {p.type.split("-").map(w => w[0]?.toUpperCase() + w.slice(1)).join(" ")}
-                  </span>
+                  <div className="mb-3">
+                    <span
+                      className="inline-flex w-auto shrink-0 px-3 py-1 rounded-full text-xs font-semibold border border-border"
+                      style={{ background: "#8D9F87", color: "#0b0b0b" }}
+                    >
+                      {p.type.split("-").map(w => w[0]?.toUpperCase() + w.slice(1)).join(" ")}
+                    </span>
+                  </div>
                 ) : null}
                 <h3 className="text-lg font-semibold text-foreground mb-2">
                   <Link href={`/publications/${p.slug || p.id}`} className="hover:underline">
