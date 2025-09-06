@@ -1,31 +1,47 @@
-import { getApps, initializeApp, applicationDefault, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import 'server-only';
+import { getApps, initializeApp, cert, type App } from 'firebase-admin/app';
+import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 
 function normalizePrivateKey(raw?: string): string | undefined {
   if (!raw) return undefined;
-  // Handle escaped \n
-  let key = raw.includes('\\n') ? raw.replace(/\\n/g, '\n') : raw;
-  // If it's base64 (no header/footer), try to decode
+  let key = raw.trim();
+  // Strip accidental wrapping quotes
+  if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith('\'') && key.endsWith('\''))) {
+    key = key.slice(1, -1);
+  }
+  // Convert escaped \n to real newlines
+  if (key.includes('\\n')) key = key.replace(/\\n/g, '\n');
+  // If no PEM markers, try base64 decode
   if (!key.includes('BEGIN') && /^[A-Za-z0-9+/=\s]+$/.test(key)) {
     try {
-      key = Buffer.from(key, 'base64').toString('utf8');
+      const decoded = Buffer.from(key, 'base64').toString('utf8');
+      if (decoded.includes('BEGIN')) key = decoded;
     } catch {}
   }
   return key;
 }
 
-const projectId = process.env.FIREBASE_PROJECT_ID!;
-const clientEmail = process.env.FIREBASE_CLIENT_EMAIL!;
-const privateKey = normalizePrivateKey(process.env.FIREBASE_PRIVATE_KEY);
-
-if (!getApps().length) {
-  initializeApp(
-    privateKey && clientEmail
-      ? { credential: cert({ projectId, clientEmail, privateKey }) }
-      : { credential: applicationDefault() }
-  );
+function getCred() {
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = normalizePrivateKey(process.env.FIREBASE_PRIVATE_KEY);
+  if (!projectId || !clientEmail || !privateKey) {
+    throw new Error('Missing Firebase Admin env vars. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY.');
+  }
+  if (!privateKey.includes('BEGIN PRIVATE KEY') || !privateKey.includes('END PRIVATE KEY')) {
+    throw new Error('FIREBASE_PRIVATE_KEY is not valid PEM. Paste with real newlines or escape with \\n.');
+  }
+  return cert({ projectId, clientEmail, privateKey });
 }
 
-export function getAdminDb() {
-  return getFirestore();
+let app: App | undefined;
+function getAdminApp(): App {
+  if (!app) {
+    app = getApps()[0] ?? initializeApp({ credential: getCred() });
+  }
+  return app;
+}
+
+export function getAdminDb(): Firestore {
+  return getFirestore(getAdminApp());
 }
