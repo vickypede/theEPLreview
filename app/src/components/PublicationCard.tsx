@@ -59,7 +59,7 @@ export default function PublicationCard({
           <div className="inline-flex items-center gap-2">
             {formattedType ? (
               <span
-                className="text-[11px] px-2 py-1 rounded-full border border-border"
+                className="inline-block text-[11px] px-2 py-1 rounded-full border border-border"
                 style={{ background: "#8D9F87", color: "#0b0b0b" }}
               >
                 {formattedType}
@@ -104,7 +104,8 @@ export default function PublicationCard({
         </div>
 
         {/* Bottom meta row pinned */}
-        <div className="flex items-center justify-end text-xs text-muted-foreground">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span className="text-sm font-medium" style={{ color: "#f25a87" }}>Read →</span>
           <span>{prettyDate(date)}</span>
         </div>
       </div>
