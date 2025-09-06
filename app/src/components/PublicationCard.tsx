@@ -59,7 +59,7 @@ export default function PublicationCard({
           <div className="inline-flex items-center gap-2">
             {formattedType ? (
               <span
-                className="inline-block text-[11px] px-2 py-1 rounded-full border border-border"
+                className="inline-flex w-auto shrink-0 text-[11px] px-2 py-1 rounded-full border border-border"
                 style={{ background: "#8D9F87", color: "#0b0b0b" }}
               >
                 {formattedType}
