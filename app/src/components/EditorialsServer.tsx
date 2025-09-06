@@ -34,7 +34,7 @@ export default async function EditorialsServer() {
                   />
                 </div>
               )}
-              <div className="p-6">
+              <div className="p-6 flex flex-col min-h-[180px]">
                 {p.type ? (
                   <span
                     className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3 border border-border"
@@ -51,7 +51,7 @@ export default async function EditorialsServer() {
                 {p.excerpt ? (
                   <p className="text-muted-foreground text-sm line-clamp-2">{p.excerpt}</p>
                 ) : null}
-                <div className="mt-4">
+                <div className="mt-auto">
                   <Link href={`/publications/${p.slug || p.id}`} className="text-primary hover:text-foreground text-sm font-medium">
                     Read →
                   </Link>

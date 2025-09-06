@@ -35,16 +35,18 @@ function prettyDate(d?: Date | null): string {
   return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 }
 
-function formatRelativeOrDate(d?: Date | null): string {
+function formatRelative(d?: Date | null): string {
   if (!d) return "";
   const now = Date.now();
   const ms = now - d.getTime();
-  const minutes = Math.floor(ms / 60000);
+  const clampedMs = Math.max(ms, 0);
+  const minutes = Math.floor(clampedMs / 60000);
   if (minutes < 1) return "just now";
   if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
-  return d.toLocaleDateString(undefined, { day: "2-digit", month: "long", year: "numeric" });
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
 }
 
 export default function PublicationDetail({ pub }: { pub: Publication }) {
@@ -79,11 +81,12 @@ export default function PublicationDetail({ pub }: { pub: Publication }) {
         </h1>
 
         {/* Date */}
-        {pubDate && (
-          <div className="mb-6 text-sm text-muted-foreground">
-            {formatRelativeOrDate(pubDate)}
-          </div>
-        )}
+        {(() => {
+          const t = formatRelative(pubDate);
+          return t ? (
+            <div className="mb-6 text-sm text-muted-foreground">{t}</div>
+          ) : null;
+        })()}
 
         {/* Hero image */}
         {pub.featuredImage && (
