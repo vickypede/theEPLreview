@@ -4,16 +4,18 @@ import PublicationDetail from '@/components/PublicationDetail';
 
 export const revalidate = 120;
 
-type Props = { params: { slug: string } };
+type Props = { params: Promise<{ slug: string }> };
 
 export default async function PublicationPage({ params }: Props) {
-  const pub = await getPublicationBySlugOrId(params.slug);
+  const { slug } = await params;
+  const pub = await getPublicationBySlugOrId(slug);
   if (!pub) return notFound();
   return <PublicationDetail pub={pub} />;
 }
 
 export async function generateMetadata({ params }: Props) {
-  const pub = await getPublicationBySlugOrId(params.slug);
+  const { slug } = await params;
+  const pub = await getPublicationBySlugOrId(slug);
   if (!pub) return { title: 'Not Found' };
   return {
     title: `${pub.title} • The EPL Review`,
