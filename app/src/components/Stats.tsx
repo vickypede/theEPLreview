@@ -3,17 +3,17 @@
 export default function Stats() {
   return (
     <div className="min-h-screen surface">
-      {/* Hero Section */}
-      <section className="surface-2 text-foreground py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold mb-4">Premier League Hub</h1>
-          <p className="text-xl text-muted-foreground">Live table and top scorers & assists</p>
-        </div>
-      </section>
-
       {/* Stats Grid */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Page header (consistent with Publications) */}
+          <h1 className="text-2xl md:text-3xl font-semibold mb-4" style={{ color: '#696D7D' }}>
+            Premier League Hub
+          </h1>
+          <p className="mb-6 text-sm md:text-base opacity-80">
+            Live table and top scorers & assists.
+          </p>
+
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
             
             {/* EPL Table Card */}

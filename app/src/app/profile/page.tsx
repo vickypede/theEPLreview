@@ -172,8 +172,8 @@ export default function ProfilePage(){
         {/* Title + subtle saved indicator */}
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 className="text-lg font-bold text-foreground font-heading">Your Profile</h1>
-            <p className="text-muted-foreground text-sm">Customize your Premier League experience</p>
+            <h1 className="text-2xl md:text-3xl font-semibold mb-1" style={{ color: '#696D7D' }}>Your Profile</h1>
+            <p className="text-sm md:text-base opacity-80">Customize your Premier League experience</p>
           </div>
           {justSaved && (
             <span
