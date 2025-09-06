@@ -21,7 +21,7 @@ export default async function EditorialsServer() {
           {latestPubs.map((p) => (
             <article
               key={p.id}
-              className="bg-card rounded-[var(--radius-card)] shadow-md hover:shadow-lg transition-shadow border border-border overflow-hidden"
+              className="bg-card rounded-[var(--radius-card)] shadow-md hover:shadow-lg transition-shadow transition-transform hover:-translate-y-0.5 border border-border overflow-hidden"
             >
               {p.featuredImage && (
                 <div className="relative aspect-[16/9]">

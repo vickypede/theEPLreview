@@ -257,7 +257,7 @@ export default function Landing() {
                         shrink-0 snap-start
                         w-[78vw]
                         h-[var(--club-h-m)]
-                        card border-0 p-0 overflow-hidden
+                        card border-0 p-0 overflow-hidden transition-transform hover:-translate-y-0.5
                       "
                       style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}
                     >
@@ -323,7 +323,7 @@ export default function Landing() {
                 const brand = c?.id ? CLUB_BRAND[c.id] ?? "#4f46e5" : "#4f46e5";
                 const tint = hexToRgba(brand, 0.04);
                 return (
-                  <article key={c?.id ?? i} className="card border-0 p-0 flex flex-col xl:h-[var(--club-h)]" style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}>
+                  <article key={c?.id ?? i} className="card border-0 p-0 flex flex-col xl:h-[var(--club-h)] transition-transform hover:-translate-y-0.5" style={{ backgroundImage: `linear-gradient(180deg, ${tint}, transparent)` }}>
                     <div className="p-4 flex flex-col gap-3">
                       <div className="flex items-center gap-3">
                         {c?.badgeUrl ? (
