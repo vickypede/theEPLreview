@@ -341,6 +341,13 @@ export default function ProfilePage(){
                   >
                     Clear
                   </button>
+                  <button
+                    type="button"
+                    onClick={resetDefaults}
+                    className="btn btn-ghost"
+                  >
+                    Reset to defaults
+                  </button>
                 </div>
               </div>
 
@@ -400,15 +407,6 @@ export default function ProfilePage(){
               </div>
             </section>
 
-            {/* Actions (secondary) */}
-            <section className="card p-5">
-              <div className="flex flex-wrap gap-2">
-                <button className="btn" onClick={() => setFollowed(allSlugs)}>Select all clubs</button>
-                <button className="btn" onClick={() => setFollowed(top6Slugs)}>Follow Top 6</button>
-                <button className="btn" onClick={() => setFollowed([])}>Clear all</button>
-                <button className="btn" onClick={resetDefaults}>Reset to defaults</button>
-              </div>
-            </section>
 
             {/* Mobile sticky save (nice UX) */}
             <div className="lg:hidden sticky bottom-3">
