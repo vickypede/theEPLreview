@@ -151,7 +151,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen surface">
       {/* ======================= NEWS ======================= */}
-      <section className="section-y">
+      <section className="section-y pb-6 md:pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 [--club-h:260px] [--club-h-m:220px] [--gap:1.5rem]">
             {/* Left: Latest headlines list */}
