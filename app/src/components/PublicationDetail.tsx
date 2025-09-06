@@ -78,17 +78,12 @@ export default function PublicationDetail({ pub }: { pub: Publication }) {
           {pub.title}
         </h1>
 
-        {/* Tag + time (same line) */}
-        <div className="flex items-center gap-3 mb-6 text-sm">
-          {typeLabel ? (
-            <span className="inline-block px-3 py-1 rounded-full border border-border" style={{ background: "#8D9F87", color: "#0b0b0b" }}>
-              {typeLabel}
-            </span>
-          ) : null}
-          {pubDate ? (
-            <span className="text-muted-foreground">{formatRelativeOrDate(pubDate)}</span>
-          ) : null}
-        </div>
+        {/* Date */}
+        {pubDate && (
+          <div className="mb-6 text-sm text-muted-foreground">
+            {formatRelativeOrDate(pubDate)}
+          </div>
+        )}
 
         {/* Hero image */}
         {pub.featuredImage && (
@@ -135,8 +130,8 @@ export default function PublicationDetail({ pub }: { pub: Publication }) {
         </div>
 
         {/* Author footer */}
-        <div className="mt-8 text-sm text-muted-foreground">
-          Written by <span className="text-foreground">{pub.authorByline || "The EPL Review"}</span>
+        <div className="mt-8 text-sm text-foreground">
+          {pub.authorByline || "The EPL Review"}
         </div>
       </div>
     </>
