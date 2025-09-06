@@ -51,11 +51,7 @@ export default async function EditorialsServer() {
                 {p.excerpt ? (
                   <p className="text-muted-foreground text-sm line-clamp-2">{p.excerpt}</p>
                 ) : null}
-                <div className="mt-auto">
-                  <Link href={`/publications/${p.slug || p.id}`} className="text-primary hover:text-foreground text-sm font-medium">
-                    Read →
-                  </Link>
-                </div>
+                {/* Removed Read link */}
               </div>
             </article>
           ))}

@@ -104,8 +104,7 @@ export default function PublicationCard({
         </div>
 
         {/* Bottom meta row pinned */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span className="text-sm font-medium" style={{ color: "#f25a87" }}>Read →</span>
+        <div className="flex items-center justify-end text-xs text-muted-foreground">
           <span>{prettyDate(date)}</span>
         </div>
       </div>
