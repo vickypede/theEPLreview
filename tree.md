@@ -2,7 +2,7 @@ theeplreview/
 ├── 📁 app/                          # Next.js Frontend Application
 │   ├── 📁 src/
 │   │   ├── 📁 app/                 # Next.js App Router
-│   │   │   ├── 📄 page.tsx         # Homepage (shows Landing component)
+│   │   │   ├── 📄 page.tsx         # Homepage (Landing + PublicationsSection)
 │   │   │   ├── 📁 clubs/           # Club pages
 │   │   │   │   ├── 📄 page.tsx     # /clubs (shows ClubsList)
 │   │   │   │   └── 📁 [slug]/      # Dynamic club routes
@@ -14,7 +14,7 @@ theeplreview/
 │   │   │   ├── 📁 profile/         # User profile
 │   │   │   │   └── 📄 page.tsx     # /profile (user settings)
 │   │   │   ├── 📁 publications/    # Publication pages
-│   │   │   │   ├── 📄 page.tsx     # /publications (shows PublicationsGrid)
+│   │   │   │   ├── 📄 page.tsx     # /publications (shows PublicationCard grid)
 │   │   │   │   └── 📁 [slug]/      # Dynamic publication routes
 │   │   │   │       ├── 📄 page.tsx # /publications/[slug] (shows PublicationDetail)
 │   │   │   │       └── 📄 loading.tsx # Loading component
@@ -27,8 +27,10 @@ theeplreview/
 │   │   │   │   │       └── 📄 page.tsx # /admin/sources/new
 │   │   │   │   └── 📁 write/       # Content writing
 │   │   │   │       └── 📄 page.tsx # /admin/write
-│   │   │   ├── 📄 layout.tsx       # Root layout (Header + Footer)
+│   │   │   ├── 📄 layout.tsx       # Root layout (Header + Footer + SEO metadata)
 │   │   │   ├── 📄 globals.css      # Global styles & theme
+│   │   │   ├── 📄 robots.ts        # robots.txt route
+│   │   │   ├── 📄 sitemap.ts       # Dynamic sitemap route
 │   │   │   ├── 📄 favicon.ico      # App favicon
 │   │   │   ├── 📄 icon.png         # App icon
 │   │   │   └── 📄 apple-icon.png   # Apple touch icon
@@ -38,7 +40,6 @@ theeplreview/
 │   │   │   ├── 📄 ArticlesList.tsx     # News articles display
 │   │   │   ├── 📄 ClubsList.tsx        # Club directory listing
 │   │   │   ├── 📄 ClubArticlesList.tsx # Club-specific articles
-│   │   │   ├── 📄 PublicationsGrid.tsx # Publications grid display
 │   │   │   ├── 📄 PublicationCard.tsx  # Individual publication card
 │   │   │   ├── 📄 PublicationDetail.tsx # Publication detail view
 │   │   │   ├── 📄 Header.tsx           # Global navigation header
@@ -49,7 +50,9 @@ theeplreview/
 │   │   │   └── 📄 AdminGuard.tsx       # Admin route protection
 │   │   ├── 📁 lib/                 # Utility libraries
 │   │   │   ├── 📄 firebase.ts      # Firebase client config
+│   │   │   ├── 📄 firebaseAdmin.ts # Firebase Admin SDK config
 │   │   │   ├── 📄 firestoreConverters.ts # Firestore data converters
+│   │   │   ├── 📄 publications.server.ts # Server-side publication helpers
 │   │   │   └── 📄 useEnsureProfile.ts # Profile auto-creation hook
 │   │   ├── 📁 hooks/               # Custom React hooks
 │   │   │   └── 📄 useAuthGate.tsx  # Authentication gate hook
@@ -108,6 +111,16 @@ theeplreview/
 │   ├── 📄 package-lock.json        # Dependency lock file
 │   ├── 📄 tsconfig.json            # TypeScript config
 │   └── 📄 tsconfig.dev.json        # Development TypeScript config
+│
+├── 📁 ios-app/                      # iOS Swift Application
+│   ├── 📄 README.md                # iOS app documentation
+│   ├── 📄 .gitkeep                 # Git placeholder
+│   └── 📁 [Future iOS project files]
+│
+├── 📁 android-app/                  # Android Kotlin/Java Application
+│   ├── 📄 README.md                # Android app documentation
+│   ├── 📄 .gitkeep                 # Git placeholder
+│   └── 📁 [Future Android project files]
 │
 ├── 📁 infra/                        # Infrastructure
 │   └── 📁 firecrawl/               # Firecrawl integration
@@ -170,11 +183,48 @@ theeplreview/
 ├── 📄 package.json                  # Root dependencies
 ├── 📄 package-lock.json             # Root dependency lock file
 ├── 📄 tree.md                       # Repository structure documentation
-├── 📄 todo.md                       # Todo list
+├── 📄 fix.md                        # SSR/SEO implementation plan
+├── 📄 refactor.md                   # Homepage consolidation plan
+├── 📄 visibility.md                 # Google search visibility strategy
 ├── 📄 wip.md                        # Work in progress notes
 ├── 📄 error.md                      # Error documentation
-├── 📄 profileLanding.md             # Profile landing documentation
-├── 📄 profilepage.md                # Profile page documentation
-├── 📄 pub.md                        # Publication documentation
+├── 📄 instruction.md                # Development instructions
+├── 📄 notes.md                      # Development notes
 ├── 📄 publications.md               # Publications documentation
 └── 📄 sources.md                    # Sources documentation
+
+## 🔄 Reusable Files for Mobile Development
+
+### **Shared Data Models & Types**
+- `app/src/types/index.ts` - Core data types (Article, Club, Publication)
+- `app/src/types/publication.ts` - Publication-specific types
+- `functions/src/seed/clubs.json` - Club definitions & metadata
+- `functions/src/seed/sources.json` - News source configurations
+
+### **Shared Assets & Branding**
+- `app/public/assets/logo/` - Logo files (PNG, WebP formats)
+- `app/public/assets/logo_header/` - Header-specific logos
+- `solidBGlogo/` - Complete logo packs with multiple sizes
+
+### **Shared Configuration**
+- `firebase.json` - Firebase project configuration
+- `firestore.rules` - Database security rules
+- `firestore.indexes.json` - Database indexes
+- `firebase-config.js` - Firebase SDK configuration
+
+### **Shared Business Logic**
+- `functions/src/index.ts` - Data ingestion & processing logic
+- `app/src/lib/firestoreConverters.ts` - Data transformation utilities
+- `app/src/lib/useEnsureProfile.ts` - User profile management
+
+### **Shared Documentation**
+- `publications.md` - Publication system documentation
+- `sources.md` - News source documentation
+- `notes.md` - Development notes & patterns
+
+### **Mobile-Specific Benefits**
+- **Same Firebase Backend**: iOS/Android apps can use identical Firestore collections
+- **Unified Authentication**: Same Firebase Auth across all platforms
+- **Shared Content**: Articles, publications, and club data available to all apps
+- **Consistent Branding**: Same logos and visual assets across platforms
+- **Unified Admin**: Manage content from web admin panel for all platforms

@@ -362,7 +362,7 @@ function computeHeadlessEnabled(config: RuntimeConfig, reqQuery: any): boolean {
 // -----------------------------------------------------------------------------
 // NEW: Article likelihood & freshness helpers (HTML path only)
 // -----------------------------------------------------------------------------
-const TITLE_DENY = /^(about|contact|privacy|cookies|terms|fixtures?|results?|table|index)\b/i;
+const TITLE_DENY = /^(about|contact|privacy|cookies|terms|womens?|nwsl|wsl|fixtures?|results?|table|index)\b/i;
 
 function extractMainText(html: string): string {
   const $ = cheerio.load(html);
