@@ -41,7 +41,6 @@ export default async function HomePage() {
   return (
     <>
       <Landing />
-      {/* @ts-expect-error Server Component */}
       <PublicationsSection />
     </>
   );
