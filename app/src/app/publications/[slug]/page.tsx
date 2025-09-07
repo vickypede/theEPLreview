@@ -20,5 +20,6 @@ export async function generateMetadata({ params }: Props) {
   return {
     title: `${pub.title} • The EPL Review`,
     description: pub.excerpt || pub.content?.slice(0, 160) || '',
+    alternates: { canonical: `/publications/${pub.slug || pub.id}` },
   };
 }
