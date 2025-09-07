@@ -6,7 +6,7 @@ export const revalidate = 120;
 
 export default async function EditorialsServer() {
   const ITEMS_TO_FETCH = 15;
-  const ITEMS_TO_SHOW = 3; // tune later
+  const ITEMS_TO_SHOW = 5; // show more on homepage; can tune later
   const pubs = await getLatestPublications(ITEMS_TO_FETCH);
   const latestPubs = pubs.slice(0, ITEMS_TO_SHOW);
 
@@ -20,7 +20,7 @@ export default async function EditorialsServer() {
           </Link>
         </div>
 
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {latestPubs.map((p) => (
             <Link key={p.id} href={`/publications/${p.slug || p.id}`}>
               <PublicationCard
