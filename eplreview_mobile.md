@@ -599,6 +599,23 @@ async function sendPush({title, body, url, club}: {title:string; body:string; ur
 - 17.13 Polishing, Accessibility pass, performance checks.
 - 17.14 TestFlight; iterate; submit for review.
 
+17.15 **Last-mile checklist** (must-pass before submission)
+
+  - 17.15.1 Certificates: Developer & Distribution created on the same Mac used to Archive.
+  - 17.15.2 APNs `.p8` key belongs to the **same Apple Team** as the app’s bundle ID; uploaded to Firebase → Cloud Messaging.
+  - 17.15.3 `GoogleService-Info.plist` bundle ID **exact match** with Xcode target; run on device once so Analytics/Crashlytics register.
+  - 17.15.4 Firestore Security Rules allow `/users/{uid}/bookmarks/*` writes for the signed-in user only.
+  - 17.15.5 `ADMIN_PUSH_SECRET` created (Firebase/Secrets) and HTTPS function deployed; admin UI can send a test push.
+  - 17.15.6 Topic names sanitized (lowercase, no spaces): `publications`, `club_<slug>`.
+  - 17.15.7 AASA served at `/.well-known/apple-app-site-association` with **application/json**, **no redirects**; validate with Apple’s tool.
+  - 17.15.8 Associated Domains entitlement added: `applinks:theeplreview.com`.
+  - 17.15.9 App Icons: all required sizes present in Asset Catalog; 1024×1024 uploaded in App Store Connect.
+  - 17.15.10 Localization: Base localization present; strings not hard-coded for non-English content.
+  - 17.15.11 App Privacy in App Store Connect completed; Privacy Policy & Terms URLs reachable.
+  - 17.15.12 Push permission prompt shown **after** user action (first share/bookmark/open publications) to improve acceptance.
+  - 17.15.13 Optional: Background Modes checked only for **Remote notifications**; background fetch left off unless used.
+  - 17.15.14 Build with `xcodebuild -showBuildSettings` sanity check; Archive succeeds locally.
+
 ---
 
 ### Notes
