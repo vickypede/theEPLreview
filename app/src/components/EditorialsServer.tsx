@@ -1,11 +1,14 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { getLatestPublications } from '@/lib/publications.server';
+import PublicationCard from '@/components/PublicationCard';
 
 export const revalidate = 120;
 
 export default async function EditorialsServer() {
-  const latestPubs = await getLatestPublications(3);
+  const ITEMS_TO_FETCH = 15;
+  const ITEMS_TO_SHOW = 3; // tune later
+  const pubs = await getLatestPublications(ITEMS_TO_FETCH);
+  const latestPubs = pubs.slice(0, ITEMS_TO_SHOW);
 
   return (
     <section className="section-y surface-2">
@@ -17,45 +20,19 @@ export default async function EditorialsServer() {
           </Link>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {latestPubs.map((p) => (
-            <article
-              key={p.id}
-              className="bg-card rounded-[var(--radius-card)] shadow-md hover:shadow-lg transition-shadow transition-transform hover:-translate-y-0.5 border border-border overflow-hidden"
-            >
-              {p.featuredImage && (
-                <div className="relative aspect-[16/9]">
-                  <Image
-                    src={p.featuredImage}
-                    alt={p.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
-                  />
-                </div>
-              )}
-              <div className="p-6 flex flex-col min-h-[180px]">
-                {p.type ? (
-                  <div className="mb-3">
-                    <span
-                      className="inline-flex w-auto shrink-0 px-3 py-1 rounded-full text-xs font-semibold border border-border"
-                      style={{ background: "#8D9F87", color: "#0b0b0b" }}
-                    >
-                      {p.type.split("-").map(w => w[0]?.toUpperCase() + w.slice(1)).join(" ")}
-                    </span>
-                  </div>
-                ) : null}
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  <Link href={`/publications/${p.slug || p.id}`} className="hover:underline">
-                    {p.title}
-                  </Link>
-                </h3>
-                {p.excerpt ? (
-                  <p className="text-muted-foreground text-sm line-clamp-2">{p.excerpt}</p>
-                ) : null}
-                {/* Removed Read link */}
-              </div>
-            </article>
+            <Link key={p.id} href={`/publications/${p.slug || p.id}`}>
+              <PublicationCard
+                title={p.title}
+                excerpt={p.excerpt}
+                featuredImage={p.featuredImage || null}
+                authorByline={p.authorByline || ''}
+                type={p.type || ''}
+                readingTime={p.readingTime || undefined}
+                date={undefined}
+              />
+            </Link>
           ))}
         </div>
       </div>
