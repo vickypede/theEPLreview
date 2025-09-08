@@ -31,12 +31,11 @@ struct Club: Identifiable {
 
     init?(doc: DocumentSnapshot) {
         guard let data = doc.data(),
-              let name = data["name"] as? String,
-              let slug = data["slug"] as? String else { return nil }
+              let name = data["name"] as? String else { return nil }
         self.id = doc.documentID
         self.name = name
-        self.slug = slug
-        self.crestURL = data["crestURL"] as? String
+        self.slug = data["slug"] as? String ?? doc.documentID
+        self.crestURL = data["crestURL"] as? String ?? data["badgeUrl"] as? String
     }
 }
 
