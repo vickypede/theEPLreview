@@ -12,3 +12,8 @@ struct SafariView: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {}
 }
+
+// Make URL Identifiable so it can be used with `.sheet(item:)`
+extension URL: Identifiable {
+    public var id: String { absoluteString }
+}
