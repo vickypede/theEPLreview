@@ -16,7 +16,7 @@ struct ContentView: View {
             NavigationStack { NewsListView() }
                 .tabItem { Label("News", systemImage: "newspaper") }
 
-            Text("Clubs Coming Soon")
+            NavigationStack { ClubsListView() }
                 .tabItem { Label("Clubs", systemImage: "sportscourt") }
         }
     }
