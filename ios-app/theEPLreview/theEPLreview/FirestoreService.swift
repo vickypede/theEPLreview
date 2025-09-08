@@ -11,6 +11,13 @@ struct Article: Identifiable, Codable {
     let clubs: [String]
 }
 
+struct Club: Identifiable, Codable {
+    @DocumentID var id: String?
+    let name: String
+    let slug: String
+    let crestURL: String?
+}
+
 final class FirestoreService {
     static let shared = FirestoreService()
     private let db = Firestore.firestore()
@@ -32,6 +39,15 @@ final class FirestoreService {
             .limit(to: limit)
             .addSnapshotListener { snap, _ in
                 let items = snap?.documents.compactMap { try? $0.data(as: Article.self) } ?? []
+                completion(items)
+            }
+    }
+
+    func allClubs(completion: @escaping ([Club]) -> Void) {
+        db.collection("clubs")
+            .order(by: "name")
+            .addSnapshotListener { snap, _ in
+                let items = snap?.documents.compactMap { try? $0.data(as: Club.self) } ?? []
                 completion(items)
             }
     }
