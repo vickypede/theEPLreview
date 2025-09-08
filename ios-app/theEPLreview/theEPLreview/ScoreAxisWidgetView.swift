@@ -29,8 +29,15 @@ struct ScoreAxisWidgetView: UIViewRepresentable {
         "leeds": 71
     ]
 
+    @State private var dynamicHeight: CGFloat = 420
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
     func makeUIView(context: Context) -> WKWebView {
-        let web = WKWebView()
+        let config = WKWebViewConfiguration()
+        config.userContentController.add(context.coordinator, name: "size")
+
+        let web = WKWebView(frame: .zero, configuration: config)
         web.scrollView.isScrollEnabled = false
         web.isOpaque = false
         web.backgroundColor = .clear
@@ -39,7 +46,21 @@ struct ScoreAxisWidgetView: UIViewRepresentable {
         return web
     }
 
-    func updateUIView(_ uiView: WKWebView, context: Context) {}
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        // nothing
+    }
+
+    class Coordinator: NSObject, WKScriptMessageHandler {
+        var parent: ScoreAxisWidgetView
+        init(_ parent: ScoreAxisWidgetView) { self.parent = parent }
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            if message.name == "size", let h = message.body as? Double {
+                DispatchQueue.main.async {
+                    parent.dynamicHeight = max(120, CGFloat(h))
+                }
+            }
+        }
+    }
 
     private func widgetHTML(for slug: String) -> String {
         guard let teamID = Self.scoreAxisIDs[slug] else {
@@ -53,8 +74,17 @@ struct ScoreAxisWidgetView: UIViewRepresentable {
 
         return """
         <html><head><meta name='viewport' content='initial-scale=1.0, width=device-width'>
-        <style>body{margin:0;background:#333333;}</style></head><body>
-        <iframe src=\"\(src)\" style='width:100%; height:420px; border:0;' referrerpolicy='no-referrer-when-downgrade'></iframe>
+        <style>body{margin:0;background:#333333;}</style>
+        <script>
+        function sendHeight(){
+            var h = document.body.scrollHeight;
+            window.webkit.messageHandlers.size.postMessage(h);
+        }
+        window.addEventListener('load', sendHeight);
+        window.addEventListener('resize', sendHeight);
+        </script>
+        </head><body>
+        <iframe src=\"\(src)\" style='width:100%; border:0;' onload='sendHeight()' referrerpolicy='no-referrer-when-downgrade'></iframe>
         </body></html>
         """
     }

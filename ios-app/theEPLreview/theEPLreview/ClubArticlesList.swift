@@ -9,7 +9,7 @@ struct ClubArticlesList: View {
         List {
             // ScoreAxis widget header
             ScoreAxisWidgetView(clubSlug: club.slug)
-                .frame(height: 140)
+                .frame(maxHeight: .infinity)
                 .listRowInsets(EdgeInsets())
 
             ForEach(items) { a in
