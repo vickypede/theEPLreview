@@ -6,14 +6,21 @@ struct ClubArticlesList: View {
     @State private var safariURL: URL?
 
     var body: some View {
-        List(items) { a in
-            Button {
-                if let u = URL(string: a.url) { safariURL = u }
-            } label: {
-                VStack(alignment: .leading) {
-                    Text(a.title).font(.headline)
-                    if let ts = a.publishedAt?.dateValue() {
-                        Text(ts.formatted()).font(.caption).foregroundStyle(.secondary)
+        List {
+            // ScoreAxis widget header
+            ScoreAxisWidgetView(clubSlug: club.slug)
+                .frame(height: 140)
+                .listRowInsets(EdgeInsets())
+
+            ForEach(items) { a in
+                Button {
+                    if let u = URL(string: a.url) { safariURL = u }
+                } label: {
+                    VStack(alignment: .leading) {
+                        Text(a.title).font(.headline)
+                        if let ts = a.publishedAt?.dateValue() {
+                            Text(ts.formatted()).font(.caption).foregroundStyle(.secondary)
+                        }
                     }
                 }
             }
