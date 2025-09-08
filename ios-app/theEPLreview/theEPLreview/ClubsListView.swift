@@ -2,12 +2,15 @@ import SwiftUI
 
 struct ClubsListView: View {
     @State private var clubs: [Club] = []
+    @State private var loading = true
 
     var body: some View {
         Group {
-            if clubs.isEmpty {
+            if loading {
                 ProgressView("Loading clubs…")
-                    .task { FirestoreService.shared.allClubs { clubs = $0 } }
+            } else if clubs.isEmpty {
+                Text("No clubs available")
+                    .foregroundStyle(.secondary)
             } else {
                 List(clubs) { club in
                     NavigationLink(destination: ClubArticlesList(club: club)) {
@@ -28,5 +31,11 @@ struct ClubsListView: View {
             }
         }
         .navigationTitle("Clubs")
+        .task {
+            FirestoreService.shared.allClubs { arr in
+                clubs = arr
+                loading = false
+            }
+        }
     }
 }
