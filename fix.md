@@ -1,3 +1,47 @@
+ScoreAxis Widget API Migration Fix (December 2024)
+
+Issue
+- ScoreAxis widgets showing "error" and not loading on web app.
+- Root cause: ScoreAxis deprecated the old `www.scoreaxis.com/widget/...` API format with numeric team IDs.
+- New format requires `widgets.scoreaxis.com/api/football/...` with token-based team/league IDs.
+
+Solution
+- Migrated from iframe-based embeds to script-based widget embeds.
+- Updated team info widgets (`TeamPanel.tsx`) to use new token mapping.
+- Updated league table and top players widgets (`Stats.tsx`) to use new league token.
+- Created reusable `ScoreAxisWidget.tsx` component for script-based embedding.
+
+Changes Made
+1. Created `app/src/components/ScoreAxisWidget.tsx`
+   - Client component that injects ScoreAxis script tags dynamically.
+   - Handles widget ID generation and script loading.
+
+2. Updated `app/src/components/TeamPanel.tsx`
+   - Replaced `SCOREAXIS_IDS` (numeric IDs) with `SCOREAXIS_TEAMINFO_TOKENS` (token strings).
+   - Changed from iframe embeds to `ScoreAxisWidget` component.
+   - Updated URL generation to use `widgets.scoreaxis.com/api/football/team-info/{token}`.
+
+3. Updated `app/src/components/Stats.tsx`
+   - Replaced hardcoded league table/players iframe URLs.
+   - Added `SCOREAXIS_EPL_LEAGUE_TOKEN` constant.
+   - Migrated to `ScoreAxisWidget` component with new API format.
+
+4. Security Update: Bumped Next.js
+   - Upgraded from `15.5.2` to `15.5.9` to resolve CVE-2025-66478.
+   - Updated `eslint-config-next` to match.
+
+Team Token Mapping
+- All EPL teams now have token-based IDs in `SCOREAXIS_TEAMINFO_TOKENS`.
+- League token: `6232265abf1fa71a672159ec` (for table and top players widgets).
+
+Commits
+- `82d8cfa`: Fix ScoreAxis embeds (widgets.scoreaxis.com tokens)
+- `2dab1d9`: Bump Next.js to 15.5.9 (security update)
+
+Status: ✅ Fixed and deployed
+
+---
+
 Publications SSR + SEO Fix Plan (Granular, Project‑Aware)
 
 Goal
