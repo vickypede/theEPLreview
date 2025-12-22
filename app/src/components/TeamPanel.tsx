@@ -4,55 +4,45 @@ import { useEffect, useMemo, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Club } from "@/types";
+import ScoreAxisWidget from "@/components/ScoreAxisWidget";
 
-// ScoreAxis ID mapping - these are the widget IDs from ScoreAxis
-// Keep this in sync when you get new IDs from their widget generator
-// link to get Ids https://www.scoreaxis.com/free-soccer-widgets/team-info-widget/ !!!
-const SCOREAXIS_IDS: Record<string, number> = {
-  "arsenal": 19,
-  "manchester-city": 9,
-  "liverpool": 8,
-  "chelsea": 18,
-  "manchester-united": 14,
-  "tottenham": 6,
-  "newcastle": 20,
-  "aston-villa": 15,
-  "brighton": 78,
-  "west-ham": 1,
-  "brentford": 236,
-  "fulham": 11,
-  "crystal-palace": 51,
-  "wolves": 29,
-  "everton": 13,
-  "nottingham-forest": 63,
-  "burnley": 27,
-  "luton-town": 115,
-  "sheffield-united": 21,
-  "bournemouth": 52,
-  "leeds": 71,
+// ScoreAxis TEAM INFO tokens (new embed format uses widgets.scoreaxis.com + token IDs)
+// Keep this in sync with ScoreAxis widget generator output.
+const SCOREAXIS_TEAMINFO_TOKENS: Record<string, string> = {
+  "arsenal": "62321b19adaf4b2bd73de890",
+  "aston-villa": "62321b2eadaf4b2bd73dec16",
+  "bournemouth": "62321afdadaf4b2bd73de3c6",
+  "brentford": "62321b0fadaf4b2bd73de6fc",
+  "brighton": "62321b27adaf4b2bd73deae6",
+  "burnley": "62321b39adaf4b2bd73dee20",
+  "chelsea": "62321b27adaf4b2bd73deaea",
+  "crystal-palace": "62321b19adaf4b2bd73de88c",
+  "everton": "62321b48adaf4b2bd73df0e2",
+  "fulham": "62321af9adaf4b2bd73de304",
+  "luton": "62321b09adaf4b2bd73de5c0",
+  "leeds": "62321b19adaf4b2bd73de882",
+  "liverpool": "62321afeadaf4b2bd73de3ec",
+  "manchester-city": "62321b13adaf4b2bd73de7a6",
+  "manchester-united": "62321b0badaf4b2bd73de62c",
+  "newcastle": "62321b39adaf4b2bd73dee16",
+  "nottingham-forest": "62321b0badaf4b2bd73de632",
+  "sheffield-united": "62321b07adaf4b2bd73de560",
+  "sunderland": "62321afdadaf4b2bd73de3c2",
+  "tottenham": "62321b0fadaf4b2bd73de6f8",
+  "west-ham": "62321b27adaf4b2bd73deae4",
+  // App slug is "wolves", ScoreAxis token corresponds to wolverhampton.
+  "wolves": "62321b39adaf4b2bd73dee10",
 };
 
-
-
-function useScoreAxisAutoHeight() {
-  useEffect(() => {
-    const onMsg = (event: MessageEvent) => {
-      const data = event.data as { inst?: string; appHeight?: string };
-      if (!data?.inst || !data?.appHeight) return;
-      const iframe = document.querySelector<HTMLIFrameElement>(
-        `iframe[data-inst="${data.inst}"]`
-      );
-      if (iframe) iframe.style.height = `${parseInt(data.appHeight, 10)}px`;
-    };
-    window.addEventListener("message", onMsg);
-    return () => window.removeEventListener("message", onMsg);
-  }, []);
+function buildTeamInfoScriptSrc(teamToken: string, widgetId: string) {
+  return `https://widgets.scoreaxis.com/api/football/team-info/${teamToken}?widgetId=${encodeURIComponent(
+    widgetId
+  )}&lang=en&statsBlock=1&playersBlock=1&matchesBlock=1&links=1&font=heebo&fontSize=14&widgetWidth=auto&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23141416&linkColor=%23141416&borderColor=%23ecf1f7&tabColor=%23f3f8fd`;
 }
 
 export default function TeamPanel({ slug }: { slug: string }) {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
-  useScoreAxisAutoHeight();
 
   // Fetch clubs from Firestore
   useEffect(() => {
@@ -85,24 +75,17 @@ export default function TeamPanel({ slug }: { slug: string }) {
     return clubs.find((club) => club.id === slug) ?? null;
   }, [clubs, slug]);
 
-  // Get ScoreAxis ID for this team
-  const scoreAxisId = team ? SCOREAXIS_IDS[team.id] : null;
+  // Get ScoreAxis token for this team (new format)
+  const scoreAxisToken = team ? SCOREAXIS_TEAMINFO_TOKENS[team.id] : null;
 
   // Debug logging
   console.log('TeamPanel Debug:', {
     slug,
     team,
-    scoreAxisId,
+    scoreAxisToken,
     allClubs: clubs.map(c => ({ id: c.id, name: c.name })),
-    scoreAxisMapping: SCOREAXIS_IDS
+    scoreAxisMapping: SCOREAXIS_TEAMINFO_TOKENS
   });
-
-  // Generate ScoreAxis URL with unified dark theme and tabs for all clubs
-  const generateScoreAxisUrl = (teamId: number, instanceId: string) => {
-    const bodyBackground = encodeURIComponent('#333333');
-    const textColor = encodeURIComponent('#cccccc');
-    return `https://www.scoreaxis.com/widget/team-info/${teamId}?autoHeight=1&bodyBackground=${bodyBackground}&textColor=${textColor}&teamLogo=1&matchesTab=1&playersTab=1&statsTab=1&inst=${instanceId}`;
-  };
 
   if (loading) {
     return (
@@ -126,8 +109,8 @@ export default function TeamPanel({ slug }: { slug: string }) {
     );
   }
 
-  // Check if team has ScoreAxis ID configured
-  if (!scoreAxisId) {
+  // Check if team has ScoreAxis token configured
+  if (!scoreAxisToken) {
     return (
       <section className="mb-8">
         <div className="text-center mb-6">
@@ -142,10 +125,10 @@ export default function TeamPanel({ slug }: { slug: string }) {
             <div className="p-6 text-center">
               <p className="text-muted-foreground mb-4">
                 Team stats widget not yet configured for <strong className="text-foreground">{team.name}</strong>. 
-                Please add this team to the <code className="px-2 py-1 rounded surface-2 border border-border">SCOREAXIS_IDS</code> mapping in the code.
+                Please add this team to the <code className="px-2 py-1 rounded surface-2 border border-border">SCOREAXIS_TEAMINFO_TOKENS</code> mapping in the code.
               </p>
               <p className="text-sm text-muted-foreground">
-                To get the ID: visit <a href="https://www.scoreaxis.com/free-soccer-widgets/team-info-widget/" target="_blank" rel="noreferrer" className="underline text-primary">ScoreAxis Team Info Widget</a>, select {team.name}, and copy the number from the iframe src.
+                To get the token: open the ScoreAxis Team Info widget generator, select {team.name}, and copy the token from the script src (widgets.scoreaxis.com).
               </p>
             </div>
           </article>
@@ -154,8 +137,7 @@ export default function TeamPanel({ slug }: { slug: string }) {
     );
   }
 
-  // unique inst values per iframe (important when the page has multiple widgets)
-  const instInfo = `info_${scoreAxisId}`;
+  const widgetId = `team_info_${team.id}`;
 
   return (
     <section className="mb-8">
@@ -170,16 +152,11 @@ export default function TeamPanel({ slug }: { slug: string }) {
           <div className="px-4 py-3 border-b surface-2 text-foreground">
             <h3 className="font-semibold">Team Info & Stats</h3>
           </div>
-          <div className="p-3" style={{ backgroundColor: '#333333' }}>
-            <iframe
-              key={`info-${scoreAxisId}`}
-              data-inst={instInfo}
-              src={generateScoreAxisUrl(scoreAxisId, instInfo)}
-              title={`${team.name} – Team Info`}
-              className="w-full rounded-lg border-0"
-              style={{ height: 420 }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
+          <div className="p-3">
+            <ScoreAxisWidget
+              widgetId={widgetId}
+              scriptSrc={buildTeamInfoScriptSrc(scoreAxisToken, widgetId)}
+              className="w-full rounded-lg"
             />
           </div>
           <div className="px-4 pb-3 text-xs text-muted-foreground">

@@ -1,6 +1,26 @@
 "use client";
 
+import ScoreAxisWidget from "@/components/ScoreAxisWidget";
+
+const SCOREAXIS_EPL_LEAGUE_TOKEN = "6232265abf1fa71a672159ec";
+
+function buildLeagueTableScriptSrc(widgetId: string) {
+  // Matches the new ScoreAxis embed snippet format (widgets.scoreaxis.com/api/football/...).
+  return `https://widgets.scoreaxis.com/api/football/league-table/${SCOREAXIS_EPL_LEAGUE_TOKEN}?widgetId=${encodeURIComponent(
+    widgetId
+  )}&lang=en&teamLogo=1&tableLines=0&homeAway=1&header=1&position=1&goals=1&gamesCount=1&diff=1&winCount=1&drawCount=1&loseCount=1&lastGames=1&points=1&teamsLimit=all&links=1&font=heebo&fontSize=14&widgetWidth=auto&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23141416&linkColor=%23141416&borderColor=%23ecf1f7&tabColor=%23f3f8fd`;
+}
+
+function buildTopPlayersScriptSrc(widgetId: string) {
+  return `https://widgets.scoreaxis.com/api/football/league-top-players/${SCOREAXIS_EPL_LEAGUE_TOKEN}?widgetId=${encodeURIComponent(
+    widgetId
+  )}&lang=en&playersCount=10&goalsBlock=1&assistsBlock=1&cardsBlock=1&font=heebo&fontSize=14&widgetWidth=auto&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23141416&linkColor=%23141416&borderColor=%23ecf1f7&tabColor=%23f3f8fd`;
+}
+
 export default function Stats() {
+  const tableWidgetId = "epl_table";
+  const topPlayersWidgetId = "epl_top_players";
+
   return (
     <div className="min-h-screen surface">
       {/* Stats Grid */}
@@ -22,12 +42,10 @@ export default function Stats() {
                 <h2 className="text-xl font-bold text-foreground">EPL Table</h2>
               </div>
               <div className="p-4">
-                <iframe
-                  className="w-full h-96 border-0 rounded-lg"
-                  src="https://www.scoreaxis.com/widget/standings-widget/8"
-                  title="Premier League Table"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
+                <ScoreAxisWidget
+                  widgetId={tableWidgetId}
+                  scriptSrc={buildLeagueTableScriptSrc(tableWidgetId)}
+                  className="w-full rounded-lg"
                 />
               </div>
               <footer className="px-6 py-3 surface-2 border-t border-border text-center">
@@ -43,12 +61,10 @@ export default function Stats() {
                 <h2 className="text-xl font-bold text-foreground">Top Scorers & Assists</h2>
               </div>
               <div className="p-4">
-                <iframe
-                  className="w-full h-96 border-0 rounded-lg"
-                  src="https://www.scoreaxis.com/widget/league-top-players/8"
-                  title="Premier League Top Players"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
+                <ScoreAxisWidget
+                  widgetId={topPlayersWidgetId}
+                  scriptSrc={buildTopPlayersScriptSrc(topPlayersWidgetId)}
+                  className="w-full rounded-lg"
                 />
               </div>
               <footer className="px-6 py-3 surface-2 border-t border-border text-center">
