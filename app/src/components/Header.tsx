@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEnsureProfile } from "@/lib/useEnsureProfile";
 import { auth, db } from "@/lib/firebase";
+import { isCurrentPremierLeagueClub } from "@/lib/clubs";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
 import type { Club } from "@/types";
@@ -82,7 +83,9 @@ export default function Header() {
       try {
         if (!db) return;
         const snap = await getDocs(collection(db, "clubs"));
-        const list = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Club, "id">) })) as Club[];
+        const list = snap.docs
+          .map((d) => ({ id: d.id, ...(d.data() as Omit<Club, "id">) }))
+          .filter(isCurrentPremierLeagueClub) as Club[];
         list.sort((a, b) => a.name.localeCompare(b.name));
         if (mounted) setClubs(list.slice(0, 20));
       } catch {

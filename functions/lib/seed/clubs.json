@@ -2,115 +2,208 @@
     "arsenal": {
         "name": "Arsenal",
         "isTop6": true,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
         "names": ["Arsenal", "Gunners", "AFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg"
+        "ambiguous": [],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t3.png"
     },
     "aston-villa": {
         "name": "Aston Villa",
         "isTop6": false,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
         "names": ["Aston Villa", "Villa", "Villans", "AVFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/9/9f/Aston_Villa_logo.svg"
+        "ambiguous": ["Villa"],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t7.png"
     },
     "bournemouth": {
         "name": "AFC Bournemouth",
         "isTop6": false,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
         "names": ["Bournemouth", "AFC Bournemouth", "Cherries", "AFCB"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/e/e5/AFC_Bournemouth_%282013%29.svg"
+        "ambiguous": ["Bournemouth"],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t91.png"
     },
     "brentford": {
         "name": "Brentford",
         "isTop6": false,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
         "names": ["Brentford", "Bees", "BFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg"
+        "ambiguous": [],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t94.png"
     },
     "brighton": {
         "name": "Brighton & Hove Albion",
         "isTop6": false,
-        "names": ["Brighton", "Brighton & Hove Albion", "Seagulls", "Albion"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg"
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
+        "names": ["Brighton", "Brighton & Hove Albion", "Seagulls", "Albion", "BHAFC"],
+        "ambiguous": [],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t36.png"
     },
     "burnley": {
         "name": "Burnley",
         "isTop6": false,
-        "names": ["Burnley", "Clarets"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/6/6d/Burnley_FC_Logo.svg"
+        "isCurrentPremierLeague": false,
+        "season": "2026-27",
+        "names": ["Burnley", "Clarets", "BFC"],
+        "ambiguous": [],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t90.png"
     },
     "chelsea": {
         "name": "Chelsea",
         "isTop6": true,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
         "names": ["Chelsea", "Blues", "CFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg"
+        "ambiguous": [],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t8.png"
+    },
+    "coventry": {
+        "name": "Coventry City",
+        "isTop6": false,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
+        "names": ["Coventry", "Coventry City", "Sky Blues", "CCFC"],
+        "ambiguous": ["Sky Blues"],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t9.png"
     },
     "crystal-palace": {
         "name": "Crystal Palace",
         "isTop6": false,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
         "names": ["Crystal Palace", "Palace", "Eagles", "CPFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/a/a2/Crystal_Palace_FC_logo_%282022%29.svg"
+        "ambiguous": ["Palace", "Eagles"],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t31.png"
     },
     "everton": {
         "name": "Everton",
         "isTop6": false,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
         "names": ["Everton", "Toffees", "EFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/7/7c/Everton_FC_logo.svg"
+        "ambiguous": [],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t11.png"
     },
     "fulham": {
         "name": "Fulham",
         "isTop6": false,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
         "names": ["Fulham", "Cottagers", "FFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/e/eb/Fulham_FC_%28shield%29.svg"
+        "ambiguous": [],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t54.png"
+    },
+    "hull-city": {
+        "name": "Hull City",
+        "isTop6": false,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
+        "names": ["Hull", "Hull City", "Hull City AFC", "Tigers", "HCFC"],
+        "ambiguous": ["Hull", "Tigers"],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t88.png"
+    },
+    "ipswich": {
+        "name": "Ipswich Town",
+        "isTop6": false,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
+        "names": ["Ipswich", "Ipswich Town", "Tractor Boys", "ITFC"],
+        "ambiguous": [],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t40.png"
     },
     "leeds": {
         "name": "Leeds United",
         "isTop6": false,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
         "names": ["Leeds", "Leeds United", "Whites", "LUFC", "Peacocks"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg"
+        "ambiguous": ["Whites"],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t2.png"
     },
     "liverpool": {
         "name": "Liverpool",
         "isTop6": true,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
         "names": ["Liverpool", "Reds", "LFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg"
+        "ambiguous": [],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t14.png"
     },
     "manchester-city": {
         "name": "Manchester City",
         "isTop6": true,
-        "names": ["Manchester City", "Man City", "City", "Citizens", "Cityzens", "Sky Blues", "MCFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg"
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
+        "names": ["Manchester City", "Man City", "City", "Citizens", "Cityzens", "MCFC"],
+        "ambiguous": ["City"],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t43.png"
     },
     "manchester-united": {
         "name": "Manchester United",
         "isTop6": true,
-        "names": ["Manchester United", "Man United", "United", "Red Devils", "MUFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg"
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
+        "names": ["Manchester United", "Man United", "Man Utd", "United", "Red Devils", "MUFC"],
+        "ambiguous": ["United"],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t1.png"
     },
     "newcastle": {
         "name": "Newcastle United",
         "isTop6": false,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
         "names": ["Newcastle", "Newcastle United", "Magpies", "Toon", "NUFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg"
+        "ambiguous": ["Newcastle"],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t4.png"
     },
     "nottingham-forest": {
         "name": "Nottingham Forest",
         "isTop6": false,
-        "names": ["Nottingham Forest", "Forest", "Tricky Trees", "NFFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_logo.svg"
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
+        "names": ["Nottingham Forest", "Forest", "Nott'm Forest", "NFFC"],
+        "ambiguous": ["Forest"],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t17.png"
+    },
+    "sunderland": {
+        "name": "Sunderland",
+        "isTop6": false,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
+        "names": ["Sunderland", "Sunderland AFC", "Black Cats", "SAFC"],
+        "ambiguous": [],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t56.png"
     },
     "tottenham": {
         "name": "Tottenham Hotspur",
         "isTop6": true,
+        "isCurrentPremierLeague": true,
+        "season": "2026-27",
         "names": ["Tottenham", "Tottenham Hotspur", "Spurs", "Lilywhites", "THFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg"
+        "ambiguous": [],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t6.png"
     },
     "west-ham": {
         "name": "West Ham United",
         "isTop6": false,
+        "isCurrentPremierLeague": false,
+        "season": "2026-27",
         "names": ["West Ham", "West Ham United", "Hammers", "Irons", "WHUFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/c/c2/West_Ham_United_FC_logo.svg"
+        "ambiguous": ["West Ham"],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t21.png"
     },
     "wolves": {
         "name": "Wolverhampton Wanderers",
         "isTop6": false,
+        "isCurrentPremierLeague": false,
+        "season": "2026-27",
         "names": ["Wolves", "Wolverhampton", "Wolverhampton Wanderers", "WWFC"],
-        "badgeUrl": "https://upload.wikimedia.org/wikipedia/en/f/fc/Wolverhampton_Wanderers.svg"
+        "ambiguous": ["Wolves"],
+        "badgeUrl": "https://resources.premierleague.com/premierleague/badges/t39.png"
     }
 }

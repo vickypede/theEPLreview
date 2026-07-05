@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { isCurrentPremierLeagueClub, sortClubsByPriorityThenName } from '@/lib/clubs';
 import type { Club } from '@/types';
 
 type UiClub = Club;
@@ -19,12 +20,10 @@ export default function ClubsList() {
         if (!db) return;
         const clubsRef = collection(db, 'clubs');
         const snapshot = await getDocs(clubsRef);
-        const list = snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Club, 'id'>) })) as UiClub[];
-        // Sort by isTop6 (desc) then by name (asc)
-        list.sort((a, b) => {
-          if (a.isTop6 !== b.isTop6) return a.isTop6 ? -1 : 1;
-          return a.name.localeCompare(b.name);
-        });
+        const list = snapshot.docs
+          .map((d) => ({ id: d.id, ...(d.data() as Omit<Club, 'id'>) }))
+          .filter(isCurrentPremierLeagueClub) as UiClub[];
+        list.sort(sortClubsByPriorityThenName);
         if (mounted) setClubs(list);
       } catch {
         // ignore

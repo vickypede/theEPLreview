@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { isCurrentPremierLeagueClub } from "@/lib/clubs";
 import type { Article, Club } from "@/types";
-import Image from "next/image";
 
 type UiArticle = Article & { sourceName?: string; source?: string };
 
@@ -30,6 +30,11 @@ const CLUB_BRAND: Record<string, string> = {
   "west-ham": "#7A263A",
   wolves: "#FDB913",
   everton: "#003399",
+  coventry: "#76B7E8",
+  "hull-city": "#F6A800",
+  ipswich: "#0057B8",
+  leeds: "#FFCD00",
+  sunderland: "#E30613",
 };
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -66,8 +71,9 @@ export default function Landing() {
         const clubsRef = collection(db, "clubs");
         const clubsSnap = await getDocs(clubsRef);
         const allClubs = clubsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Club, "id">) })) as Club[];
-        const top = allClubs.filter((c) => c.isTop6).slice(0, 6);
-        const six = (top.length === 6 ? top : [...allClubs].sort((a, b) => a.name.localeCompare(b.name)).slice(0, 6)).map((c: Club) => ({
+        const currentClubs = allClubs.filter(isCurrentPremierLeagueClub);
+        const top = currentClubs.filter((c) => c.isTop6).slice(0, 6);
+        const six = (top.length === 6 ? top : [...currentClubs].sort((a, b) => a.name.localeCompare(b.name)).slice(0, 6)).map((c: Club) => ({
           id: c.id,
           name: c.name,
           badgeUrl: c.badgeUrl,

@@ -1,6 +1,6 @@
 import { initializeApp, applicationDefault } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import clubs from './clubs.json';
+import clubs from '../src/seed/clubs.json';
 
 initializeApp({ credential: applicationDefault() });
 const db = getFirestore();

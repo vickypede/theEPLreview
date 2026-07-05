@@ -57,6 +57,17 @@ type SourceDoc = {
   maxAgeHours?: number;
 };
 
+type ClubDoc = {
+  id: string;
+  name?: string;
+  isTop6?: boolean;
+  isCurrentPremierLeague?: boolean;
+  names?: string[];
+  ambiguous?: string[];
+  badgeUrl?: string;
+  season?: string;
+};
+
 type RuntimeConfig = {
   enableHeadlessGlobal?: boolean;
   headlessDailyWindow?: { startHourUTC: number; durationMinutes: number };
@@ -293,6 +304,7 @@ async function buildClubDetectors(): Promise<ClubDetector[]> {
     for (const doc of snap.docs) {
       const slug = doc.id;
       const data = (doc.data() as any) || {};
+      if (data.isCurrentPremierLeague !== true) continue;
       const names: string[] = Array.isArray(data.names) ? data.names : [];
       const allNames = new Set<string>([slug, ...names]);
       const regexes = Array.from(allNames)
@@ -531,12 +543,25 @@ export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => 
     const sourcesSnap = await db.collection("sources").where("isActive", "==", true).get();
     let sources: SourceDoc[] = sourcesSnap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
 
-    // Group filtering using /clubs.isTop6
+    const clubsSnap = await db.collection("clubs").get();
+    const currentClubs = clubsSnap.docs
+      .map((c) => ({ id: c.id, ...(c.data() as any) } as ClubDoc))
+      .filter((c) => c.isCurrentPremierLeague === true);
+    const currentClubSet = new Set<string>(currentClubs.map((c) => c.id));
+    const top6Set = new Set<string>(currentClubs.filter((c) => c.isTop6 === true).map((c) => c.id));
+    const other14Set = new Set<string>(currentClubs.filter((c) => c.isTop6 !== true).map((c) => c.id));
+    const isAnyCurrent = (slugs: string[] | undefined) => (slugs || []).some((s) => currentClubSet.has(s));
+
+    // Never run club-specific sources for inactive/non-current clubs.
+    sources = sources.filter((s: any) => {
+      const slugs: string[] = Array.isArray(s.clubSlugs) ? s.clubSlugs : [];
+      return slugs.length === 0 || isAnyCurrent(slugs);
+    });
+
+    // Group filtering using current /clubs.isTop6
     if (group === "top6" || group === "other14") {
-      const clubsSnap = await db.collection("clubs").get();
-      const top6Set = new Set<string>(clubsSnap.docs.filter((c) => (c.data() as any)?.isTop6).map((c) => c.id));
       const isAnyTop6 = (slugs: string[] | undefined) => (slugs || []).some((s) => top6Set.has(s));
-      const isAnyOther14 = (slugs: string[] | undefined) => (slugs || []).some((s) => !top6Set.has(s));
+      const isAnyOther14 = (slugs: string[] | undefined) => (slugs || []).some((s) => other14Set.has(s));
       sources = sources.filter((s: any) => {
         const slugs: string[] = Array.isArray(s.clubSlugs) ? s.clubSlugs : [];
         if (slugs.length === 0) return true; // general sources run in both jobs; dedupe by URL id
@@ -868,7 +893,11 @@ export const seedClubsHttp = onRequest({ timeoutSeconds: 300 }, async (_req, res
           id,
           name: data.name,
           isTop6: Boolean(data.isTop6),
+          isCurrentPremierLeague: data.isCurrentPremierLeague === true,
+          season: data.season || null,
           names: Array.isArray(data.names) ? data.names : [],
+          ambiguous: Array.isArray(data.ambiguous) ? data.ambiguous : [],
+          badgeUrl: data.badgeUrl || null,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         },

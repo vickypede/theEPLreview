@@ -172,14 +172,14 @@
     "type": "html",
     "url": "https://www.westhamtillidie.com/",
     "clubSlugs": ["west-ham"],
-    "isActive": true
+    "isActive": false
   },
   "westham-footballlondon": {
     "name": "Football.London (West Ham)",
     "type": "html",
     "url": "https://www.football.london/west-ham-united-fc/",
     "clubSlugs": ["west-ham"],
-    "isActive": true
+    "isActive": false
   },
   "manutd-manunews": {
     "name": "ManUtd News",
@@ -368,7 +368,7 @@
     "type": "html",
     "url": "https://sportwitness.co.uk/category/premier-league/wolves/",
     "clubSlugs": ["wolves"],
-    "isActive": true
+    "isActive": false
   },
   "chelsea-prideoflondon": {
     "name": "The Pride of London",
@@ -529,9 +529,43 @@
     "type": "html",
     "url": "https://www.football365.com/wolves/",
     "clubSlugs": ["wolves"],
+    "isActive": false
+  },
+  "coventry-official": {
+    "name": "Coventry City Official",
+    "type": "html",
+    "url": "https://www.ccfc.co.uk/news/",
+    "clubSlugs": ["coventry"],
     "isActive": true
-  }
-  ,
+  },
+  "hull-official": {
+    "name": "Hull City Official",
+    "type": "html",
+    "url": "https://www.wearehullcity.co.uk/news/",
+    "clubSlugs": ["hull-city"],
+    "isActive": true
+  },
+  "ipswich-official": {
+    "name": "Ipswich Town Official",
+    "type": "html",
+    "url": "https://www.itfc.co.uk/news/",
+    "clubSlugs": ["ipswich"],
+    "isActive": true
+  },
+  "leeds-official": {
+    "name": "Leeds United Official",
+    "type": "html",
+    "url": "https://www.leedsunited.com/en/news",
+    "clubSlugs": ["leeds"],
+    "isActive": true
+  },
+  "sunderland-official": {
+    "name": "Sunderland Official",
+    "type": "html",
+    "url": "https://www.safc.com/news/",
+    "clubSlugs": ["sunderland"],
+    "isActive": true
+  },
   "msn-soccer": {
     "name": "MSN Sports Soccer",
     "type": "html",

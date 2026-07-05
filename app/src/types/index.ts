@@ -15,8 +15,10 @@ export interface Club {
   id: string;
   name: string;
   isTop6: boolean;
+  isCurrentPremierLeague?: boolean;
+  season?: string;
   names: string[];
-  ambiguous: string[];
+  ambiguous?: string[];
   scoreAxisId?: number; // ScoreAxis widget ID for team stats
   badgeUrl?: string; // Official club badge URL
 }

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import AdminGuard from '@/components/AdminGuard';
 import { db } from '@/lib/firebase';
+import { isCurrentPremierLeagueClub, sortClubsByPriorityThenName } from '@/lib/clubs';
 import {
   addDoc,
   collection,
@@ -16,11 +17,13 @@ type Club = {
   id: string;
   name: string;
   isTop6?: boolean;
+  isCurrentPremierLeague?: boolean;
 };
 
 type ClubDoc = {
   name: string;
   isTop6?: boolean;
+  isCurrentPremierLeague?: boolean;
 };
 
 type SourceType = 'rss' | 'html';
@@ -62,12 +65,9 @@ export default function AddSourcePage() {
           const data = d.data() as ClubDoc; // ✅ no 'any'
           return { id: d.id, ...data };
         });
-        // Top 6 first, then name
-        list.sort((a, b) => {
-          if ((a.isTop6 ? 1 : 0) !== (b.isTop6 ? 1 : 0)) return a.isTop6 ? -1 : 1;
-          return a.name.localeCompare(b.name);
-        });
-        if (mounted) setClubs(list);
+        const currentClubs = list.filter(isCurrentPremierLeagueClub) as Club[];
+        currentClubs.sort(sortClubsByPriorityThenName);
+        if (mounted) setClubs(currentClubs);
       } finally {
         if (mounted) setLoadingClubs(false);
       }

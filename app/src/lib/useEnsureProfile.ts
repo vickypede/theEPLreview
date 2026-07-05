@@ -5,11 +5,13 @@ import {
   doc, getDoc, setDoc, serverTimestamp,
   collection, query, where, getDocs
 } from 'firebase/firestore';
+import { isCurrentPremierLeagueClub } from '@/lib/clubs';
 import { auth, db } from '@/lib/firebase';
+import type { Club } from '@/types';
 
 export function useEnsureProfile() {
   if (!auth || !db) return;
-  
+
   onAuthStateChanged(auth, async (u) => {
     if (!u) return;
     const pref = doc(db!, 'user_profiles', u.uid);
@@ -20,7 +22,10 @@ export function useEnsureProfile() {
     const top6Snap = await getDocs(
       query(collection(db!, 'clubs'), where('isTop6', '==', true))
     );
-    const top6 = top6Snap.docs.map(d => d.id);
+    const top6 = top6Snap.docs
+      .map(d => ({ id: d.id, ...(d.data() as Omit<Club, 'id'>) }))
+      .filter(isCurrentPremierLeagueClub)
+      .map(d => d.id);
 
     await setDoc(pref, {
       displayName: u.displayName || '',

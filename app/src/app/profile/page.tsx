@@ -9,6 +9,7 @@ import {
 import {
   collection, doc, getDoc, getDocs, orderBy, query, setDoc, updateDoc
 } from 'firebase/firestore';
+import { isCurrentPremierLeagueClub } from '@/lib/clubs';
 import { Club, UserProfile } from '@/types';
 
 export default function ProfilePage(){
@@ -51,7 +52,10 @@ export default function ProfilePage(){
     (async () => {
       const qClubs = query(collection(db!, 'clubs'), orderBy('name'));
       const s = await getDocs(qClubs);
-      setClubs(s.docs.map(d => ({ id: d.id, ...(d.data() as Omit<Club, 'id'>) })));
+      const currentClubs = s.docs
+        .map(d => ({ id: d.id, ...(d.data() as Omit<Club, 'id'>) }))
+        .filter(isCurrentPremierLeagueClub) as Club[];
+      setClubs(currentClubs);
     })();
   }, []);
 
