@@ -9,6 +9,11 @@ This document serves as your learning blueprint for building an AWS replica of *
 
 ---
 
+## 🏷️ Global Naming Convention
+To avoid confusion while manually connecting 20+ resources, you will use the `epl-lab-` prefix for **every single resource** you create.
+
+---
+
 ## 🛑 Phase 0: Billing Guardrails & Teardown Checklist
 
 Before building anything, ensure you protect yourself from runaway costs.
@@ -20,13 +25,13 @@ Before building anything, ensure you protect yourself from runaway costs.
 
 ### 2. Teardown Checklist & Verification
 When you are done with this lab (in a day or two), you **must manually delete these resources** as they bill by the hour even if nobody uses the site. *Never close your laptop until you have manually verified the following consoles:*
-- [ ] **NAT Gateway**: Verify 0 available. (~$32/mo)
+- [ ] **NAT Gateway** (`epl-lab-nat-1a`): Verify 0 available. (~$32/mo)
 - [ ] **Elastic IPs**: Verify 0 allocated.
-- [ ] **Application Load Balancer (ALB)**: Verify 0 active ALBs.
+- [ ] **Application Load Balancer** (`epl-lab-alb`): Verify 0 active ALBs.
 - [ ] **ECS Services**: Verify Desired Count is 0 or the service is deleted.
 - [ ] **CloudWatch Log Groups**: Delete all `/aws/lambda/` and `/ecs/` log groups.
-- [ ] **ECR Image Repositories**: Empty and delete the repo.
-- [ ] **Secrets Manager Secrets**: Schedule for deletion.
+- [ ] **ECR Image Repositories** (`epl-lab-ecr-frontend`): Empty and delete the repo.
+- [ ] **Secrets Manager Secrets**: Schedule `epl-lab-secret-firecrawl` for deletion.
 
 ---
 
@@ -36,26 +41,26 @@ When you are done with this lab (in a day or two), you **must manually delete th
 architecture-beta
     group aws(cloud)[AWS Cloud]
 
-    group vpc(cloud)[VPC 10.0.0.0/16] in aws
+    group vpc(cloud)[epl-lab-vpc: 10.0.0.0/16] in aws
     
-    group pubA(cloud)[Public Subnet A] in vpc
-    group pubB(cloud)[Public Subnet B] in vpc
+    group pubA(cloud)[epl-lab-subnet-public-1a] in vpc
+    group pubB(cloud)[epl-lab-subnet-public-1b] in vpc
     
-    group privAppA(cloud)[Private Subnet A] in vpc
-    group privAppB(cloud)[Private Subnet B] in vpc
+    group privAppA(cloud)[epl-lab-subnet-private-app-1a] in vpc
+    group privAppB(cloud)[epl-lab-subnet-private-app-1b] in vpc
 
-    service igw(internet)[Internet Gateway] in vpc
-    service alb(server)[Application Load Balancer] in pubA
-    service nat(server)[NAT Gateway] in pubA
-    service ddbep(internet)[DynamoDB VPC Gateway Endpoint] in vpc
+    service igw(internet)[epl-lab-igw] in vpc
+    service alb(server)[epl-lab-alb] in pubA
+    service nat(server)[epl-lab-nat-1a] in pubA
+    service ddbep(internet)[epl-lab-vpce-ddb] in vpc
     
-    service ecs(server)[ECS Fargate (Next.js)] in privAppA
-    service sqs(database)[Amazon SQS Queue] in aws
-    service event(server)[EventBridge Cron] in aws
-    service master(server)[Master Lambda] in privAppA
-    service worker(server)[Worker Lambda] in privAppB
+    service ecs(server)[epl-lab-ecs-service] in privAppA
+    service sqs(database)[epl-lab-sqs-ingestion] in aws
+    service event(server)[epl-lab-rule-cron] in aws
+    service master(server)[epl-lab-lambda-master] in privAppA
+    service worker(server)[epl-lab-lambda-worker] in privAppB
     
-    service ddb(database)[DynamoDB (Regional)] in aws
+    service ddb(database)[epl-lab-data-table] in aws
     service cw(database)[CloudWatch Alarms] in aws
 
     igw:R -- L:alb
@@ -77,19 +82,19 @@ architecture-beta
 ## 🛠️ Phase 1: The Network Foundation (VPC)
 *Goal: Create an isolated network environment with proper internet routing.*
 
-1. **Create the VPC**: Navigate to **VPC > Your VPCs > Create VPC**. Name: `epl-vpc`. CIDR: `10.0.0.0/16`.
+1. **Create the VPC**: Navigate to **VPC > Your VPCs > Create VPC**. Name: `epl-lab-vpc`. CIDR: `10.0.0.0/16`.
 2. **Create 4 Subnets** (Split across 2 Availability Zones):
-   - **Public Subnet 1**: `10.0.0.0/24`
-   - **Public Subnet 2**: `10.0.1.0/24`
-   - **Private App Subnet 1**: `10.0.2.0/24`
-   - **Private App Subnet 2**: `10.0.3.0/24`
+   - **Public Subnet 1**: `epl-lab-subnet-public-1a` (`10.0.0.0/24`)
+   - **Public Subnet 2**: `epl-lab-subnet-public-1b` (`10.0.1.0/24`)
+   - **Private App Subnet 1**: `epl-lab-subnet-private-app-1a` (`10.0.2.0/24`)
+   - **Private App Subnet 2**: `epl-lab-subnet-private-app-1b` (`10.0.3.0/24`)
 3. **Gateways & Routing**
-   - **Internet Gateway (IGW)**: Attach to `epl-vpc`.
-   - **NAT Gateway**: Create in **Public Subnet 1**. Allocate an Elastic IP. 
-   - **Public Route Table**: Route `0.0.0.0/0` -> `IGW`. Attach to Public Subnets.
-   - **Private Route Table**: Route `0.0.0.0/0` -> `NAT Gateway`. Attach to Private App Subnets.
+   - **Internet Gateway**: Create `epl-lab-igw`. Attach to `epl-lab-vpc`.
+   - **NAT Gateway**: Create `epl-lab-nat-1a` in `epl-lab-subnet-public-1a`. Allocate an Elastic IP. 
+   - **Public Route Table**: Create `epl-lab-rt-public`. Route `0.0.0.0/0` -> `epl-lab-igw`. Attach to both Public Subnets.
+   - **Private Route Table**: Create `epl-lab-rt-private`. Route `0.0.0.0/0` -> `epl-lab-nat-1a`. Attach to both Private App Subnets.
 4. **DynamoDB VPC Gateway Endpoint**
-   - Create a Gateway Endpoint for DynamoDB and attach it to your Private Route Tables. This keeps database traffic off the public internet.
+   - Create `epl-lab-vpce-ddb` (Gateway Endpoint) and attach it to `epl-lab-rt-private`.
 
 ---
 
@@ -98,7 +103,7 @@ architecture-beta
 
 1. Navigate to **DynamoDB > Tables > Create Table**.
 2. **Table Configuration**:
-   - **Name**: `EplReview_Data`
+   - **Name**: `epl-lab-data-table`
    - **Partition Key (PK)**: `PK` (String)
    - **Sort Key (SK)**: `SK` (String)
 
@@ -106,61 +111,51 @@ architecture-beta
    - **Name**: `GlobalNewsIndex`
    - **Partition Key**: `GSI1PK` (String)
    - **Sort Key**: `GSI1SK` (String)
-   - *Purpose*: To fetch the latest news globally across all clubs for the homepage.
 
-4. **Data Modeling Rules (How you will save data)**:
-   - **Sources**: `PK="SOURCE"`, `SK="SOURCE#<id>"` *(Allows querying PK="SOURCE" to get all sources).*
+4. **Data Modeling Rules**:
+   - **Sources**: `PK="SOURCE"`, `SK="SOURCE#<id>"`
    - **Clubs**: `PK="CLUB"`, `SK="CLUB#<slug>"`
-   - **Articles**: `PK="ARTICLE#<id>"`, `SK="METADATA"`. Also set `GSI1PK="ARTICLE"`, `GSI1SK="<publishedAt>#<articleId>"` to populate the GlobalNewsIndex.
+   - **Articles**: `PK="ARTICLE#<id>"`, `SK="METADATA"`. Set `GSI1PK="ARTICLE"`, `GSI1SK="<publishedAt>#<articleId>"` for the `GlobalNewsIndex`.
 
-5. **Many-to-Many Relationships (Articles to Clubs)**:
-   To fetch articles for a specific club (e.g., Arsenal), save a "Link" item for every club an article is tagged to:
+5. **Many-to-Many Relationships**:
    - `PK="CLUB#<slug>"`, `SK="ARTICLE#<publishedAt>#<articleId>"`
-   - **Crucial Note**: To prevent an N+1 query problem, denormalize (duplicate) the article's `title`, `url`, and `source` directly onto this Link item!
+   - **Crucial Note**: Denormalize (duplicate) the article's `title` and `url` directly onto this Link item to avoid N+1 queries.
 
 ---
 
-## ⚙️ Phase 3: Decoupled Scraping Engine (EventBridge + SQS + Lambda)
+## ⚙️ Phase 3: Decoupled Scraping Engine
 *Goal: Break down the monolithic script into a scalable worker queue.*
 
-> [!NOTE]
-> **Why are Lambdas in a VPC?** You don't strictly need Lambdas in a VPC just to reach DynamoDB or SQS. However, we are placing them in the Private Subnets intentionally for this lab so you are forced to learn how NAT Gateways, Route Tables, and VPC Endpoints work!
-
 1. **Amazon SQS Queue**
-   - Create a **Standard Queue** named `epl-ingestion-queue`. (Standard provides parallel throughput).
-   - Set up a **Dead Letter Queue (DLQ)**.
+   - Create a Standard Queue named `epl-lab-sqs-ingestion`.
+   - Set up a Dead Letter Queue (DLQ) named `epl-lab-sqs-ingestion-dlq`.
 2. **"Master" Lambda Function**
-   - Attached to your **Private App Subnets**.
-   - Logic: Query DynamoDB for `PK="SOURCE"`. Loop through them and push a JSON message to SQS.
+   - Create `epl-lab-lambda-master` attached to `epl-lab-subnet-private-app-1a` and `1b`.
+   - Logic: Query DynamoDB for `PK="SOURCE"`. Push to SQS.
 3. **Amazon EventBridge (Cron)**
-   - Rule Schedule: `cron(0 2 * * ? *)`
-   - Target: Master Lambda.
+   - Rule Name: `epl-lab-rule-cron`. Schedule: `cron(0 2 * * ? *)`.
+   - Target: `epl-lab-lambda-master`.
 4. **"Worker" Lambda Function**
-   - Attached to your **Private App Subnets**.
-   - Trigger: The SQS Queue.
-   - **Idempotency Rule**: Standard SQS can deliver messages twice. You MUST write your Lambda to use DynamoDB conditional writes (only write if the URL hash doesn't exist) so you don't duplicate articles!
+   - Create `epl-lab-lambda-worker` attached to the private subnets.
+   - Trigger: `epl-lab-sqs-ingestion`.
+   - **Idempotency Rule**: Use DynamoDB conditional writes (only write if the URL hash doesn't exist) to avoid duplicating articles on SQS retries.
 
 ---
 
 ## 🔒 Phase 4: Security & Least-Privilege IAM
 *Goal: Secure API keys and restrict resource access.*
 
-1. **Secrets Manager**: Store your `FIRECRAWL_API_KEY` here.
+1. **Secrets Manager**: Store your API key as `epl-lab-secret-firecrawl`.
 2. **IAM Roles**: 
-   - **Lambdas**: Attach `AWSLambdaVPCAccessExecutionRole`, `AmazonDynamoDBFullAccess`, and `AmazonSQSFullAccess`.
-   - **ECS Task Role**: The Next.js container needs an IAM role attached to the task that grants `AmazonDynamoDBReadOnlyAccess` so it can query the table!
-   - **Learning Exercise**: Once the lab works, replace `FullAccess` with strict inline JSON policies.
+   - **Lambda Role**: Create `epl-lab-role-lambda-execution`. Attach `AWSLambdaVPCAccessExecutionRole`, `AmazonDynamoDBFullAccess`, `AmazonSQSFullAccess`.
+   - **ECS Task Role**: Create `epl-lab-role-ecs-task`. Attach `AmazonDynamoDBReadOnlyAccess`.
 
 ---
 
-## 🖥️ Phase 5: Containerizing & Refactoring the Next.js Frontend
+## 🖥️ Phase 5: Containerizing the Next.js Frontend
 *Goal: Build the Next.js App Router for ECS deployment.*
 
-> [!WARNING]
-> **Frontend Refactoring Required**: Your current codebase relies heavily on Firebase Client SDKs in client components. DynamoDB does not have client-side security rules. To securely fetch data in AWS, you must move all database queries into Next.js **React Server Components (RSC)** so the AWS SDK runs securely on the server.
-
-1. **Dockerfile Configuration**: 
-   Because your project is in `app/`, create this Dockerfile in the `app/` directory:
+1. **Dockerfile Configuration** in the `app/` directory:
    ```dockerfile
    FROM node:22-alpine
    WORKDIR /app
@@ -171,18 +166,19 @@ architecture-beta
    EXPOSE 3000
    CMD ["npm", "start"]
    ```
+2. **Frontend Refactoring Required**: Rewrite Firebase Client fetches into **Next.js React Server Components (RSC)** so the AWS SDK (`@aws-sdk/client-dynamodb`) runs securely on the ECS server.
 
 ---
 
 ## 🌐 Phase 6: Hosting the Frontend (ALB + ECS Fargate)
 *Goal: Serve the container to the web.*
 
-1. **Amazon ECR**: Create a repository `epl-frontend`. Build and push your Docker image.
-2. **Application Load Balancer (ALB)**: Create an Internet-facing ALB in your Public Subnets.
+1. **Amazon ECR**: Create a repository `epl-lab-ecr-frontend`. Build and push your image.
+2. **Application Load Balancer (ALB)**: Create `epl-lab-alb` (Internet-facing) in `epl-lab-subnet-public-1a` and `1b`. Create a Target Group named `epl-lab-tg-frontend`.
 3. **ECS Cluster & Task**: 
-   - Create a Fargate cluster.
-   - Create a Task Definition pointing to your ECR image and attach the **ECS Task Role** created in Phase 4.
-   - Run the service in your **Private App Subnets**, linked to the ALB Target Group.
+   - Create a Fargate cluster `epl-lab-ecs-cluster`.
+   - Create a Task Definition `epl-lab-task-frontend` pointing to your ECR image. Attach `epl-lab-role-ecs-task`.
+   - Run the service `epl-lab-ecs-service` in your private subnets, linked to `epl-lab-tg-frontend`.
 
 ---
 
@@ -191,7 +187,6 @@ architecture-beta
 
 1. Navigate to **CloudWatch > Alarms > Create Alarm**.
 2. **Setup the following 3 Alarms**:
-   - **Lambda Errors**: Alarm if the Master Lambda `Errors` metric > 0.
-   - **DLQ Depth**: Alarm if your SQS DLQ `ApproximateNumberOfMessagesVisible` > 0 (meaning scrapers are failing).
-   - **ECS Health**: Alarm if your ALB `UnHealthyHostCount` > 0.
-3. **Log Inspection**: Practice querying your Worker Lambda logs using **CloudWatch Logs Insights**.
+   - `epl-lab-alarm-lambda-errors`: Alarm if `epl-lab-lambda-master` `Errors` > 0.
+   - `epl-lab-alarm-dlq-depth`: Alarm if `epl-lab-sqs-ingestion-dlq` `ApproximateNumberOfMessagesVisible` > 0.
+   - `epl-lab-alarm-ecs-health`: Alarm if `epl-lab-alb` `UnHealthyHostCount` > 0.
