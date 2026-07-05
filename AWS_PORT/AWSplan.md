@@ -9,12 +9,12 @@ This document serves as your learning blueprint for building an AWS replica of *
 
 ---
 
-## 🏷️ Global Naming Convention
+## Global Naming Convention
 To avoid confusion while manually connecting 20+ resources, you will use the `epl-lab-` prefix for **every single resource** you create.
 
 ---
 
-## 🛑 Phase 0: Billing Guardrails & Teardown Checklist
+## Phase 0: Billing Guardrails & Teardown Checklist
 
 Before building anything, ensure you protect yourself from runaway costs.
 
@@ -35,7 +35,7 @@ When you are done with this lab (in a day or two), you **must manually delete th
 
 ---
 
-## 🏛️ Architecture Overview
+## Architecture Overview
 
 ```mermaid
 architecture-beta
@@ -79,7 +79,7 @@ architecture-beta
 
 ---
 
-## 🛠️ Phase 1: The Network Foundation (VPC)
+## Phase 1: The Network Foundation (VPC)
 *Goal: Create an isolated network environment with proper internet routing.*
 
 1. **Create the VPC**: Navigate to **VPC > Your VPCs > Create VPC**. Name: `epl-lab-vpc`. CIDR: `10.0.0.0/16`.
@@ -98,7 +98,17 @@ architecture-beta
 
 ---
 
-## 💾 Phase 2: True Single-Table DynamoDB Design
+## Phase 1.5: Security Groups (Firewalls)
+*Goal: Lock down traffic between layers to strictly necessary ports.*
+
+1. Navigate to **EC2 > Security Groups** and create:
+   - **ALB Security Group** (`epl-lab-sg-alb`): Allow inbound HTTP (Port 80) from `0.0.0.0/0` (the entire internet).
+   - **ECS Security Group** (`epl-lab-sg-ecs`): Allow inbound Custom TCP (Port 3000) **ONLY** from `epl-lab-sg-alb`. *This is critical: it prevents anyone from bypassing the load balancer.*
+   - **Lambda Security Group** (`epl-lab-sg-lambda`): Keep the default outbound rule (Allow All Traffic to `0.0.0.0/0`) so the scrapers can reach the internet.
+
+---
+
+## Phase 2: True Single-Table DynamoDB Design
 *Goal: Port Firestore to DynamoDB using advanced enterprise NoSQL access patterns.*
 
 1. Navigate to **DynamoDB > Tables > Create Table**.
@@ -123,36 +133,37 @@ architecture-beta
 
 ---
 
-## ⚙️ Phase 3: Decoupled Scraping Engine
+## Phase 3: Decoupled Scraping Engine
 *Goal: Break down the monolithic script into a scalable worker queue.*
 
 1. **Amazon SQS Queue**
    - Create a Standard Queue named `epl-lab-sqs-ingestion`.
    - Set up a Dead Letter Queue (DLQ) named `epl-lab-sqs-ingestion-dlq`.
 2. **"Master" Lambda Function**
-   - Create `epl-lab-lambda-master` attached to `epl-lab-subnet-private-app-1a` and `1b`.
+   - Create `epl-lab-lambda-master` attached to `epl-lab-subnet-private-app-1a` and `1b`. Assign `epl-lab-sg-lambda`.
    - Logic: Query DynamoDB for `PK="SOURCE"`. Push to SQS.
 3. **Amazon EventBridge (Cron)**
    - Rule Name: `epl-lab-rule-cron`. Schedule: `cron(0 2 * * ? *)`.
    - Target: `epl-lab-lambda-master`.
 4. **"Worker" Lambda Function**
-   - Create `epl-lab-lambda-worker` attached to the private subnets.
+   - Create `epl-lab-lambda-worker` attached to the private subnets. Assign `epl-lab-sg-lambda`.
    - Trigger: `epl-lab-sqs-ingestion`.
-   - **Idempotency Rule**: Use DynamoDB conditional writes (only write if the URL hash doesn't exist) to avoid duplicating articles on SQS retries.
+   - **Idempotency Rule**: Calculate `articleId` as `SHA256(canonicalUrl)`. To prevent duplicates from SQS retries, use DynamoDB conditional writes: `attribute_not_exists(PK)`.
 
 ---
 
-## 🔒 Phase 4: Security & Least-Privilege IAM
+## Phase 4: Security & IAM Execution Roles
 *Goal: Secure API keys and restrict resource access.*
 
 1. **Secrets Manager**: Store your API key as `epl-lab-secret-firecrawl`.
 2. **IAM Roles**: 
-   - **Lambda Role**: Create `epl-lab-role-lambda-execution`. Attach `AWSLambdaVPCAccessExecutionRole`, `AmazonDynamoDBFullAccess`, `AmazonSQSFullAccess`.
-   - **ECS Task Role**: Create `epl-lab-role-ecs-task`. Attach `AmazonDynamoDBReadOnlyAccess`.
+   - **Lambda Execution Role** (`epl-lab-role-lambda-execution`): Attach `AWSLambdaVPCAccessExecutionRole`, `AmazonDynamoDBFullAccess`, `AmazonSQSFullAccess`.
+   - **ECS Task Execution Role** (`epl-lab-role-ecs-task-execution`): Used by Fargate itself. Attach `AmazonECSTaskExecutionRolePolicy` so it can pull your image from ECR and send logs to CloudWatch.
+   - **ECS Task Role** (`epl-lab-role-ecs-task`): Used by your Next.js application code. Attach `AmazonDynamoDBReadOnlyAccess` so your code can read the tables.
 
 ---
 
-## 🖥️ Phase 5: Containerizing the Next.js Frontend
+## Phase 5: Containerizing the Next.js Frontend
 *Goal: Build the Next.js App Router for ECS deployment.*
 
 1. **Dockerfile Configuration** in the `app/` directory:
@@ -170,19 +181,19 @@ architecture-beta
 
 ---
 
-## 🌐 Phase 6: Hosting the Frontend (ALB + ECS Fargate)
+## Phase 6: Hosting the Frontend (ALB + ECS Fargate)
 *Goal: Serve the container to the web.*
 
 1. **Amazon ECR**: Create a repository `epl-lab-ecr-frontend`. Build and push your image.
-2. **Application Load Balancer (ALB)**: Create `epl-lab-alb` (Internet-facing) in `epl-lab-subnet-public-1a` and `1b`. Create a Target Group named `epl-lab-tg-frontend`.
+2. **Application Load Balancer (ALB)**: Create `epl-lab-alb` (Internet-facing) in `epl-lab-subnet-public-1a` and `1b`. Attach `epl-lab-sg-alb`. Create a Target Group named `epl-lab-tg-frontend`.
 3. **ECS Cluster & Task**: 
    - Create a Fargate cluster `epl-lab-ecs-cluster`.
-   - Create a Task Definition `epl-lab-task-frontend` pointing to your ECR image. Attach `epl-lab-role-ecs-task`.
-   - Run the service `epl-lab-ecs-service` in your private subnets, linked to `epl-lab-tg-frontend`.
+   - Create a Task Definition `epl-lab-task-frontend` pointing to your ECR image. Attach `epl-lab-role-ecs-task-execution` (Execution Role) AND `epl-lab-role-ecs-task` (Task Role).
+   - Run the service `epl-lab-ecs-service` in your private subnets, linked to `epl-lab-tg-frontend`. Attach `epl-lab-sg-ecs`.
 
 ---
 
-## 🚨 Phase 7: Monitoring & Alarms (CloudWatch)
+## Phase 7: Monitoring & Alarms (CloudWatch)
 *Goal: Build enterprise-grade alerting.*
 
 1. Navigate to **CloudWatch > Alarms > Create Alarm**.
