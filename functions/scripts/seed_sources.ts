@@ -9,28 +9,34 @@ async function seedSources() {
   console.log('Starting sources seeding...');
 
   for (const [id, data] of Object.entries(sources as Record<string, any>)) {
-    await db.collection('sources').doc(id).set(
-      {
-        id,
-        name: (data as any).name,
-        type: (data as any).type,
-        url: (data as any).url,
-        clubSlugs: (data as any).clubSlugs ?? [],
-        isActive: (data as any).isActive ?? true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      { merge: true },
-    );
-    console.log('✓ Upserted source:', id, '-', (data as any).name);
+    const ref = db.collection('sources').doc(id);
+    const existing = await ref.get();
+    const seedData: Record<string, any> = {
+      id,
+      name: data.name,
+      type: data.type,
+      url: data.url,
+      clubSlugs: Array.isArray(data.clubSlugs) ? data.clubSlugs : [],
+      includePathRegex: data.includePathRegex || null,
+      needsJs: !!data.needsJs,
+      badPathRegex: data.badPathRegex || null,
+      maxAgeHours: typeof data.maxAgeHours === 'number' ? data.maxAgeHours : null,
+      isActive: data.isActive ?? true,
+      updatedAt: new Date(),
+    };
+
+    if (!existing.exists) {
+      seedData.createdAt = new Date();
+    }
+
+    await ref.set(seedData, { merge: true });
+    console.log('Upserted source:', id, '-', data.name);
   }
 
-  console.log('✅ Sources seeding completed!');
+  console.log('Sources seeding completed!');
 }
 
 seedSources().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-
-

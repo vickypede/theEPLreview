@@ -851,23 +851,27 @@ export const seedSourcesHttp = onRequest({ timeoutSeconds: 300 }, async (req, re
     const batch = db.batch();
     for (const [id, data] of Object.entries(payload)) {
       const ref = db.collection("sources").doc(id);
+      const existing = await ref.get();
+      const seedData: Record<string, any> = {
+        id,
+        name: data.name,
+        type: data.type,
+        url: data.url,
+        clubSlugs: Array.isArray(data.clubSlugs) ? data.clubSlugs : [],
+        includePathRegex: data.includePathRegex || null,
+        needsJs: !!data.needsJs,
+        // NEW optional fields are passed through if present in seed
+        badPathRegex: data.badPathRegex || null,
+        maxAgeHours: typeof data.maxAgeHours === "number" ? data.maxAgeHours : null,
+        isActive: data.isActive ?? true,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+      if (!existing.exists) {
+        seedData.createdAt = admin.firestore.FieldValue.serverTimestamp();
+      }
       batch.set(
         ref,
-        {
-          id,
-          name: data.name,
-          type: data.type,
-          url: data.url,
-          clubSlugs: Array.isArray(data.clubSlugs) ? data.clubSlugs : [],
-          includePathRegex: data.includePathRegex || null,
-          needsJs: !!data.needsJs,
-          // NEW optional fields are passed through if present in seed
-          badPathRegex: data.badPathRegex || null,
-          maxAgeHours: typeof data.maxAgeHours === "number" ? data.maxAgeHours : null,
-          isActive: data.isActive ?? true,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
+        seedData,
         { merge: true },
       );
     }
@@ -887,20 +891,24 @@ export const seedClubsHttp = onRequest({ timeoutSeconds: 300 }, async (_req, res
     const batch = db.batch();
     for (const [id, data] of Object.entries(payload)) {
       const ref = db.collection("clubs").doc(id);
+      const existing = await ref.get();
+      const seedData: Record<string, any> = {
+        id,
+        name: data.name,
+        isTop6: Boolean(data.isTop6),
+        isCurrentPremierLeague: data.isCurrentPremierLeague === true,
+        season: data.season || null,
+        names: Array.isArray(data.names) ? data.names : [],
+        ambiguous: Array.isArray(data.ambiguous) ? data.ambiguous : [],
+        badgeUrl: data.badgeUrl || null,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+      if (!existing.exists) {
+        seedData.createdAt = admin.firestore.FieldValue.serverTimestamp();
+      }
       batch.set(
         ref,
-        {
-          id,
-          name: data.name,
-          isTop6: Boolean(data.isTop6),
-          isCurrentPremierLeague: data.isCurrentPremierLeague === true,
-          season: data.season || null,
-          names: Array.isArray(data.names) ? data.names : [],
-          ambiguous: Array.isArray(data.ambiguous) ? data.ambiguous : [],
-          badgeUrl: data.badgeUrl || null,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
+        seedData,
         { merge: true },
       );
     }

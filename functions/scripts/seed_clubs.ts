@@ -7,17 +7,28 @@ const db = getFirestore();
 
 async function seedClubs() {
   console.log('Starting club seeding...');
-  
-  for (const [slug, data] of Object.entries(clubs as any)) {
-    await db.collection('clubs').doc(slug).set({ 
-      id: slug, 
-      ...data, 
-      createdAt: new Date() 
-    }, { merge: true });
-    console.log('✓ Upserted:', slug, '-', data.name);
+
+  for (const [slug, data] of Object.entries(clubs as Record<string, any>)) {
+    const ref = db.collection('clubs').doc(slug);
+    const existing = await ref.get();
+    const seedData: Record<string, any> = {
+      id: slug,
+      ...data,
+      updatedAt: new Date(),
+    };
+
+    if (!existing.exists) {
+      seedData.createdAt = new Date();
+    }
+
+    await ref.set(seedData, { merge: true });
+    console.log('Upserted:', slug, '-', data.name);
   }
-  
-  console.log('✅ Club seeding completed!');
+
+  console.log('Club seeding completed!');
 }
 
-seedClubs().catch(console.error);
+seedClubs().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
