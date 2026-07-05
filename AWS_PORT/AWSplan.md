@@ -96,23 +96,27 @@ architecture-beta
 ## 💾 Phase 2: True Single-Table DynamoDB Design
 *Goal: Port Firestore to DynamoDB using advanced enterprise NoSQL access patterns.*
 
-Unlike Firestore, where you have different "collections" for Sources, Clubs, and Articles, in DynamoDB you will store everything in a **single table**.
-
 1. Navigate to **DynamoDB > Tables > Create Table**.
 2. **Table Configuration**:
    - **Name**: `EplReview_Data`
    - **Partition Key (PK)**: `PK` (String)
    - **Sort Key (SK)**: `SK` (String)
 
-3. **Data Modeling Rules (How you will save data)**:
-   - **Sources**: `PK="SOURCE#<id>"`, `SK="METADATA"`
-   - **Clubs**: `PK="CLUB#<slug>"`, `SK="METADATA"`
-   - **Articles**: `PK="ARTICLE#<id>"`, `SK="METADATA"`
+3. **Global Secondary Index (GSI)**:
+   - **Name**: `GlobalNewsIndex`
+   - **Partition Key**: `GSI1PK` (String)
+   - **Sort Key**: `GSI1SK` (String)
+   - *Purpose*: To fetch the latest news globally across all clubs for the homepage.
 
-4. **Many-to-Many Relationships (Articles to Clubs)**:
-   An article can belong to multiple clubs. To model this, you will save "Link" items for every club an article is tagged to:
+4. **Data Modeling Rules (How you will save data)**:
+   - **Sources**: `PK="SOURCE"`, `SK="SOURCE#<id>"` *(Allows querying PK="SOURCE" to get all sources).*
+   - **Clubs**: `PK="CLUB"`, `SK="CLUB#<slug>"`
+   - **Articles**: `PK="ARTICLE#<id>"`, `SK="METADATA"`. Also set `GSI1PK="ARTICLE"`, `GSI1SK="<publishedAt>#<articleId>"` to populate the GlobalNewsIndex.
+
+5. **Many-to-Many Relationships (Articles to Clubs)**:
+   To fetch articles for a specific club (e.g., Arsenal), save a "Link" item for every club an article is tagged to:
    - `PK="CLUB#<slug>"`, `SK="ARTICLE#<publishedAt>#<articleId>"`
-   - *Why?* This allows you to instantly query all articles for "arsenal" sorted chronologically just by querying `PK="CLUB#arsenal" AND SK begins_with "ARTICLE#"`.
+   - **Crucial Note**: To prevent an N+1 query problem, denormalize (duplicate) the article's `title`, `url`, and `source` directly onto this Link item!
 
 ---
 
@@ -123,18 +127,18 @@ Unlike Firestore, where you have different "collections" for Sources, Clubs, and
 > **Why are Lambdas in a VPC?** You don't strictly need Lambdas in a VPC just to reach DynamoDB or SQS. However, we are placing them in the Private Subnets intentionally for this lab so you are forced to learn how NAT Gateways, Route Tables, and VPC Endpoints work!
 
 1. **Amazon SQS Queue**
-   - Create a **Standard Queue** named `epl-ingestion-queue`. (Standard provides parallel throughput, whereas FIFO restricts concurrency).
+   - Create a **Standard Queue** named `epl-ingestion-queue`. (Standard provides parallel throughput).
    - Set up a **Dead Letter Queue (DLQ)**.
 2. **"Master" Lambda Function**
    - Attached to your **Private App Subnets**.
-   - Logic: Query DynamoDB for `PK begins_with "SOURCE#"`. Loop through them and push a JSON message to SQS.
+   - Logic: Query DynamoDB for `PK="SOURCE"`. Loop through them and push a JSON message to SQS.
 3. **Amazon EventBridge (Cron)**
    - Rule Schedule: `cron(0 2 * * ? *)`
    - Target: Master Lambda.
 4. **"Worker" Lambda Function**
    - Attached to your **Private App Subnets**.
    - Trigger: The SQS Queue.
-   - Logic: Receives 1 feed URL, scrapes it via NAT Gateway, and writes the Article and Link items to DynamoDB.
+   - **Idempotency Rule**: Standard SQS can deliver messages twice. You MUST write your Lambda to use DynamoDB conditional writes (only write if the URL hash doesn't exist) so you don't duplicate articles!
 
 ---
 
@@ -143,8 +147,9 @@ Unlike Firestore, where you have different "collections" for Sources, Clubs, and
 
 1. **Secrets Manager**: Store your `FIRECRAWL_API_KEY` here.
 2. **IAM Roles**: 
-   - Start your Lambdas with `AWSLambdaVPCAccessExecutionRole`, `AmazonDynamoDBFullAccess`, and `AmazonSQSFullAccess`.
-   - **Learning Exercise**: Once the lab works, replace `FullAccess` with strict inline JSON policies that only allow `dynamodb:PutItem` and `dynamodb:Query` on your specific table ARN.
+   - **Lambdas**: Attach `AWSLambdaVPCAccessExecutionRole`, `AmazonDynamoDBFullAccess`, and `AmazonSQSFullAccess`.
+   - **ECS Task Role**: The Next.js container needs an IAM role attached to the task that grants `AmazonDynamoDBReadOnlyAccess` so it can query the table!
+   - **Learning Exercise**: Once the lab works, replace `FullAccess` with strict inline JSON policies.
 
 ---
 
@@ -152,7 +157,7 @@ Unlike Firestore, where you have different "collections" for Sources, Clubs, and
 *Goal: Build the Next.js App Router for ECS deployment.*
 
 > [!WARNING]
-> **Frontend Refactoring Required**: Your current codebase relies heavily on Firebase Client SDKs in client components. DynamoDB does not have client-side security rules. To securely fetch data in AWS, you must move all database queries into Next.js **React Server Components (RSC)** or API Routes so the AWS SDK runs securely on the server.
+> **Frontend Refactoring Required**: Your current codebase relies heavily on Firebase Client SDKs in client components. DynamoDB does not have client-side security rules. To securely fetch data in AWS, you must move all database queries into Next.js **React Server Components (RSC)** so the AWS SDK runs securely on the server.
 
 1. **Dockerfile Configuration**: 
    Because your project is in `app/`, create this Dockerfile in the `app/` directory:
@@ -176,7 +181,7 @@ Unlike Firestore, where you have different "collections" for Sources, Clubs, and
 2. **Application Load Balancer (ALB)**: Create an Internet-facing ALB in your Public Subnets.
 3. **ECS Cluster & Task**: 
    - Create a Fargate cluster.
-   - Create a Task Definition pointing to your ECR image.
+   - Create a Task Definition pointing to your ECR image and attach the **ECS Task Role** created in Phase 4.
    - Run the service in your **Private App Subnets**, linked to the ALB Target Group.
 
 ---
