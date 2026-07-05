@@ -530,7 +530,7 @@ async function gatherLinksWithinCrumb(
 // -----------------------------------------------------------------------------
 // Main ingestion
 // -----------------------------------------------------------------------------
-export const ingestRun = onRequest({ timeoutSeconds: 540 }, async (req, res) => {
+export const ingestRun = onRequest({ timeoutSeconds: 540, memory: "1GiB" }, async (req, res) => {
   try {
     const group = (req.query.group as string) || "all"; // top6 | other14 | all
     const verbose =
