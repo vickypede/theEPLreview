@@ -17,6 +17,7 @@ export default function Footer() {
         </div>
         <div className="text-center sm:text-left">
           <p>© {new Date().getFullYear()} The EPL Review</p>
+          <p className="text-xs sm:text-sm">Victor Onipede</p>
           <p className="text-xs sm:text-sm">Unofficial fan project. Not affiliated with the Premier League.</p>
         </div>
         <div className="flex justify-center sm:justify-end items-center gap-4">
